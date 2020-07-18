@@ -1,0 +1,69 @@
+#!/usr/bin/awk -f 
+
+function replace(str, var,
+	head, tail, key)
+{
+	tail = str
+	head = ""
+	while (match(tail, "\\$\\{[[:alnum:]_%@]+\\}")) {
+		key = substr(tail, RSTART + 2, RLENGTH - 3)
+		gsub("%", toupper(var), key)
+		if (ENVIRON[key] == "") {
+			print("missing key: " key) >"/dev/stderr"
+			exit(101)
+		}
+		head = head substr(tail, 1, RSTART - 1) ENVIRON[key]
+		tail = substr(tail, RSTART + RLENGTH)
+	}
+	return head tail
+}
+
+function read_block(\
+	str, line)
+{
+	for (str = ""; getline line && line !~ /^#end/; str = str line "\n")
+		continue
+	return str
+}
+
+function list_dir(path, table,
+	cmd, i)
+{
+	cmd = "ls '" path "'"
+	for (i = 1; cmd | getline > 0; i++)
+		table[i] = $0
+	close(cmd)
+}
+
+function print_block(str, table,
+	i)
+{
+	for (i in table) {
+		ENVIRON["@"] = table[i]
+		printf("%s", replace(str, table[i]))
+	}
+}
+
+BEGIN {
+	cmd = "date +'%Y-%m-%d %H:%M:%S %z'"
+	cmd | getline ENVIRON["NOW"]
+	close(cmd)
+}
+
+/^#foreach / {
+	split(ENVIRON[$2], table, " ")
+	print_block(read_block(), table)
+	delete table
+	next
+}
+
+/^#fordir / {
+	list_dir($2, table)
+	print_block(read_block(), table)
+	delete table
+	next
+}
+
+{
+	print replace($0)
+}

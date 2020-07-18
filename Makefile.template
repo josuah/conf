@@ -1,0 +1,8 @@
+TEMPLATE = ../bin/adm-template
+
+conf: /etc/${NAME}/${CONF}
+
+/etc/${NAME}/${CONF}: ${CONF}.in Makefile ${TEMPLATE}
+	mkdir -p ${@D}
+	${TEMPLATE} $< >/tmp/adm-etc-conf
+	mv -f /tmp/adm-etc-conf $@
