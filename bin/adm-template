@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f 
+#!/usr/bin/awk -f
 
 function replace(str, var,
 	head, tail, key)
