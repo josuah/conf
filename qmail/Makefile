@@ -1,6 +1,9 @@
-all: control/me
-	mkdir -p /etc/qmail
-	cp -r control /etc/qmail
+NAME = qmail
+COPY = control
+
+all: control/me copy
 
 control/me:
-	hostname >$@
+	hostname >control/me
+
+include ../Makefile.template

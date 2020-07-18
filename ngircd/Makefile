@@ -1,7 +1,8 @@
 NAME = ngircd
 CONF = ngircd.conf
+ENV = /etc/env/chat/*
+COPY = ngircd.motd
 
-all: conf
-	cp -f ngircd.motd /etc/ngircd
+all: conf copy
 
 include ../Makefile.template

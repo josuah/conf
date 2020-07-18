@@ -44,10 +44,22 @@ function print_block(str, table,
 	}
 }
 
+function read_env_file(path,
+	value)
+{
+	getline value <path
+	sub(".*/", "", path)
+	close(path)
+	ENVIRON[path] = value
+}
+
 BEGIN {
 	cmd = "date +'%Y-%m-%d %H:%M:%S %z'"
 	cmd | getline ENVIRON["NOW"]
 	close(cmd)
+
+	while (ARGV[--ARGC] != "--" && ARGC > 1)
+		read_env_file(ARGV[ARGC])
 }
 
 /^#foreach / {

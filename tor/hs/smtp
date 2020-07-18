@@ -1,0 +1,2 @@
+HiddenServiceDir /var/lib/tor/hs/smtp
+HiddenServicePort 25 127.0.0.1:25
