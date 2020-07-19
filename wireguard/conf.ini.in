@@ -1,16 +1,11 @@
 # generated from adm-config repo at ${NOW}
 
 [Interface]
+PrivateKey = ${WIREGUARD_PRIVATE_KEY}
 ListenPort = 51820
 
+#foreach WIREGUARD_PEERS
 [Peer]
-PublicKey = xTIBA5rboUvnH4htodjb6e697QjLERt1NAB4mZqp8Dg=
-AllowedIPs = 10.192.122.3/32, 10.192.124.1/24
-
-[Peer]
-PublicKey = TrMvSoP4jYQlY6RIzBgbssQqY3vxI2Pi+y71lOWWXX0=
-AllowedIPs = 10.192.122.4/32, 192.168.0.0/16
-
-[Peer]
-PublicKey = gN65BkIKy1eCE9pP1wdc8ROUtkHLF2PfAqYdyYBz6EA=
-AllowedIPs = 10.10.10.230/32
+PublicKey = ${WIREGUARD_PUBLIC_KEY_%}
+AllowedIPs = ${WIREGUARD_NETWORKS_%}
+#end
