@@ -1,3 +1,5 @@
+# generated from adm-config repo at ${NOW}
+
 [global]
 	listen = 127.0.0.1
 	name = irc.z0.is
@@ -5,7 +7,7 @@
 	admininfo2 = https://josuah.net
 	adminemail = me@josuah.net
 	info = binary cat never dies
-	motdfile = data/ngircd.motd
+	motdfile = /etc/ngircd/ngircd.motd
 	serveruid = nobody
 	servergid = nogroup
 
@@ -32,27 +34,27 @@
 	pingtimeout = 120
 	pongtimeout = 20
 	[operator]
-	name = "josuah"
-	password = "${OPERATOR_PASS}"
+	name = josuah
+	password = ${OPERATOR_PASS}
 
 [channel]
-	name = "general"
+	name = #general
 	topic = main discussion channel of irc.z0.is
 
 #foreach DISCORD_CHAN
 
 [channel]
-	name = "discord-${@}"
-	topic = "Discord channel for ${@}"
-	key = "${IRC_KEY_DISCORD_%}"
-	modes = k
+	name = #discord-${@}
+	topic = Discord channel for ${@}
+	modes = tnk
+	key = ${IRC_KEY_DISCORD_%}
 #end
 
 #foreach WHATSAPP_CHAN
 
 [channel]
-	name = "whatsapp-${@}"
-	topic = "WhatsApp channel for ${@}"
-	key = "${IRC_KEY_WHATSAPP_%}"
-	modes = k
+	name = #whatsapp-${@}
+	topic = WhatsApp channel for ${@}
+	modes = tnk
+	key = ${IRC_KEY_WHATSAPP_%}
 #end

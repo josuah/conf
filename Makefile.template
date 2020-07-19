@@ -1,12 +1,13 @@
 TEMPLATE = ../bin/adm-template
 
-copy: ${COPY}
+x:
+
+copy: x ${COPY}
 	mkdir -p /etc/${NAME}
 	cp -rf ${COPY} /etc/${NAME}
 
-conf: ${CONF:=.in} /etc/${NAME}/${CONF}
-
-/etc/${NAME}/${CONF}: Makefile ${CONF:=.in} ${TEMPLATE}
+conf: x ${CONF:=.in} /etc/${NAME}/${CONF}
+/etc/${NAME}/${CONF}: x Makefile ${CONF:=.in} ${TEMPLATE}
 	mkdir -p ${@D}
 	${TEMPLATE} ${CONF:=.in} -- ${ENV} >/tmp/adm-etc-conf
 	mv -f /tmp/adm-etc-conf $@

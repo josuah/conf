@@ -1,6 +1,6 @@
-# ${NOW}
+# generated from adm-config repo at ${NOW}
 
-listen = 127.0.0.1
+listen = 0.0.0.0, ::
 ssl = yes
 
 mail_home = /var/mail/%L{domain}/%L{username}

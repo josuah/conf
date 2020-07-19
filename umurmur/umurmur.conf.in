@@ -1,3 +1,5 @@
+# generated from adm-config repo at ${NOW}
+
 max_bandwidth=48000;
 welcometext="Welcome to uMurmur!";
 password="";
