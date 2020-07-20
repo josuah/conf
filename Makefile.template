@@ -7,6 +7,7 @@ copy: x ${COPY}
 	cp -rf ${COPY} /etc/${NAME}
 
 conf: x ${CONF:=.in} /etc/${NAME}/${CONF}
+
 /etc/${NAME}/${CONF}: x Makefile ${CONF:=.in} ${TEMPLATE}
 	mkdir -p ${@D}
 	${TEMPLATE} ${CONF:=.in} -- ${ENV} >/tmp/adm-etc-conf
