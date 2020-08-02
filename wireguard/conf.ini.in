@@ -9,5 +9,6 @@ ListenPort = 51820
 
 [Peer]
 PublicKey = ${WIREGUARD_PUBLIC_KEY_%}
+Endpoint = ${@}.z0.is
 AllowedIPs = ${WIREGUARD_NETWORKS_%}
 #end
