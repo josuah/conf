@@ -1,53 +1,47 @@
 # generated from adm-config repo at ${NOW}
 
 [irc]
-
-	[irc.local]
-	Server="127.0.0.1:6667"
-	Nick="matterbridge"
-	RemoteNickFormat="<{NICK}> "
+[irc.local]
+  Server = "127.0.0.1:6667"
+  Nick = "matterbridge"
+  RemoteNickFormat = "<{NICK}> "
 
 [whatsapp]
-
-	[whatsapp.me]
-	Number="${WHATSAPP_NUMBER}"
-	SessionFile="/var/cache/matterbridge/whatsapp.gob"
+[whatsapp.me]
+  Number = "${WHATSAPP_NUMBER}"
+  SessionFile = "/var/cache/matterbridge/whatsapp.gob"
 
 [discord]
+[discord.me]
+  Token = "${DISCORD_TOKEN}"
+  Server = "${DISCORD_GUILD}"
 
-	[discord.me]
-	Token="${DISCORD_TOKEN}"
-	Server="${DISCORD_GUILD}"
-
+# WhatsApp channels
 #foreach WHATSAPP_CHAN
 
 [[gateway]]
-name="whatsapp-${@}"
-enable=true
-
-	[[gateway.inout]]
-	account="irc.local"
-	channel="#whatsapp-${@}"
-	options={ key="${IRC_KEY_WHATSAPP_%}" }
-
-	[[gateway.inout]]
-	account="whatsapp.me"
-	channel="${WHATSAPP_ID_%}"
-
+  name = "whatsapp-${@}"
+  enable = true
+[[gateway.inout]]
+  account = "irc.local"
+  channel = "#whatsapp-${@}"
+  options = { key="${IRC_KEY_WHATSAPP_%}" }
+[[gateway.inout]]
+  account = "whatsapp.me"
+  channel = "${WHATSAPP_ID_%}"
 #end
+
+# Discord channels
 #foreach DISCORD_CHAN
 
 [[gateway]]
-name="discord-${@}"
-enable=true
-
-	[[gateway.inout]]
-	account="irc.local"
-	channel="#discord-${@}"
-	options={ key="${IRC_KEY_DISCORD_%}" }
-
-	[[gateway.inout]]
-	account="discord.me"
-	channel="${@}"
-
+  name = "discord-${@}"
+  enable = true
+[[gateway.inout]]
+  account = "irc.local"
+  channel = "#discord-${@}"
+  options = { key="${IRC_KEY_DISCORD_%}" }
+[[gateway.inout]]
+  account = "discord.me"
+  channel = "${@}"
 #end

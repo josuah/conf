@@ -4,7 +4,9 @@
 PrivateKey = ${WIREGUARD_PRIVATE_KEY}
 ListenPort = 51820
 
+# Peers
 #foreach WIREGUARD_PEERS
+
 [Peer]
 PublicKey = ${WIREGUARD_PUBLIC_KEY_%}
 AllowedIPs = ${WIREGUARD_NETWORKS_%}

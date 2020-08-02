@@ -40,9 +40,9 @@ protocol lmtp {
 }
 
 plugin {
-   sieve = file:~/sieve;active=~/.dovecot.sieve
-   sieve_default = /var/lib/dovecot/sieve/default.sieve
-   sieve_global = /var/lib/dovecot/sieve/global/
+	sieve = file:~/sieve;active=~/.dovecot.sieve
+	sieve_default = /var/lib/dovecot/sieve/default.sieve
+	sieve_global = /var/lib/dovecot/sieve/global/
 }
 
 # ssl/tls
@@ -50,6 +50,8 @@ plugin {
 ssl = yes
 ssl_cert = </etc/ssl/host/cert.pem
 ssl_key = </etc/ssl/host/privkey.pem
+
+# certificates
 #fordir /etc/ssl/live
 
 local_name ${@} {
