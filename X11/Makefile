@@ -1,4 +1,4 @@
-NAME = xorg
+NAME = X11
 COPY = xorg.conf
 
 all: copy
