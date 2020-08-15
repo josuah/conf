@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+setxkbmap us -option compose:ralt
+xset b off
+xsetroot -solid '#222222'
+find /usr/local/share/fonts/ -mindepth 1 -maxdepth 1 -type d -exec xset +fp {} \;
+
+mkdir -p "$HOME/.cache"
+exec nohup >"$HOME/.cache/dwm.log" \
+	dwm
