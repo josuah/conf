@@ -4,8 +4,6 @@ for path in  /usr /usr/pkg /usr/local /usr/plan9 /usr/go; do
 done
 
 export MAIL="/var/mail/$USER/Maildir"
-export LESSHISTFILE="/tmp/lesshist"
-export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
 export ENV="$HOME/.profile"
 
 export LC_COLLATE="C"
@@ -15,8 +13,16 @@ export LESS="XSR"
 export EDITOR="vim"
 export PAGER="less"
 export MANPAGER="less"
+export LESSHISTFILE="/tmp/lesshist"
 
-export TERM="xterm-256color"
-export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
+case $- in (*i*)
+	export TERM="xterm-256color"
+	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
+	export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
 
-set -o emacs 2>"/dev/null"
+	set -o emacs 2>"/dev/null"
+
+	pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK" >/dev/null ||
+		ssh-agent -a "$SSH_AUTH_SOCK"
+	;;
+esac
