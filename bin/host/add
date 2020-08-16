@@ -1,0 +1,18 @@
+#!/bin/sh -eu
+host=host/$(hostname -s)
+item=${1:?}
+item=${1%/}
+
+[ -e "$item" ] || { echo>&2 "$item does not exist"; exit 1; }
+touch "$host"
+grep -Fxq "$item" "$host" && exec echo>&2 "$item already set for $host"
+
+case $item in
+(role/*|module/*)
+	echo "$item" | sort -o "$host" "$host" -
+	echo>&2 "added $item"
+	;;
+(*)
+	echo "unknown configuration type"
+	;;
+esac

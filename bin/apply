@@ -1,29 +1,19 @@
 #!/bin/sh -eu
-
-mod=${1:?}
-base=$(cd "$(dirname "$0")/.."; pwd)
-db=$base/db
-dest=/etc/$mod
-tmp=$(mktemp)
+host=host/$(hostname -s)
+base=$(cd $(dirname "$0")/..; pwd)
 bin=$base/bin
-trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
-copy() {
-	local copy=${1:?}
-	mkdir -p "$dest"
-	cp -rf "$copy" "$dest"
-}
+[ -f "$host" ] || { echo>&2 "$host does not exist"; exit 1; }
 
-conf() {
-	local conf=${1:?}
-	"$bin/template" "$db" "$conf.in" >$tmp
-	mv "$tmp" "$conf"
-}
-
-pass() {
-	dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -x -A n | tr -cd '0-9a-f' >$tmp
-	mv "$tmp" "${1:?}"
-}
-
-cd "mod/$mod"
-. ./mod.sh
+while read item; do
+	case $item in
+	(module/*)
+		"$bin/module" "$item"
+		;;
+	(role/*)
+		while read role; do
+			"$bin/module" "$role"
+		done <$item
+		;;
+	esac
+done <$host

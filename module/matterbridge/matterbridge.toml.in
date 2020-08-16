@@ -18,15 +18,15 @@
 
 #for whatsapp/chan
 [[gateway]]
-  name = "#whatsapp-{{whatsapp/%/name}}"
+  name = "#whatsapp-{{ this }}"
   enable = true
 [[gateway.inout]]
   account = "irc.local"
-  channel = "#whatsapp-{{ name }}"
-  options = { key="{{ irc/chan/%/key }}" }
+  channel = "#whatsapp-{{ this }}"
+  options = { key="{{ irc/chan/#whatsapp-%/pass }}" }
 [[gateway.inout]]
   account = "whatsapp.me"
-  channel = "{{ whatsapp/%/id }}"
+  channel = "{{ whatsapp/chan/% }}"
 #end
 
 #for discord/chan
@@ -36,7 +36,7 @@
 [[gateway.inout]]
   account = "irc.local"
   channel = "{{ discord/chan/%/name }}"
-  options = { key="{{ irc/chan/%/key }}" }
+  options = { key="{{ irc/chan/%/pass }}" }
 [[gateway.inout]]
   account = "discord.me"
   channel = "{{ this }}"

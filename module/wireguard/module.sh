@@ -1,4 +1,4 @@
-path=$DB/wireguard/pass
+path=$db/wireguard/pass
 [ ! -f "$path" ] || (
 	mkdir -p "$(dirname "$path")"
 	umask 600

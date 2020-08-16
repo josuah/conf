@@ -1,0 +1,17 @@
+#!/bin/sh -eu
+host=host/$(hostname -s)
+item=${1:?}
+item=${1%/}
+
+touch "$host"
+grep -Fxq "$item" "$host" || exec echo>&2 "$item already deleted for $host"
+
+case $item in
+(role/*|module/*)
+	grep -Fxv "$item" "$host" | sort -o "$host" -
+	echo>&2 "deleted $item"
+	;;
+(*)
+	echo "unknown configuration type"
+	;;
+esac

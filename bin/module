@@ -1,0 +1,33 @@
+#!/bin/sh -eu
+
+module=${1:?}
+base=$(cd "$(dirname "$0")/.."; pwd)
+dest=/etc/${module#module/}
+var=$base/var
+bin=$base/bin
+tmp=$(mktemp)
+trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+
+copy() {
+	local copy=${1:?}
+	mkdir -p "$dest"
+	cp -rf "$copy" "$dest"
+}
+
+conf() {
+	local conf=${1:?}
+	"$bin/template" "$var" "$conf.in" >$tmp
+	mkdir -p "$(dirname "$dest/$conf")"
+	mv "$tmp" "$dest/$conf"
+}
+
+pass() {
+	local pass=${1:?}
+	dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -x -A n | tr -cd '0-9a-f' >$tmp
+	mv "$tmp" "$pass"
+}
+
+cd "$base/$module"
+echo ">>> $module"
+set -x
+. ./module.sh
