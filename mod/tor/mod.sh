@@ -1,0 +1,2 @@
+copy torrc
+copy hs

@@ -1,0 +1,22 @@
+export PATH=/bin:/sbin
+for path in  /usr /usr/pkg /usr/local /usr/plan9 /usr/go; do
+	export PATH="$PATH:$path/bin:$path/sbin"
+done
+
+export MAIL="/var/mail/$USER/Maildir"
+export LESSHISTFILE="/tmp/lesshist"
+export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
+export ENV="$HOME/.profile"
+
+export LC_COLLATE="C"
+export LC_ALL="en_US.UTF-8"
+
+export LESS="XSR"
+export EDITOR="vim"
+export PAGER="less"
+export MANPAGER="less"
+
+export TERM="xterm-256color"
+export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
+
+set -o emacs 2>"/dev/null"

@@ -1,0 +1,12 @@
+# generated from adm-config repo at {{ now }}
+
+[Interface]
+PrivateKey = {{ wireguard/private-key }}
+ListenPort = 51820
+
+#for wireguard/peer
+[Peer]
+PublicKey = {{ wireguard/peer/public-key }}
+Endpoint = {{ this }}.z0.is
+AllowedIPs = {{ net/%/ip }}
+#end

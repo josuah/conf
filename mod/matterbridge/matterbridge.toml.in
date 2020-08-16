@@ -1,0 +1,43 @@
+# generated from adm-config repo at {{ now }}
+
+[irc]
+[irc.local]
+  Server = "127.0.0.1:6667"
+  Nick = "matterbridge"
+  RemoteNickFormat = "<{NICK}> "
+
+[whatsapp]
+[whatsapp.me]
+  Number = "{{ whatsapp/number }}"
+  SessionFile = "/var/cache/matterbridge/whatsapp.gob"
+
+[discord]
+[discord.me]
+  Token = "{{ discord/token }}"
+  Server = "{{ discord/guild }}"
+
+#for whatsapp/chan
+[[gateway]]
+  name = "#whatsapp-{{whatsapp/%/name}}"
+  enable = true
+[[gateway.inout]]
+  account = "irc.local"
+  channel = "#whatsapp-{{ name }}"
+  options = { key="{{ irc/chan/%/key }}" }
+[[gateway.inout]]
+  account = "whatsapp.me"
+  channel = "{{ whatsapp/%/id }}"
+#end
+
+#for discord/chan
+[[gateway]]
+  name = "{{ discord/chan/%/name }}"
+  enable = true
+[[gateway.inout]]
+  account = "irc.local"
+  channel = "{{ discord/chan/%/name }}"
+  options = { key="{{ irc/chan/%/key }}" }
+[[gateway.inout]]
+  account = "discord.me"
+  channel = "{{ this }}"
+#end

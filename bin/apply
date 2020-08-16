@@ -1,0 +1,33 @@
+#!/bin/sh -eu
+
+name=${1:?}
+base=$(cd "$(dirname "$0")/.."; pwd)
+db=$base/db
+dest=/etc/$name
+
+copy() {
+	mkdir -p "$dest"
+	cp -rf "${1:?}" "$dest"
+}
+
+conf() {
+
+}
+
+pass() {
+
+}
+
+conf: base ${CONF:=.in} /etc/${NAME}/${CONF}
+
+base: /var/lib /var/db
+
+/var/lib:
+	ln -sf /var/db /var/lib
+/var/db:
+	ln -sf /var/lib /var/db
+
+/etc/${NAME}/${CONF}: x Makefile ${CONF:=.in}
+	mkdir -p ${@D}
+	${BIN}/adm-template ${DB} ${CONF:=.in} >/tmp/adm-etc-conf
+	mv -f /tmp/adm-etc-conf $@
