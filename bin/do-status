@@ -7,7 +7,7 @@ case $cmd in
 (service)
 	service=${1:?}
 
-	"$bin/service" status "$service" >/dev/null 2>&1 \
+	"$base/bin/service" status "$service" >/dev/null 2>&1 \
 		&& echo "service/$service ok" \
 		|| echo "service/$service fail"
 	;;

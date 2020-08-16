@@ -3,8 +3,6 @@
 apply=${1:-deploy}
 
 export base=$(cd $(dirname "$0")/..; pwd)
-export var=$base/var
-export bin=$base/bin
 export tmp=$(mktemp)
 export host=host/$(hostname -s)
 export exit=0
@@ -12,7 +10,7 @@ export exit=0
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 o() {
-	"$bin/do-$apply" "$@"
+	"$base/bin/do-$apply" "$@"
 }
 
 module() {

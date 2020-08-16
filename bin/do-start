@@ -7,7 +7,7 @@ case $cmd in
 (service)
 	service=${1:?}
 
-	"$bin/service" start "$service" >/dev/null 2>&1
+	"$base/bin/service" start "$service" >/dev/null 2>&1
 	;;
 (exec)
 	exit 1

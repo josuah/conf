@@ -2,8 +2,8 @@
 
 item=${1:?}
 
-host=host/$(hostname -s)
 item=${item%/}
+host=host/$(hostname -s)
 
 touch "$host"
 grep -Fxq "$item" "$host" || exec echo>&2 "$item already deleted for $host"

@@ -13,13 +13,13 @@ case $cmd in
 (conf)
 	conf=${1:?}
 
-	(cd "$var"; "$bin/template" >$tmp) <$conf.in
+	(cd "$base/var"; "$base/bin/template" >$tmp) <$conf.in
 	mkdir -p "$(dirname "$dest/$conf")"
 	mv "$tmp" "$dest/$conf"
 	;;
 (pass)
 	for pass; do
-		cd "$base/$var"
+		cd "$base/var"
 		[ -d "$pass/pass" ] && continue
 		dd if=/dev/urandom bs=32 count=1 2>/dev/null \
 		| od -x -A n | tr -cd '0-9a-f' >$tmp
@@ -37,10 +37,10 @@ case $cmd in
 	fi
 	;;
 (package)
-	"$bin/package" install "$@"
+	"$base/bin/package" install "$@"
 	;;
 (service)
-	"$bin/service" enable "$@"
+	"$base/bin/service" enable "$@"
 	;;
 (exec)
 	exit 0
