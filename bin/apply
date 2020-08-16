@@ -1,33 +1,29 @@
 #!/bin/sh -eu
 
-name=${1:?}
+mod=${1:?}
 base=$(cd "$(dirname "$0")/.."; pwd)
 db=$base/db
-dest=/etc/$name
+dest=/etc/$mod
+tmp=$(mktemp)
+bin=$base/bin
+trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 copy() {
+	local copy=${1:?}
 	mkdir -p "$dest"
-	cp -rf "${1:?}" "$dest"
+	cp -rf "$copy" "$dest"
 }
 
 conf() {
-
+	local conf=${1:?}
+	"$bin/template" "$db" "$conf.in" >$tmp
+	mv "$tmp" "$conf"
 }
 
 pass() {
-
+	dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -x -A n | tr -cd '0-9a-f' >$tmp
+	mv "$tmp" "${1:?}"
 }
 
-conf: base ${CONF:=.in} /etc/${NAME}/${CONF}
-
-base: /var/lib /var/db
-
-/var/lib:
-	ln -sf /var/db /var/lib
-/var/db:
-	ln -sf /var/lib /var/db
-
-/etc/${NAME}/${CONF}: x Makefile ${CONF:=.in}
-	mkdir -p ${@D}
-	${BIN}/adm-template ${DB} ${CONF:=.in} >/tmp/adm-etc-conf
-	mv -f /tmp/adm-etc-conf $@
+cd "mod/$mod"
+. ./mod.sh
