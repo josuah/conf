@@ -19,7 +19,7 @@ copy() {
 conf() {
 	local conf=${1:?}
 
-	"$bin/template" "$var" "$conf.in" >$tmp
+	(cd "$var"; "$bin/template" >$tmp) <$conf.in
 	mkdir -p "$(dirname "$dest/$conf")"
 	mv "$tmp" "$dest/$conf"
 }

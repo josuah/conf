@@ -17,8 +17,7 @@ function replace(str, this,
 		} else if (key == "now") {
 			value = global["now"]
 		} else {
-			path = global["path"] "/" key
-			getline value <path
+			getline value <key
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -39,7 +38,7 @@ function read_block( \
 function list_dir(path, table,
 	cmd, i)
 {
-	cmd = "ls '" global["path"] "/" path "'"
+	cmd = "ls '" path "'"
 	for (i = 1; cmd | getline > 0; i++)
 		table[i] = $0
 	close(cmd)
@@ -60,11 +59,6 @@ BEGIN {
 	cmd = "hostname -s"
 	cmd | getline global["hostname"]
 	close(cmd)
-
-	global["path"] = ARGV[1]
-	for (i = 1; i < ARGC; i++)
-		ARGV[i] = ARGV[i + 1]
-	ARGC--
 }
 
 /^#for / {
