@@ -1,0 +1,58 @@
+#!/bin/sh -eu
+
+cmd=${1:?}
+service=${2:?}
+shift 2
+
+die() {
+	echo >&2 "error: $*"
+	exit 1
+}
+
+case "$cmd" in
+(enable)
+	if command -v rcctl; then
+		rcctl enable "$
+		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
+
+	elif [ -d "/etc/rc.conf.d" ]; then
+		path=/etc/rc.conf.d/$service
+		echo "$service=true" >$path
+		[ $# -gt 0 ] && echo "$service_flags='$*'" >>$path
+	else
+		die "no service backend for $cmd"
+	fi
+	;;
+(disable)
+	if command -v rcctl; then
+		rcctl disable "$service"
+
+	elif [ -d "/etc/rc.conf.d" ]; then
+		rm -f "/etc/rc.conf.d/$service"
+	else
+		die "no service backend for $cmd"
+	fi
+	;;
+(start)
+	if [ -d "/etc/rc.d" ]; then
+		"/etc/init.d/$service" start
+	else
+		die "no service backend for $cmd"
+	fi
+	;;
+(stop)
+	if [ -d "/etc/rc.d" ]; then
+		"/etc/init.d/$service" stop
+	else
+		die "no service backend for $cmd"
+	fi
+	;;
+(status)
+	if [ -d "/etc/rc.d" ]; then
+		"/etc/init.d/$service" check
+	else
+		die "no service backend for $cmd"
+	fi
+	;;
+
+esac
