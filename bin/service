@@ -9,51 +9,49 @@ die() {
 	exit 1
 }
 
-case "$cmd" in
+case $cmd in
 (enable)
-	if command -v rcctl >/dev/null; then
+	case $(uname) in
+	(OpenBSD)
 		rcctl enable "$service"
 		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
-
-	elif [ -d "/etc/rc.conf.d" ]; then
+		;;
+	(NetBSD|FreeBSD)
 		path=/etc/rc.conf.d/$service
-		echo "$service=true" >$path
+		echo "$service=YES" >$path
 		[ $# -gt 0 ] && echo "$service_flags='$*'" >>$path
-	else
-		die "no service backend for $cmd"
-	fi
+		;;
+	(*) die "no service backend for $cmd" ;;
+	esac
 	;;
 (disable)
-	if command -v rcctl >/dev/null; then
+	case $(uname) in
+	(OpenBSD)
 		rcctl disable "$service"
-
-	elif [ -d "/etc/rc.conf.d" ]; then
+		;;
+	(NetBSD|FreeBSD)
 		rm -f "/etc/rc.conf.d/$service"
-	else
-		die "no service backend for $cmd"
-	fi
+		;;
+	(*) die "no service backend for $cmd" ;;
+	esac
 	;;
-(start)
-	if [ -d "/etc/rc.d" ]; then
+(start|stop)
+	case $(uname) in
+	(*BSD)
 		"/etc/rc.d/$service" start
-	else
-		die "no service backend for $cmd"
-	fi
-	;;
-(stop)
-	if [ -d "/etc/rc.d" ]; then
-		"/etc/rc.d/$service" stop
-	else
-		die "no service backend for $cmd"
-	fi
+		;;
+	(*) die "no service backend for $cmd" ;;
+	esac
 	;;
 (status)
-	if [ -d "/etc/rc.d" ]; then
+	case $(uname) in
+	(OpenBSD)
 		"/etc/rc.d/$service" check
-	else
-		die "no service backend for $cmd"
-	fi
+		;;
+	(*BSD)
+		"/etc/rc.d/$service" status
+		;;
+	(*) die "no service backend for $cmd" ;;
+	esac
 	;;
 esac
-
-true
