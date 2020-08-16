@@ -5,7 +5,7 @@ host=host/$(hostname -s)
 while read item; do
 	case $item in
 	(module/*)
-		echo " \\_ $item"
+		echo " * $item"
 		;;
 	(role/*)
 		echo " * $item"
