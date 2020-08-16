@@ -1,0 +1,23 @@
+Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+HostbasedAuthentication	no
+PasswordAuthentication	no
+IgnoreRhosts		yes
+PermitRootLogin		prohibit-password
+AuthorizedKeysFile	.ssh/authorized_keys
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+Subsystem sftp /usr/libexec/sftp-server
+
+Match Group sftp
+	X11Forwarding no
+	AllowTcpForwarding no
+	PermitTTY no
+	ChrootDir %h
+	ForceCommand internal-sftp -u 007

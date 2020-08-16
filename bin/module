@@ -30,7 +30,7 @@ pass() {
 	mv "$tmp" "$pass"
 }
 
-git() {
+repo() {
 	local repo=${1:?} path=${2:?}
 
 	if [ -d "$path" ]; then

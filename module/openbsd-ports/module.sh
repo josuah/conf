@@ -1,1 +1,1 @@
-git https://github.com/openbsd/ports /usr/ports
+repo https://github.com/openbsd/ports /usr/ports
