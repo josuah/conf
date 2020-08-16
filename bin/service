@@ -14,12 +14,12 @@ case $cmd in
 	case $(uname) in
 	(OpenBSD)
 		rcctl enable "$service"
-		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
+		[ $# = 0 ] || rcctl set "$service" flags "$*"
 		;;
 	(NetBSD|FreeBSD)
 		path=/etc/rc.conf.d/$service
 		echo "$service=YES" >$path
-		[ $# -gt 0 ] && echo "$service_flags='$*'" >>$path
+		[ $# = 0 ] || echo "$service_flags='$*'" >>$path
 		;;
 	(*) die "no service backend for $cmd" ;;
 	esac
