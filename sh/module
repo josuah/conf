@@ -4,7 +4,7 @@ module=${1:?}
 base=$(cd "$(dirname "$0")/.."; pwd)
 dest=/etc/${module#module/}
 var=$base/var
-bin=$base/bin
+bin=$base/sh
 tmp=$(mktemp)
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 

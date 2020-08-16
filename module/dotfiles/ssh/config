@@ -1,8 +1,2 @@
 ForwardAgent	yes
 Include		~/.ssh/local
-
-Host	adm1
-	Port 2222
-
-Host	git.dis-hosting.fr
-	Port 2222
