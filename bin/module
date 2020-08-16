@@ -9,10 +9,11 @@ tmp=$(mktemp)
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 copy() {
-	local copy=${1:?}
-
-	mkdir -p "$dest"
-	cp -rf "$copy" "$dest"
+	local copy
+	for copy; do
+		mkdir -p "$dest"
+		cp -rf "$copy" "$dest"
+	done
 }
 
 conf() {
@@ -24,10 +25,14 @@ conf() {
 }
 
 pass() {
-	local pass=${1:?}
-
-	dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -x -A n | tr -cd '0-9a-f' >$tmp
-	mv "$tmp" "$pass"
+	local pass
+	for pass; do
+		[ -d "$pass/pass" ] && continue
+		dd if=/dev/urandom bs=32 count=1 2>/dev/null \
+		| od -x -A n | tr -cd '0-9a-f' >$tmp
+		mkdir -p "$pass"
+		mv "$tmp" "$pass/pass"
+	done
 }
 
 repo() {
