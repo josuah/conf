@@ -1,2 +1,2 @@
-copy torrc
-copy hs
+o copy torrc
+o copy hs

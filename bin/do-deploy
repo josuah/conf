@@ -1,27 +1,27 @@
 #!/bin/sh -eu
 
-module=${1:?}
+cmd=${1:?}
+shift
 
-dest=/etc/${module#module/}
-
-copy() {
+case $cmd in
+(copy)
 	local copy
+
 	for copy; do
 		mkdir -p "$dest"
 		cp -rf "$copy" "$dest"
 	done
-}
-
-conf() {
+	;;
+(conf)
 	local conf=${1:?}
 
 	(cd "$var"; "$bin/template" >$tmp) <$conf.in
 	mkdir -p "$(dirname "$dest/$conf")"
 	mv "$tmp" "$dest/$conf"
-}
-
-pass() {
+	;;
+(pass)
 	local pass
+
 	for pass; do
 		[ -d "$pass/pass" ] && continue
 		dd if=/dev/urandom bs=32 count=1 2>/dev/null \
@@ -29,9 +29,8 @@ pass() {
 		mkdir -p "$pass"
 		mv "$tmp" "$pass/pass"
 	done
-}
-
-repo() {
+	;;
+(repo)
 	local repo=${1:?} path=${2:?}
 
 	if [ -d "$path" ]; then
@@ -39,20 +38,14 @@ repo() {
 	else
 		git clone --depth 1 "$repo" "$path"
 	fi
-}
-
-package() {
+	;;
+(package)
 	$bin/package install "$@"
-}
-
-service() {
+	;;
+(service)
 	$bin/service enable "$@"
-}
-
-run() {
-	return 0
-}
-
-cd "$base/$module"
-echo ">>> $module"
-. ./module.sh
+	;;
+(exec)
+	exit 0
+	;;
+esac

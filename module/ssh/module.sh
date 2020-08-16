@@ -1,5 +1,4 @@
-copy sshd_config
-
-run && {
+o copy sshd_config
+o exec && {
 	ssh-keygen -A
 }

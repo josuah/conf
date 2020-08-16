@@ -7,20 +7,38 @@ export var=$base/var
 export bin=$base/bin
 export tmp=$(mktemp)
 export host=host/$(hostname -s)
+export exit=0
 
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+
+o() {
+	"$bin/do-$apply" "$@"
+}
+
+module() {
+	local module=${1:?}
+	export dest=/etc/${module#module/}
+
+	echo >&2 ">>> $apply $module"
+	(cd "$base/$module"; . ./module.sh) || {
+		echo >&2 "failed"
+		exit=1
+	}
+}
 
 [ -f "$host" ] || { echo>&2 "$host does not exist"; exit 1; }
 
 while read item; do
 	case $item in
 	(module/*)
-		"$bin/apply-$apply" "$item" || :
+		module "$item"
 		;;
 	(role/*)
 		while read role; do
-			"$bin/apply-$apply" "$role" || :
+			module "$role"
 		done <$item
 		;;
 	esac
 done <$host
+
+exit "$exit"

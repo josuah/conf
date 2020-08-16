@@ -1,1 +1,1 @@
-conf opensips.cfg
+o conf opensips.cfg

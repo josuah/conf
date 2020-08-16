@@ -1,4 +1,4 @@
-run && {
+o exec && {
 	find * \
 	  -name "*.sh" -o \
 	  -type d -exec mkdir -p "$HOME/.{}" \; -o \

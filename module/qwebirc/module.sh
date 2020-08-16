@@ -1,1 +1,1 @@
-copy config.py
+o copy config.py

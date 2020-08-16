@@ -11,7 +11,7 @@ die() {
 
 case "$cmd" in
 (enable)
-	if command -v rcctl; then
+	if command -v rcctl >/dev/null; then
 		rcctl enable "$service"
 		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
 
@@ -24,7 +24,7 @@ case "$cmd" in
 	fi
 	;;
 (disable)
-	if command -v rcctl; then
+	if command -v rcctl >/dev/null; then
 		rcctl disable "$service"
 
 	elif [ -d "/etc/rc.conf.d" ]; then
@@ -55,3 +55,5 @@ case "$cmd" in
 	fi
 	;;
 esac
+
+true

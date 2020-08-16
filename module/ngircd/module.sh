@@ -1,2 +1,2 @@
-conf ngircd.conf
-copy ngircd.motd
+o conf ngircd.conf
+o copy ngircd.motd

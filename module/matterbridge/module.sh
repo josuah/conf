@@ -1,1 +1,1 @@
-conf matterbridge.toml
+o conf matterbridge.toml

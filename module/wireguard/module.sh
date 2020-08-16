@@ -1,4 +1,4 @@
-run && {
+o exec && {
 	path=$db/wireguard/pass
 	[ ! -f "$path" ] || (
 		mkdir -p "$(dirname "$path")"
@@ -6,5 +6,4 @@ run && {
 		wg genkey >$path
 	)
 }
-
-conf conf.ini
+o conf conf.ini

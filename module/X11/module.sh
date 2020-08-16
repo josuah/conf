@@ -1,1 +1,1 @@
-copy xorg.conf
+o copy xorg.conf
