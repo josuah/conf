@@ -12,7 +12,7 @@ die() {
 case "$cmd" in
 (enable)
 	if command -v rcctl; then
-		rcctl enable "$servcie"
+		rcctl enable "$service"
 		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
 
 	elif [ -d "/etc/rc.conf.d" ]; then
@@ -54,5 +54,4 @@ case "$cmd" in
 		die "no service backend for $cmd"
 	fi
 	;;
-
 esac
