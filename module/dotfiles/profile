@@ -20,3 +20,6 @@ export TERM="xterm-256color"
 export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
 
 set -o emacs 2>"/dev/null"
+
+export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
+pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK" || ssh-agent -a "$SSH_AUTH_SOCK"

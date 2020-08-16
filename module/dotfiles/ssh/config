@@ -1,2 +1,4 @@
 ForwardAgent	yes
-Include		~/.ssh/local
+AddKeysToAgent	yes
+Include		~/.ssh/config.local
+User		root
