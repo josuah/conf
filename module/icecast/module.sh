@@ -1,2 +1,2 @@
-pass $db/icecast/pass
+pass $var/icecast/pass
 conf icecast.xml

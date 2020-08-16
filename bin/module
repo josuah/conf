@@ -42,5 +42,4 @@ git() {
 
 cd "$base/$module"
 echo ">>> $module"
-set -x
 . ./module.sh

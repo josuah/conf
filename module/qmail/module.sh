@@ -1,3 +1,3 @@
 copy control
 
-hostname >$etc/control/me
+hostname >$dest/control/me

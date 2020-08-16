@@ -1,4 +1,5 @@
 role/base
 role/chat
 role/mail
+role/netbsd
 role/voice

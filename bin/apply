@@ -8,11 +8,11 @@ bin=$base/bin
 while read item; do
 	case $item in
 	(module/*)
-		"$bin/module" "$item"
+		"$bin/module" "$item" || :
 		;;
 	(role/*)
 		while read role; do
-			"$bin/module" "$role"
+			"$bin/module" "$role" || :
 		done <$item
 		;;
 	esac
