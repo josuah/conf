@@ -46,14 +46,7 @@ repo() {
 }
 
 package() {
-	local os=${1:?} package=${2:?}
-
-	case "$os" in
-	(openbsd|netbsd|freebsd)
-		uname | tr A-Z a-z | grep -Fqx "$os" &&
-			pkg_add "$package"
-		;;
-	esac
+	$bin/package install "$@"
 }
 
 service() {

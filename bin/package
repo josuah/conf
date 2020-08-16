@@ -1,0 +1,30 @@
+#!/bin/sh -eu
+
+command=${1:?} package=${2:?}
+
+die() {
+	echo >&2 "error: $*"
+	exit 1
+}
+
+command -v "$package" >/dev/null && exit 0
+
+case $command in
+(install)
+	if command -v pkg_add >/dev/null; then
+		pkg_add "$package"
+
+	elif command -v pkg >/dev/null; then
+		pkg install "$package"
+
+	elif command -v apt >/dev/null; then
+		apt install "$package"
+
+	elif command  -v apk >/dev/null; then
+		apk add "$package"
+
+	else
+		die "no backend found for downloading $package"
+	fi
+	;;
+esac

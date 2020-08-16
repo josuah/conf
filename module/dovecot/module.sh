@@ -1,3 +1,3 @@
 conf dovecot.conf
-package openbsd dovecot
+package dovecot dovecot
 service dovecot

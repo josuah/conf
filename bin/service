@@ -35,21 +35,21 @@ case "$cmd" in
 	;;
 (start)
 	if [ -d "/etc/rc.d" ]; then
-		"/etc/init.d/$service" start
+		"/etc/rc.d/$service" start
 	else
 		die "no service backend for $cmd"
 	fi
 	;;
 (stop)
 	if [ -d "/etc/rc.d" ]; then
-		"/etc/init.d/$service" stop
+		"/etc/rc.d/$service" stop
 	else
 		die "no service backend for $cmd"
 	fi
 	;;
 (status)
 	if [ -d "/etc/rc.d" ]; then
-		"/etc/init.d/$service" check
+		"/etc/rc.d/$service" check
 	else
 		die "no service backend for $cmd"
 	fi
