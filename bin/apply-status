@@ -2,7 +2,7 @@
 
 module=${1:?}
 
-run() ! :
+run() false
 copy() :
 conf() :
 pass() :
