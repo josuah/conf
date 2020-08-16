@@ -12,7 +12,7 @@ die() {
 case "$cmd" in
 (enable)
 	if command -v rcctl; then
-		rcctl enable "$
+		rcctl enable "$servcie"
 		[ $# -gt 0 ] && rcctl set "$service" flags "$*"
 
 	elif [ -d "/etc/rc.conf.d" ]; then
