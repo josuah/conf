@@ -1,7 +1,9 @@
 #!/bin/sh -eu
-host=host/$(hostname -s)
+
 item=${1:?}
-item=${1%/}
+
+host=host/$(hostname -s)
+item=${item%/}
 
 touch "$host"
 grep -Fxq "$item" "$host" || exec echo>&2 "$item already deleted for $host"

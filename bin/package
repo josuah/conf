@@ -1,6 +1,7 @@
 #!/bin/sh -eu
 
-command=${1:?} package=${2:?}
+command=${1:?}
+package=${2:?}
 
 die() {
 	echo >&2 "error: $*"

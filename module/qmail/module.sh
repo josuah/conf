@@ -1,3 +1,5 @@
 copy control
 
-hostname >$dest/control/me
+run && {
+	hostname >$dest/control/me
+}

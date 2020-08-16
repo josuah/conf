@@ -1,18 +1,25 @@
 #!/bin/sh -eu
-host=host/$(hostname -s)
-base=$(cd $(dirname "$0")/..; pwd)
-bin=$base/bin
+
+apply=${1:-deploy}
+
+export base=$(cd $(dirname "$0")/..; pwd)
+export var=$base/var
+export bin=$base/bin
+export tmp=$(mktemp)
+export host=host/$(hostname -s)
+
+trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 [ -f "$host" ] || { echo>&2 "$host does not exist"; exit 1; }
 
 while read item; do
 	case $item in
 	(module/*)
-		"$bin/module" "$item" || :
+		"$bin/apply-$apply" "$item" || :
 		;;
 	(role/*)
 		while read role; do
-			"$bin/module" "$role" || :
+			"$bin/apply-$apply" "$role" || :
 		done <$item
 		;;
 	esac

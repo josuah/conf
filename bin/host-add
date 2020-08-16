@@ -1,7 +1,9 @@
 #!/bin/sh -eu
-host=host/$(hostname -s)
+
 item=${1:?}
-item=${1%/}
+
+item=${item%/}
+host=host/$(hostname -s)
 
 [ -e "$item" ] || { echo>&2 "$item does not exist"; exit 1; }
 touch "$host"

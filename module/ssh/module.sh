@@ -1,3 +1,5 @@
 copy sshd_config
 
-ssh-keygen -A
+run && {
+	ssh-keygen -A
+}
