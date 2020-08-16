@@ -5,9 +5,9 @@ shift
 
 case $cmd in
 (service)
-	local service=${1:?}
+	service=${1:?}
 
-	$bin/service status "$service" >/dev/null 2>&1 \
+	"$bin/service" status "$service" >/dev/null 2>&1 \
 		&& echo "service/$service ok" \
 		|| echo "service/$service fail"
 	;;

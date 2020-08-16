@@ -20,7 +20,7 @@ module() {
 	export dest=/etc/${module#module/}
 
 	echo >&2 ">>> $apply $module"
-	(cd "$base/$module"; . ./module.sh) || {
+	(cd "$base/$module"; . ./module.sh; :) || {
 		echo >&2 "failed"
 		exit=1
 	}

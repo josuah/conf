@@ -5,23 +5,19 @@ shift
 
 case $cmd in
 (copy)
-	local copy
-
 	for copy; do
 		mkdir -p "$dest"
 		cp -rf "$copy" "$dest"
 	done
 	;;
 (conf)
-	local conf=${1:?}
+	conf=${1:?}
 
 	(cd "$var"; "$bin/template" >$tmp) <$conf.in
 	mkdir -p "$(dirname "$dest/$conf")"
 	mv "$tmp" "$dest/$conf"
 	;;
 (pass)
-	local pass
-
 	for pass; do
 		[ -d "$pass/pass" ] && continue
 		dd if=/dev/urandom bs=32 count=1 2>/dev/null \
@@ -31,7 +27,7 @@ case $cmd in
 	done
 	;;
 (repo)
-	local repo=${1:?} path=${2:?}
+	repo=${1:?} path=${2:?}
 
 	if [ -d "$path" ]; then
 		git -C "$path" fetch --all
@@ -40,10 +36,10 @@ case $cmd in
 	fi
 	;;
 (package)
-	$bin/package install "$@"
+	"$bin/package" install "$@"
 	;;
 (service)
-	$bin/service enable "$@"
+	"$bin/service" enable "$@"
 	;;
 (exec)
 	exit 0
