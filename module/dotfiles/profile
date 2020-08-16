@@ -15,6 +15,9 @@ export PAGER="less"
 export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
 
+export PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages"
+export PKG_PATH="$PKG_PATH/$(uname -s)/$(uname -m)/$(uname -r | cut -d . -f 1-2)/All/"
+
 case $- in (*i*)
 	export TERM="xterm-256color"
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
