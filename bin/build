@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+o() {
+	case $1 in
+	(repo)
+		path=$base/repo/$name
+		[ -d "$path" ] || git clone --mirror "$name" "$path" 
+		;;
+	esac
+}

@@ -1,0 +1,7 @@
+repo https://github.com/jedisct1/encpipe
+commit c6382f5f6eb245068fa8f422cd00ecd7d9278010
+
+build && {
+	make
+	make PREFIX="$PREFIX" install
+}
