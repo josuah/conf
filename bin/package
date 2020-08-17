@@ -12,21 +12,22 @@ command -v "$package" >/dev/null && exit 0
 
 case $command in
 (install)
-	case $(uname) in
-	(FreeBSD)
+	case $("$base/bin/os") in
+	(freebsd)
 		pkg install "$package"
 		;;
-	(*BSD)
+	(*bsd)
 		pkg_add "$package"
 		;;
+	(debian)
+		apt install "$package"
+		;;
+		apk add "$package"
+	(void)
+		xbps-install
+		;;
 	(*)
-		if command -v apt >/dev/null; then
-			apt install "$package"
-		elif command  -v apk >/dev/null; then
-			apk add "$package"
-		else
-			die "no backend found for downloading $package"
-		fi
+		die "no backend found for downloading $package"
 		;;
 	esac
 	;;

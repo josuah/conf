@@ -4,54 +4,69 @@ cmd=${1:?}
 service=${2:?}
 shift 2
 
-die() {
-	echo >&2 "error: $*"
-	exit 1
-}
-
-case $cmd in
-(enable)
-	case $(uname) in
-	(OpenBSD)
-		rcctl enable "$service"
-		[ $# = 0 ] || rcctl set "$service" flags "$*"
+case $("$base/bin/os") in
+(openbsd)
+	case $cmd in
+	(status)
+		rcctl check "$service"
 		;;
-	(NetBSD|FreeBSD)
+	(*)
+		rcctl "$cmd" "$service"
+		;;
+	esac
+	;;
+(*bsd)
+	case $cmd in
+	(enable)
 		path=/etc/rc.conf.d/$service
 		echo "$service=YES" >$path
-		[ $# = 0 ] || echo "$service_flags='$*'" >>$path
 		;;
-	(*) die "no service backend for $cmd" ;;
-	esac
-	;;
-(disable)
-	case $(uname) in
-	(OpenBSD)
-		rcctl disable "$service"
-		;;
-	(NetBSD|FreeBSD)
+	(disable)
 		rm -f "/etc/rc.conf.d/$service"
 		;;
-	(*) die "no service backend for $cmd" ;;
+	(*)
+		"/etc/rc.d/$service" "$cmd"
+		;;
 	esac
 	;;
-(start|stop)
-	case $(uname) in
-	(*BSD)
-		"/etc/rc.d/$service" start
+(alpine|gentoo)
+	case $cmd in
+	(enable)
+		rc-update add "$service" default
 		;;
-	(*) die "no service backend for $cmd" ;;
+	(disable)
+		rc-update del "$service" default
+		;;
+	(*)
+		rc-service "$service" "$cmd"
+		;;
 	esac
 	;;
-(status)
-	case $(uname) in
-	(OpenBSD)
-		"/etc/rc.d/$service" check
+(void)
+	case $cmd in
+	(enable)
+		ln -sf "/etc/runit/sv/$service" "/run/runit/service"
 		;;
-	(*BSD)
-		"/etc/rc.d/$service" status
+	(disable)
+		rm -f "/run/runit/service/$service"
 		;;
-	(*) die "no service backend for $cmd" ;;
+	(start)
+		sv up "$service"
+		;;
+	(*)
+		sv "$cmd" "$service"
+		;;
 	esac
+	;;
+(debian|redhat|arch|suse)
+	case "$cmd" in
+	(*)
+		systemctl "$cmd" "$service"
+		;;
+	esac
+	;;
+(*)
+	echo >&2 "error: no service backend for $cmd"
+	exit 1
 	;;
 esac
