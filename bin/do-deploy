@@ -1,9 +1,9 @@
 #!/bin/sh -eu
 
-cmd=${1:?}
+command=${1:?}
 shift
 
-case $cmd in
+case $command in
 (copy)
 	for copy; do
 		mkdir -p "$dest"
@@ -13,13 +13,13 @@ case $cmd in
 (conf)
 	conf=${1:?}
 
-	(cd "$base/var"; "$base/bin/template" >$tmp) <$conf.in
+	(cd "$base/db"; "$base/bin/template" >$tmp) <$conf.in
 	mkdir -p "$(dirname "$dest/$conf")"
 	mv "$tmp" "$dest/$conf"
 	;;
 (pass)
 	for pass; do
-		cd "$base/var"
+		cd "$base/db"
 		[ -d "$pass/pass" ] && continue
 		dd if=/dev/urandom bs=32 count=1 2>/dev/null \
 		| od -x -A n | tr -cd '0-9a-f' >$tmp

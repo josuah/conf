@@ -1,22 +1,22 @@
 #!/bin/sh -eu
 
-cmd=${1:?}
+command=${1:?}
 service=${2:?}
 shift 2
 
 case $("$base/bin/os") in
 (openbsd)
-	case $cmd in
+	case $command in
 	(status)
 		rcctl check "$service"
 		;;
 	(*)
-		rcctl "$cmd" "$service"
+		rcctl "$command" "$service"
 		;;
 	esac
 	;;
 (*bsd)
-	case $cmd in
+	case $command in
 	(enable)
 		path=/etc/rc.conf.d/$service
 		echo "$service=YES" >$path
@@ -25,12 +25,12 @@ case $("$base/bin/os") in
 		rm -f "/etc/rc.conf.d/$service"
 		;;
 	(*)
-		"/etc/rc.d/$service" "$cmd"
+		"/etc/rc.d/$service" "$command"
 		;;
 	esac
 	;;
 (alpine|gentoo)
-	case $cmd in
+	case $command in
 	(enable)
 		rc-update add "$service" default
 		;;
@@ -38,12 +38,12 @@ case $("$base/bin/os") in
 		rc-update del "$service" default
 		;;
 	(*)
-		rc-service "$service" "$cmd"
+		rc-service "$service" "$command"
 		;;
 	esac
 	;;
 (void)
-	case $cmd in
+	case $command in
 	(enable)
 		ln -sf "/etc/runit/sv/$service" "/run/runit/service"
 		;;
@@ -54,19 +54,19 @@ case $("$base/bin/os") in
 		sv up "$service"
 		;;
 	(*)
-		sv "$cmd" "$service"
+		sv "$command" "$service"
 		;;
 	esac
 	;;
 (debian|redhat|arch|suse)
-	case "$cmd" in
+	case "$command" in
 	(*)
-		systemctl "$cmd" "$service"
+		systemctl "$command" "$service"
 		;;
 	esac
 	;;
 (*)
-	echo >&2 "error: no service backend for $cmd"
+	echo >&2 "error: unknown os"
 	exit 1
 	;;
 esac

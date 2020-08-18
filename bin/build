@@ -1,10 +1,37 @@
-#!/bin/sh -e
+#!/bin/sh -eu
 
-o() {
-	case $1 in
-	(repo)
-		path=$base/repo/$name
-		[ -d "$path" ] || git clone --mirror "$name" "$path" 
-		;;
-	esac
+repo() {
+	local repo=${1:?} 
+	local git=$base/cache/git/$name
+
+	[ -d $git ] && return 0
+	git clone --mirror "$repo" "$git"
 }
+
+commit() { set -x
+	local commit=${1:?}
+	local git=$base/cache/git/$name
+	src=$base/cache/src/$name-$commit
+
+	[ -d "$src" ] && return 0
+	git -C "$git" rev-parse "$commit" >/dev/null || git -C "$git" fetch
+	git -C "$git" rev-parse "$commit" >/dev/null || exit 1
+	mkdir -p "$src"
+	git -C "$git" archive "$commit" | tar -C "$src" -xf -
+}
+
+name=${1:?}
+name=${name#build/}
+name=${name%/}
+base=$(cd "$(dirname "$0")/.."; pwd)
+export PREFIX="$base/cache/prefix/$name"
+
+[ -d "$PREFIX" ] && exit 0
+
+. "$base/build/$name"
+
+cd "$src"
+trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
+mkdir -p "$PREFIX"
+build
+exec rm -rf "$src"
