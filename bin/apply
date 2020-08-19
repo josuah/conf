@@ -44,7 +44,8 @@ export apply="${1:?}"
 export apply="${apply##*/}"
 export base="$(cd $(dirname "$0")/..; pwd)"
 export tmp="$(mktemp)"
-export item="${item:-host/${host:-$(hostname -s)}}"
+export host=$(hostname -s)
+export item="${item:-host/$host}"
 export exit=0
 shift 1
 
