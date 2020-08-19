@@ -7,7 +7,7 @@ monit=$base/monit/${1:?}
 var_timeout=5
 shift
 
-for path in "$base/host/$host/"*; do
+for path in "$base/db/adm/host/$host/"*; do
 	read "var_${path##*/}" <$path
 done
 

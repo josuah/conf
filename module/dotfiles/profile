@@ -1,6 +1,6 @@
-export PATH=/bin:/sbin
-for path in  /usr /usr/pkg /usr/local /usr/plan9 /usr/go; do
-	export PATH="$PATH:$path/bin:$path/sbin"
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+for path in pkg local plan9 go X11R6 X11R7; do
+	export PATH="$PATH:/usr/$path/bin:/usr/$path/sbin"
 done
 
 export MAIL="/var/mail/$USER/Maildir"

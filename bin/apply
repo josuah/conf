@@ -40,15 +40,15 @@ resolve() {
 	esac
 }
 
-export apply=${1:?}
-export apply=${apply##*/}
-export base=$(cd $(dirname "$0")/..; pwd)
-export tmp=$(mktemp)
-export host=${host:-$(hostname -s)}
+export apply="${1:?}"
+export apply="${apply##*/}"
+export base="$(cd $(dirname "$0")/..; pwd)"
+export tmp="$(mktemp)"
+export item="${item:-host/${host:-$(hostname -s)}}"
 export exit=0
 shift 1
 
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 [ -x "$base/bin/do/$apply" ] || die "unknown script $base/bin/do/$apply"
-resolve "host/$host/modules" "$@"
+resolve "$item" "$@"
 exit "$exit"
