@@ -1,1 +1,1 @@
-ping -c 2 -t 1 "$host_ip"
+ping -c 2 -t 1 "$var_ip"

@@ -8,16 +8,57 @@ repo() {
 	git clone --mirror "$repo" "$git"
 }
 
-commit() { set -x
+commit() {
 	local commit=${1:?}
 	local git=$base/cache/git/$name
-	src=$base/cache/src/$name-$commit
+	export source=$base/cache/source/$name-$commit
 
-	[ -d "$src" ] && return 0
+	[ -d "$source" ] && return 0
 	git -C "$git" rev-parse "$commit" >/dev/null || git -C "$git" fetch
 	git -C "$git" rev-parse "$commit" >/dev/null || exit 1
-	mkdir -p "$src"
-	git -C "$git" archive "$commit" | tar -C "$src" -xf -
+	mkdir -p "$source"
+	git -C "$git" archive "$commit" | tar -C "$source" -xf -
+}
+
+version() {
+	export version=${1:?}
+}
+
+archive() {
+	local url=${1:?}
+	export archive="$base/cache/archive/$name-$(basename "$url")"
+	export source=$base/cache/source/$name-$version
+
+	[ -d "$source" ] && return 0
+
+	trap 'rm -rf "$archive"' INT TERM EXIT HUP
+	mkdir -p "$(dirname "$archive")"
+	curl -Ls -o "$archive" "$url"
+}
+
+checksum() {
+	local sum=${1:?}
+
+	if command -v sha256sum >/dev/null; then
+		sha256sum "$archive" | sed 's/ .*//'
+	elif command -v sha256 >/dev/null; then
+		sha256 "$archive" | sed 's/ .*//'
+	elif command -v openssl >/dev/null; then
+		openssl sha256 "$archive" | sed 's/.* //'
+	fi | tee /dev/stderr | grep -Fqx "$sum" || {
+		echo >&2 "$sum < expected"
+		exit 1
+	}
+
+	trap 'rm -rf "$base/cache/tmp$$"' INT TERM EXIT HUP
+	mkdir -p "$base/cache/tmp$$"
+	rm -rf "$source"
+	case "$archive" in
+	(*gz) gzip -cd "$archive" ;;
+	(*xz) xz -cd "$archive" ;;
+	(*lz) lz -cd "$archive" ;;
+	esac | tar -x -f - -C "$base/cache/tmp$$"
+	mv "$(echo "$base/cache/tmp$$/"*)" "$source"
 }
 
 name=${1:?}
@@ -30,8 +71,10 @@ export PREFIX="$base/cache/prefix/$name"
 
 . "$base/build/$name"
 
-cd "$src"
+cd "$source"
+
 trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
+
 mkdir -p "$PREFIX"
 build
-exec rm -rf "$src"
+exec rm -rf "$source"

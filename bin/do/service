@@ -1,0 +1,10 @@
+#!/bin/sh -eu
+
+[ "$1" = "service" ] || exit 0
+shift
+
+service=${1:?}
+command=${2:?}
+base=$(cd "$(dirname "$0")/../.."; pwd)
+
+"$base/bin/os/service" "$command" "$service" >/dev/null 2>&1

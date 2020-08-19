@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+host=host/$(hostname -s)/modules
+
+while read item; do
+	case $item in
+	(module/*)
+		echo " * $item"
+		;;
+	(role/*)
+		echo " * $item"
+		while read module; do
+			echo "  \\_ $module"
+		done <$item
+		;;
+	esac
+done <$host

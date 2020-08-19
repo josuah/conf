@@ -1,0 +1,20 @@
+#!/bin/sh -eu
+
+[ "$1" = "monitor" ] || exit 0
+shift
+
+monit=$base/monit/${1:?}
+var_timeout=5
+shift
+
+for path in "$base/host/$host/"*; do
+	read "var_${path##*/}" <$path
+done
+
+for var; do
+	export "var_$var"
+done
+
+. "$monit" >/dev/null & pid=$!
+sleep "$var_timeout" && kill "$pid" &
+wait "$pid"

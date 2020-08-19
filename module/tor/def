@@ -1,0 +1,5 @@
+o package tor
+o service tor
+o monitor tcp port=9150
+o file torrc
+o file hs
