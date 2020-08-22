@@ -1,0 +1,13 @@
+#!/bin/sh -eu
+
+var_timeout=5
+
+. "${0%/*}/lib"
+
+case $command in
+( monitor )
+	. "$base/monitor/$name" >/dev/null & pid=$!
+	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
+	wait "$pid"
+	;;
+esac

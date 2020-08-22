@@ -1,0 +1,13 @@
+#!/bin/sh -eu
+
+. "${0%/*}/lib"
+
+case $command in
+( install )
+	git clone --depth 1 "$var_url" "$var_path"
+	;;
+( update )
+	git -C "$var_path" set-url origin "$var_url"
+	git -C "$var_path" fetch --all
+	;;
+esac

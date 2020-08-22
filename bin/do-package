@@ -1,0 +1,44 @@
+#!/bin/sh -eu
+
+. "${0%/*}/lib"
+
+case $command in
+( install )
+	command -v "${var_command:-$name}" >/dev/null && exit 0
+
+	case $("$base/bin/os/detect") in
+	( FreeBSD )
+		pkg install "${var_FreeBSD:-name}"
+		;;
+	( DragonflyBSD )
+		pkg install "${var_DragonflyBSD:-name}"
+		;;
+	( OpenBSD )
+		pkg_add "${var_OpenBSD:-name}"
+		;;
+	( NetnBSD )
+		pkg_add "${var_NetBSD:-name}"
+		;;
+	( DevuanLinux )
+		apt update
+		apt install "${var_DevuanLinux:-name}"
+		;;
+	( DebianLinux )
+		apt update
+		apt install "${var_DebianLinux:-name}"
+		;;
+	( AlpineLinux )
+		apk add "${var_AlpineLinux:-name}"
+		;;
+	( VoidLinux )
+		xbps-install "${var_VoidLinux:-name}"
+		;;
+	( ArchLinux )
+		pacman -Syu "${var_ArchLinux:-name}"
+		;;
+	(*)
+		die "Unknown OS"
+		;;
+	esac
+	;;
+esac

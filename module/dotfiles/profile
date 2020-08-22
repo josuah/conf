@@ -1,5 +1,5 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for path in pkg local plan9 go X11R6 X11R7; do
+for path in adm pkg local plan9 go X11R6 X11R7; do
 	export PATH="$PATH:/usr/$path/bin:/usr/$path/sbin"
 done
 
@@ -16,13 +16,14 @@ export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
 
 case $(uname) in
-(NetBSD)
+( NetBSD )
 	export PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages"
 	export PKG_PATH="$PKG_PATH/$(uname -s)/$(uname -m)/$(uname -r | cut -d . -f 1-2)/All/"
 	;;
 esac
 
-case $- in (*i*)
+case $- in
+( *i* )
 	export TERM="xterm-256color"
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
 	export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
