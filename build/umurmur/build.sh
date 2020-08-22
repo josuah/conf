@@ -1,6 +1,6 @@
-version 0.5
+version 0.2.17
 archive https://github.com/umurmur/umurmur/archive/$version.tar.gz
-checksum 01fff57f2231667b3c05ff865f872e1aa8f5e4455730972fb42d36ac8f6a96ba
+checksum e77b7b6616768f4a1c07442afe49a772692f667b00c23cc85909d4dd0ce206d2
 
 build() {
 	cc -o umurmurd \

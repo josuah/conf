@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+base=$(cd "${0%/*}"; pwd)
+
+bin/list "$1" |
+while read line args; do
+
+done

@@ -1,24 +1,37 @@
 #!/bin/cat source this file
 
-trap=
-trap_add() {
-	trap="$trap; $1"
-	trap "$trap" INT TERM EXIT HUP
-}
-
 die() {
 	echo >&2 "error: $*"
 	exit 1
 }
 
-tmp=$(mktemp)
+trap_add() {
+	trap="$trap; $1"
+	trap "$trap" INT TERM EXIT HUP
+}
+
+trap_pop() {
+	trap="${trap%; *}"
+	trap "$trap" INT TERM EXIT HUP
+}
+
+command=${1:?}
+name=${2:?}
+name=${name#*/}
+name=${name%/}
+shift 2
+
+trap=:
+
+tmp=$(mktemp -d)
 trap_add 'rm -rf "$tmp"'
 
 host=${host:-$(hostname -s)}
-base=$(cd "${0%/bin/*}"; pwd)
+base=$(cd "${0%/*}/.."; pwd)
 
-for path in "$base/db/adm/host/$host/"*; do
-	read "var_${path##*/}" <$path
+for var in "$base/var/sys/host/$host/"*; do
+	case $var in ( *"/*" ) continue ;; esac
+	read "var_${var##*/}" <$var
 done
 
 for var in "$@"; do
