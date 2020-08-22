@@ -1,6 +1,0 @@
-o run || {
-	if [ ! -f "$db/wireguard/pass" ]; then
-		(umask 600; wg genkey >$db/wireguard/pass)
-	fi
-}
-o conf wireguard.conf

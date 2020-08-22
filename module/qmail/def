@@ -1,6 +1,0 @@
-o build notqmail
-o copy control
-o monit tcp port=25
-o run || {
-	hostname >$dest/control/me
-}

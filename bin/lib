@@ -1,0 +1,26 @@
+#!/bin/cat source this file
+
+trap=
+trap_add() {
+	trap="$trap; $1"
+	trap "$trap" INT TERM EXIT HUP
+}
+
+die() {
+	echo >&2 "error: $*"
+	exit 1
+}
+
+tmp=$(mktemp)
+trap_add 'rm -rf "$tmp"'
+
+host=${host:-$(hostname -s)}
+base=$(cd "${0%/bin/*}"; pwd)
+
+for path in "$base/db/adm/host/$host/"*; do
+	read "var_${path##*/}" <$path
+done
+
+for var in "$@"; do
+	export "var_$var"
+done

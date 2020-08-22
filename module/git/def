@@ -1,3 +1,0 @@
-o package git
-o service gitdaemon
-o monit tcp port=9318

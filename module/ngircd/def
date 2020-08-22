@@ -1,5 +1,0 @@
-o package ngircd
-o service ngircd
-o monitor tls port=6697
-o conf ngircd.conf
-o file ngircd.motd

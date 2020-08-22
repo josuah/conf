@@ -1,10 +1,110 @@
 #!/bin/sh -eu
 
-[ "$1" = "service" ] || exit 0
-shift
+. "${0%/bin/*}/bin/lib"
 
-service=${1:?}
-command=${2:?}
-base=$(cd "$(dirname "$0")/../.."; pwd)
-
-"$base/bin/os/service" "$command" "$service" >/dev/null 2>&1
+caes $command in
+( enable )
+	case $("$base/bin/os") in
+	( OpenBSD )
+		rcctl enable "$name"
+		;;
+	( *BSD )
+		echo "$name=YES" >/etc/rc.conf.d/$name
+		;;
+	( AlpineLinux | GentooLinux | DevuanLinux )
+		rc-update add "$name" default
+		;;
+	( VoidLinux )
+		ln -sf "/etc/runit/sv/$name" "/run/runit/service"
+		;;
+	( DebianLinux | RedHatLinux | ArchLinux | SuseLinux )
+		systemctl enable "$name"
+		;;
+	( * )
+		die "Unknown OS"
+		;;
+	esac
+	;;
+( disable )
+	case $("$base/bin/os") in
+	( OpenBSD )
+		rcctl disable "$name"
+		;;
+	( *BSD )
+		rm -f "/etc/rc.conf.d/$name"
+		;;
+	( AlpineLinux | GentooLinux | DevuanLinux )
+		rc-update del "$name" default
+		;;
+	( VoidLinux )
+		rm -f "/run/runit/service/$name"
+		;;
+	( DebianLinux | RedHatLinux | ArchLinux | SuseLinux )
+		systemctl disable "$name"
+		;;
+	( * )
+		die "Unknown OS"
+		;;
+	esac
+	;;
+( start )
+	case $("$base/bin/os") in
+	( *BSD )
+		"/etc/rc.d/$name" start
+		;;
+	( AlpineLinux | GentooLinux | DevuanLinux )
+		rc-service start "$command"
+		;;
+	( VoidLinux )
+		sv up "$name"
+		;;
+	( DebianLinux | RedHatLinux | ArchLinux | SuseLinux )
+		systemctl start "$name"
+		;;
+	( * )
+		die "Unknown OS"
+		;;
+	esac
+	;;
+( stop )
+	case $("$base/bin/os") in
+	( *BSD )
+		"/etc/rc.d/$name" stop
+		;;
+	( AlpineLinux | GentooLinux | DevuanLinux )
+		rc-service stop "$command"
+		;;
+	( VoidLinux )
+		sv down "$name"
+		;;
+	( DebianLinux | RedHatLinux | ArchLinux | SuseLinux )
+		systemctl stop "$name"
+		;;
+	( * )
+		die "Unknown OS"
+		;;
+	esac
+	;;
+( status )
+	case $("$base/bin/os") in
+	( OpenBSD )
+		"/etc/rc.d/$name" check
+		;;
+	( *BSD )
+		"/etc/rc.d/$name" status
+		;;
+	( AlpineLinux | GentooLinux | DevuanLinux )
+		rc-service status "$command"
+		;;
+	( VoidLinux )
+		sv status "$name"
+		;;
+	( DebianLinux | RedHatLinux | ArchLinux | SuseLinux )
+		systemctl status "$name"
+		;;
+	( * )
+		die "Unknown OS"
+		;;
+	esac
+	;;
+esac

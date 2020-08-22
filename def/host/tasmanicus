@@ -1,0 +1,6 @@
+role/base
+role/chat
+role/mail
+role/openbsd
+role/server
+role/voice

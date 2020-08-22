@@ -1,0 +1,3 @@
+package/ngircd
+service/ngircd
+monitor/tcp port=6697

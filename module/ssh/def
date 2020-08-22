@@ -1,6 +1,0 @@
-o service sshd
-o monitor ssh port=22
-o file sshd_config
-o run || {
-	ssh-keygen -A
-}

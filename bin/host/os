@@ -1,8 +1,0 @@
-#!/bin/sh -eu
-
-host=host/$(hostname -s)
-
-os=$(bin/os)
-[ "$os" ] || exit 1
-mkdir -p "$host"
-echo "$os" >$host/os

@@ -1,4 +1,0 @@
-o package kamailio
-o service kamailio
-o monit tcp port=5060
-o monit tls port=5061

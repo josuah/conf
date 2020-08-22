@@ -1,4 +1,0 @@
-o package system dovecot
-o service dovecot
-o monit tls port=993
-o conf dovecot.conf

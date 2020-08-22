@@ -1,0 +1,2 @@
+package/notqmail
+monitor/tcp port=25

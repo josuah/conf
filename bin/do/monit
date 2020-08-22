@@ -1,20 +1,13 @@
 #!/bin/sh -eu
 
-[ "$1" = "monitor" ] || exit 0
-shift
-
-monit=$base/monit/${1:?}
 var_timeout=5
-shift
 
-for path in "$base/db/adm/host/$host/"*; do
-	read "var_${path##*/}" <$path
-done
+. "${0%/bin/*}/bin/lib/var"
 
-for var; do
-	export "var_$var"
-done
-
-. "$monit" >/dev/null & pid=$!
-sleep "$var_timeout" && kill "$pid" 2>/dev/null &
-wait "$pid"
+case $command in
+( monitor )
+	. "$base/monit/$name" >/dev/null & pid=$!
+	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
+	wait "$pid"
+	;;
+esac

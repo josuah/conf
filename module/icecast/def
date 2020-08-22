@@ -1,5 +1,0 @@
-o package icecast
-o service icecast
-o monit http port=8080
-o pass icecast
-o conf icecast.xml
