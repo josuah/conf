@@ -2,10 +2,10 @@
 
 node=${1:-host/$(hostname -s)}
 node=${node#def/}
-base=$(cd "${0%/bin/*}"; pwd)
+base=$(cd "${0%/*}/.."; pwd)
 
 list() {
-	local level=${1:?} node=${2:?} args=$3
+	local level="${1:?}" node="${2:?}" args="$3"
 
 	printf "%-$((level * 2))s%s %s\\n" "" "$node" "$args"
 	[ -f "$base/def/$node" ] || return 0

@@ -3,7 +3,7 @@
 . "${0%/*}/lib"
 
 case $command in
-( enable )
+( install | enable )
 	for file in "$base/module/$name/etc/"*; do
 		case $file in ( *"/*" | */template.* ) continue ;; esac
 

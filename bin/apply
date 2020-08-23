@@ -1,8 +1,15 @@
 #!/bin/sh -e
 
-base=$(cd "${0%/*}"; pwd)
+command=${1:?}
+root=${2:-host/$(hostname -s)}
+base=$(cd "${0%/*}/.."; pwd)
 
-bin/list "$1" |
-while read line args; do
+while read node args; do
+	if [ -f "$base/bin/do-${node%/*}" ]; then
+		"$base/bin/do-${node%/*}" "$command" "$node" $args || exit=1
+	fi
+done <<%
+$(bin/list "$root" )
+%
 
-done
+exit "${exit:-0}"

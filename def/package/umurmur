@@ -1,3 +1,4 @@
 build/libmbedtls
 build/libprotobuf-c
+build/libconfig
 build/umurmur

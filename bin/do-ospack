@@ -6,7 +6,7 @@ case $command in
 ( install )
 	command -v "${var_command:-$name}" >/dev/null && exit 0
 
-	case $("$base/bin/os/detect") in
+	case $("$base/bin/os") in
 	( FreeBSD )
 		pkg install "${var_FreeBSD:-name}"
 		;;

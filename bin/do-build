@@ -1,17 +1,17 @@
 #!/bin/sh -eu
 
 repo() {
-	local repo=${1:?} 
-	local git=$base/cache/git/$name
+	local repo="${1:?}"
+	local git="/var/cache/adm/git/$name"
 
 	[ -d $git ] && return 0
 	git clone --mirror "$repo" "$git"
 }
 
 commit() {
-	local git=$base/cache/git/$name
-	export version=${1:?}
-	export source=$base/cache/source/$name-$version
+	local git="/var/cache/adm/git/$name"
+	export version="${1:?}"
+	export source="/var/cache/adm/source/$name-$version"
 
 	[ -d "$source" ] && return 0
 	git -C "$git" rev-parse "$version" >/dev/null || git -C "$git" fetch
@@ -26,8 +26,8 @@ version() {
 
 archive() {
 	local url=${1:?}
-	export archive="$base/cache/archive/$name-$(basename "$url")"
-	export source=$base/cache/source/$name-$version
+	export archive="/var/cache/adm/archive/$name-$(basename "$url")"
+	export source=/var/cache/adm/source/$name-$version
 
 	[ -d "$source" ] && return 0
 
@@ -37,7 +37,7 @@ archive() {
 }
 
 checksum() {
-	local sum=${1:?}
+	local sum="${1:?}"
 
 	[ -d "$source" ] && return 0
 
@@ -70,8 +70,8 @@ case $command in
 ( install )
 	. "$base/build/$name/build.sh"
 
-	export DESTDIR="$base/cache/prefix/$name-$version"
 	export PREFIX="/usr/adm"
+	export DESTDIR="$PREFIX/opt/$name-$version"
 
 	[ -d "$DESTDIR" ] && exit 0
 

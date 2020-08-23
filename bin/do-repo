@@ -4,7 +4,9 @@
 
 case $command in
 ( install )
-	git clone --depth 1 "$var_url" "$var_path"
+	if [ ! -d "$var_path" ]; then
+		git clone --depth 1 "$var_url" "$var_path"
+	fi
 	;;
 ( update )
 	git -C "$var_path" set-url origin "$var_url"
