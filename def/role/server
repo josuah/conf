@@ -1,4 +1,2 @@
 module/ssh
-monitor/cpu
-monitor/ram
 monitor/ping

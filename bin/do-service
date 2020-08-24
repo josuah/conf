@@ -6,7 +6,7 @@ case $command in
 ( enable )
 	case $("$base/bin/os") in
 	( OpenBSD )
-		rcctl enable "$name"
+		rcctl enable "${var_OpenBSD:-name}"
 		;;
 	( *BSD )
 		echo "$name=YES" >/etc/rc.conf.d/$name

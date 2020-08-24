@@ -6,8 +6,9 @@ var_timeout=5
 
 case $command in
 ( monitor )
-	. "$base/monitor/$name" >/dev/null & pid=$!
+	. "$base/monitor/$name" >&2 & pid=$!
 	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
 	wait "$pid"
+	echo "do=monitor name=$name exit=$?"
 	;;
 esac

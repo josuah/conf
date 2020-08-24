@@ -1,0 +1,35 @@
+#!/usr/bin/awk -f
+
+function out(name, value)
+{
+	if (value)
+		print HOST "." name, value, now
+}
+
+$1 ~ /-*procs-*/ {
+	next
+}
+
+$1 == "r" {
+	for (i = 1; i <= NR; i++)
+		F[$i] = i
+	next
+}
+
+BEGIN {
+	cmd = "hostname"
+	cmd | getline HOST
+	close (cmd)
+
+	sub("\\..*", "", HOST)
+}
+
+{
+	cmd = "date +%s"
+	cmd | getline NOW
+	close(cmd)
+
+	out("sys.proc.run", F["r"])
+	out("sys.proc.back", F["b"])
+	out("sys.", F["avm"])
+}

@@ -1,18 +1,24 @@
 #!/bin/sh -e
 
-node=${1:-host/$(hostname -s)}
-node=${node#def/}
-base=$(cd "${0%/*}/.."; pwd)
-
 list() {
-	local level="${1:?}" node="${2:?}" args="$3"
+	local level="${1:?}" node="${2:?}"
+	shift 2
 
-	printf "%-$((level * 2))s%s %s\\n" "" "$node" "$args"
+	printf "%-$((level * 2))s%s" "" "$node"
+	printf " %s" "$@"
+	printf "\\n"
+
 	[ -f "$base/def/$node" ] || return 0
 
 	while read node args; do
-		list $((level + 1)) "$node" "$args"
+		list $((level + 1)) "$node" "$@" $args
 	done <$base/def/$node
 }
 
-list 0 "$node"
+node=${1:-host/$(hostname -s)}
+[ "$#" = 0 ] || shift 1
+node=${node%/}
+node=${node#def/}
+base=$(cd "${0%/*}/.."; pwd)
+
+list 0 "$node" "$@"

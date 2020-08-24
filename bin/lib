@@ -17,9 +17,11 @@ trap_pop() {
 
 command=${1:?}
 name=${2:?}
-name=${name#*/}
-name=${name%/}
 shift 2
+
+name=${name%/}
+name=${name#def/}
+name=${name#*/}
 
 trap=:
 

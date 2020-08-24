@@ -1,0 +1,20 @@
+#!/bin/sh -eu
+
+base=$(cd "${0%/*}/.."; pwd)
+
+for host in "$base/var/sys/host/"*; do
+	case $host in ( *"/*" ) continue ;; esac
+
+	host=${host##*/}
+
+	printf '%-15s ' "$host" >&2
+	"$base/bin/apply" monitor "host/$host" 2>/dev/null |
+	while read result; do
+		printf '.'
+		now=$(date +'%Y-%m-%d %s')
+		dir=/var/cache/adm/monitor/$host
+		mkdir -p "$dir"
+		echo ${now#* } $result >>$dir/${now% *}
+	done
+	printf '\n'
+done
