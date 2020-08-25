@@ -1,0 +1,15 @@
+#!/bin/sh -eu
+
+base=$(cd "${0%/*}/.."; pwd)
+
+for path in /var/cache/adm/events/*/current; do
+	case "$path" in ( *"/*/"* ) continue ;; esac
+
+	host=${path%/current}
+	host=${host##*/}
+	echo
+	echo "$host"
+
+	"$base/bin/monitor-show" "$path"
+done
+echo

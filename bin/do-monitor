@@ -1,5 +1,12 @@
 #!/bin/sh -eu
 
+{
+	env
+	printf '%s' "$0"
+	printf ' "%s"' "$@"
+	printf '\n'
+} >/tmp/log
+
 var_timeout=5
 
 . "${0%/*}/lib"

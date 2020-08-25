@@ -33,33 +33,36 @@ function sort(array, beg, end)
 	sort(array, a, end)				# sort bottom half
 }
 
-function add_value(time, value, id, progress, sum, num, out,
+function flush_values(id, progress, sum, num, out,
 	color)
 {
-	# accumulate the sum and num of entries
-	sum[id] += (value == "ok")
-	num[id] += (1)
+	color = 32 - (sum[id] < num[id])
+	out[id] = out[id] sprintf("\033[%d;1m|\033[m", color)
+	delete sum[id]
+	delete num[id]
+	progress[id] += STEP
+}
 
+function add_value(time, value, id, progress, sum, num, out)
+{
 	if (!(id in progress))
-		progress[id] = time - time % STEP + STEP
+		progress[id] = START
 
-	if (time < progress[id])
-		return
+	if (time > progress[id] && num[id] > 0)
+		flush_values(id, progress, sum, num, out)
 
-	# catch up with by filling the gaps with empty values
+	# catch up with time by filling the gaps with spaces
 	while (progress[id] < time) {
 		out[id] = out[id] " "
 		progress[id] += STEP
 	}
 
-	# flush the entries onto either "ok" or "err"
-	color = 32 - (sum[id] < num[id])
-	out[id] = sprintf("%s\033[%d;1m|\033[m", out[id], color)
-	delete sum[id]
-	delete num[id]
+	# accumulate the sum and num of entries now that we are at the tip
+	sum[id] += (value == "ok")
+	num[id] += (1)
 }
 
-function id_shorten(id,
+function id_short(id,
 	vars)
 {
 	id = var_split(id, vars)
@@ -94,16 +97,20 @@ BEGIN {
 	cmd | getline now
 	close(cmd)
 
-	STEP = 20
+	STEP = ENVIRON["STEP"] ? ENVIRON["STEP"] : 600
+	COUNT = ENVIRON["COUNT"] ? ENVIRON["COUNT"] : 80
+	START = now - STEP * COUNT
+	START = START - START % STEP + STEP
+	now = now - now % STEP + STEP
 }
 
-{
+START <= $1 {
 	time = $1
 	value = $2
 	sub("[^ ]+ [^ ]+ ", "", $0)
 
 	id = var_split($0, vars)
-	add_value(time, value, id, vars, sum, num, out, progress)
+	add_value(time, value, id, progress, sum, num, out)
 
 	for (i in var)
 		delete var[i]
@@ -111,8 +118,10 @@ BEGIN {
 
 END {
 	for (id in out) {
-		var["id"] = id
-		add_value(now, "unknown", id, progress, sum, num, out)
-		printf("  %-15s %s|\n", id_shorten(id), out[id])
+		add_value(now, "err", id, progress, num, sum, out)
+		printf("  %-15s |%s|\n", id_short(id), out[id])
 	}
+	printf("   %15s^", START)
+	printf("%" COUNT "s^", now)
+	printf("\n")
 }
