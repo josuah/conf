@@ -12,7 +12,7 @@ while read node args; do
 		"$base/bin/do-${node%/*}" "$command" "$node" $args || exit=1
 	fi
 done <<EOF
-$(bin/list "$root" "$@")
+$($base/bin/list "$root" "$@")
 EOF
 
 exit "${exit:-0}"

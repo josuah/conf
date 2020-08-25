@@ -11,10 +11,10 @@ for host in "$base/var/sys/host/"*; do
 	"$base/bin/apply" monitor "host/$host" 2>/dev/null |
 	while read result; do
 		printf '.'
-		now=$(date +'%Y-%m-%d %s')
-		dir=/var/cache/adm/monitor/$host
+		now=$(date +%s)
+		dir=/var/cache/adm/events/$host
 		mkdir -p "$dir"
-		echo ${now#* } $result >>$dir/${now% *}
+		"$base/bin/monitor-log" "$dir" "$now" $result
 	done
 	printf '\n'
 done

@@ -31,11 +31,18 @@ trap_add 'rm -rf "$tmp"'
 host=${host:-$(hostname -s)}
 base=$(cd "${0%/*}/.."; pwd)
 
-for var in "$base/var/sys/host/$host/"*; do
-	case $var in ( *"/*" ) continue ;; esac
-	read "var_${var##*/}" <$var
+all_vars=
+
+for path in "$base/var/sys/host/$host/"*; do
+	var=${path##*/}
+	case $var in ( "*" ) continue ;; esac
+	read value <$path
+
+	export "var_$var=$value"
+	all_vars="$all_vars $var=$value"
 done
 
 for var in "$@"; do
 	export "var_$var"
+	all_vars="$all_vars $var"
 done

@@ -1,0 +1,118 @@
+#!/usr/bin/awk -f
+
+function swap(array, a, b,
+	tmp)
+{
+	tmp = array[a]
+	array[a] = array[b]
+	array[b] = tmp
+}
+
+# We need sorting for making sure we have stables IDs, which are concatenated
+# strings, without predetermined order
+
+function sort(array, beg, end)
+{
+	if (beg >= end)					# end recursion
+		return
+
+	a = beg + 1					# 1st is the pivot
+	b = end
+	while (a < b) {
+		while (a < b && array[a] <= array[beg])	# beg: skip lesser
+			a++
+		while (a < b && array[b] > array[beg])	# end: skip greater
+			b--
+		swap(array, a, b)			# found 2 misplaced
+	}
+
+	if (array[beg] > array[a])			# put the pivot back
+		swap(array, beg, a)
+
+	sort(array, beg, a - 1)				# sort top half
+	sort(array, a, end)				# sort bottom half
+}
+
+function add_value(time, value, id, progress, sum, num, out,
+	color)
+{
+	# accumulate the sum and num of entries
+	sum[id] += (value == "ok")
+	num[id] += (1)
+
+	if (!(id in progress))
+		progress[id] = time - time % STEP + STEP
+
+	if (time < progress[id])
+		return
+
+	# catch up with by filling the gaps with empty values
+	while (progress[id] < time) {
+		out[id] = out[id] " "
+		progress[id] += STEP
+	}
+
+	# flush the entries onto either "ok" or "err"
+	color = 32 - (sum[id] < num[id])
+	out[id] = sprintf("%s\033[%d;1m|\033[m", out[id], color)
+	delete sum[id]
+	delete num[id]
+}
+
+function id_shorten(id,
+	vars)
+{
+	id = var_split(id, vars)
+	id = vars["name"]
+	if ("port" in vars)
+		id = id ":" vars["port"]
+	return id
+}
+
+function id_full(fields, n, vars,
+	id)
+{
+	sort(fields, 1, n)
+	for (i = 1; i <= n; i++)
+		id = id (i > 1 ? " " : "") fields[i]
+	return id
+}
+
+function var_split(input, vars,
+	key, fields, n)
+{
+	n = split(input, fields, " ")
+	for (i in fields) {
+		key = substr(fields[i], 1, index(fields[i], "=") - 1)
+		vars[key] = substr(fields[i], index(fields[i], "=") + 1)
+	}
+	return id_full(fields, n, vars)
+}
+
+BEGIN {
+	cmd = "date +%s"
+	cmd | getline now
+	close(cmd)
+
+	STEP = 20
+}
+
+{
+	time = $1
+	value = $2
+	sub("[^ ]+ [^ ]+ ", "", $0)
+
+	id = var_split($0, vars)
+	add_value(time, value, id, vars, sum, num, out, progress)
+
+	for (i in var)
+		delete var[i]
+}
+
+END {
+	for (id in out) {
+		var["id"] = id
+		add_value(now, "unknown", id, progress, sum, num, out)
+		printf("  %-15s %s|\n", id_shorten(id), out[id])
+	}
+}

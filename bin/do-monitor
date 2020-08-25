@@ -8,7 +8,7 @@ case $command in
 ( monitor )
 	. "$base/monitor/$name" >&2 & pid=$!
 	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
-	wait "$pid"
-	echo "do=monitor name=$name exit=$?"
+	wait "$pid" && status=ok || status=err
+	echo $status do=monitor name=$name $all_vars
 	;;
 esac
