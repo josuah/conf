@@ -1,11 +1,4 @@
-#!/bin/sh -eux
-
-{
-	env
-	printf '%s' "$0"
-	printf ' "%s"' "$@"
-	printf '\n'
-} >/tmp/log
+#!/bin/sh -eu
 
 var_timeout=5
 

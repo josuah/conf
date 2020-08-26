@@ -8,7 +8,7 @@ base=$(cd "${0%/*}/.."; pwd)
 
 while read node args; do
 	if [ -f "$base/bin/do-${node%/*}" ]; then
-		echo >&2 "$node"
+		echo >&2 ">>> $node"
 		"$base/bin/do-${node%/*}" "$command" "$node" $args || exit=1
 	fi
 done <<EOF

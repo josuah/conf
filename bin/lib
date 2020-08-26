@@ -15,6 +15,11 @@ trap_pop() {
 	trap "$trap" INT TERM EXIT HUP
 }
 
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+for path in adm /usr/*/bin /usr/*/sbin; do
+	[ ! -d "$path" ] || export PATH="$PATH:$path"
+done
+
 command=${1:?}
 name=${2:?}
 shift 2
@@ -30,11 +35,6 @@ trap_add 'rm -rf "$tmp"'
 
 host=${host:-$(hostname -s)}
 base=$(cd "${0%/*}/.."; pwd)
-
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for path in adm /usr/*/bin /usr/*/sbin; do
-	[ ! -d "$path" ] || export PATH="$PATH:$path"
-done
 
 all_vars=
 
