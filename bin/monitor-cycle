@@ -2,19 +2,33 @@
 
 base=$(cd "${0%/*}/.."; pwd)
 
+write() {
+	local dir="$1" now="$2"
+	shift 2
+
+	if [ "$(stat -f %z "$dir/current")" -gt $((128 * 1024 * 1024)) ]; then
+		mv "$dir/current" "$dir/$now.tmp"
+		{
+			gzip <"$dir/$now.tmp" >"$dir/$now.gz"
+			rm -f "$dir/$now.tmp"
+		} &
+	fi
+	echo "$now" "$*" >>$dir/current
+}
+
 for host in "$base/var/sys/host/"*; do
 	case $host in ( *"/*" ) continue ;; esac
 
 	host=${host##*/}
 
 	printf '%-15s ' "$host" >&2
-	"$base/bin/apply" monitor "host/$host" 2>/dev/null |
+	"$base/bin/apply" monitor "host/$host" |
 	while read result; do
 		printf '.'
 		now=$(date +%s)
-		dir=/var/cache/adm/events/$host
+		dir=/var/spool/adm/$host
 		mkdir -p "$dir"
-		"$base/bin/monitor-log" "$dir" "$now" $result
+		write "$dir" "$now" $result
 	done
 	printf '\n'
 done

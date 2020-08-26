@@ -1,6 +1,6 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for path in adm pkg local plan9 go X11R6 X11R7; do
-	export PATH="$PATH:/usr/$path/bin:/usr/$path/sbin"
+for path in adm /usr/*/bin /usr/*/sbin; do
+	[ ! -d "$path" ] || export PATH="$PATH:$path"
 done
 
 export MAIL="/var/mail/$USER/Maildir"

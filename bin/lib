@@ -31,6 +31,11 @@ trap_add 'rm -rf "$tmp"'
 host=${host:-$(hostname -s)}
 base=$(cd "${0%/*}/.."; pwd)
 
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+for path in adm /usr/*/bin /usr/*/sbin; do
+	[ ! -d "$path" ] || export PATH="$PATH:$path"
+done
+
 all_vars=
 
 for path in "$base/var/sys/host/$host/"*; do
