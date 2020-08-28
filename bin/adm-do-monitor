@@ -2,10 +2,10 @@
 
 var_timeout=5
 
-. "${0%/*}/lib"
+. adm-lib
 
 case $command in
-( monitor )
+(monitor)
 	. "$base/monitor/$name" >&2 & pid=$!
 	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
 	wait "$pid" && status=ok || status=err

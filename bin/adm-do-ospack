@@ -1,39 +1,39 @@
 #!/bin/sh -eu
 
-. "${0%/*}/lib"
+. adm-lib
 
 case $command in
-( install )
+(install)
 	command -v "${var_command:-$name}" >/dev/null && exit 0
 
-	case $("$base/bin/os") in
-	( FreeBSD )
+	case $(edm-get-os) in
+	(FreeBSD)
 		pkg install "${var_FreeBSD:-name}"
 		;;
-	( DragonflyBSD )
+	(DragonflyBSD)
 		pkg install "${var_DragonflyBSD:-name}"
 		;;
-	( OpenBSD )
+	(OpenBSD)
 		pkg_add "${var_OpenBSD:-name}"
 		;;
-	( NetnBSD )
+	(NetnBSD)
 		pkg_add "${var_NetBSD:-name}"
 		;;
-	( DevuanLinux )
+	(DevuanLinux)
 		apt update
 		apt install "${var_DevuanLinux:-name}"
 		;;
-	( DebianLinux )
+	(DebianLinux)
 		apt update
 		apt install "${var_DebianLinux:-name}"
 		;;
-	( AlpineLinux )
+	(AlpineLinux)
 		apk add "${var_AlpineLinux:-name}"
 		;;
-	( VoidLinux )
+	(VoidLinux)
 		xbps-install "${var_VoidLinux:-name}"
 		;;
-	( ArchLinux )
+	(ArchLinux)
 		pacman -Syu "${var_ArchLinux:-name}"
 		;;
 	(*)

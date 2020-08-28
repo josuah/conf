@@ -1,20 +1,20 @@
 #!/bin/sh -eu
 
-. "${0%/*}/lib"
+. adm-lib
 
 case $command in
-( install | enable )
+(install | enable)
 	for file in "$base/module/$name/etc/"*; do
-		case $file in ( *"/*" | */template.* ) continue ;; esac
+		case $file in (*"/*" | */template.*) continue ;; esac
 
 		mkdir -p "/etc/$name"
 		cp -rf "$file" "/etc/$name"
 	done
 
 	for template in "$base/module/$name/etc/template."*; do
-		case $template in ( *"/template.*" ) continue ;; esac
+		case $template in (*"/template.*") continue ;; esac
 
-		(cd "$base/db"; "$base/bin/template" >$tmp/module) <$template
+		(cd "$base/db"; adm-template >$tmp/module) <$template
 		mkdir -p "$(dirname "/etc/$name/$conf")"
 		mv "$tmp/module" "/etc/$name/$conf"
 	done

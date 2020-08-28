@@ -1,14 +1,14 @@
 #!/bin/sh -eu
 
-. "${0%/*}/lib"
+. adm-lib
 
 case $command in
-( install )
+(install)
 	if [ ! -d "$var_path" ]; then
 		git clone --depth 1 "$var_url" "$var_path"
 	fi
 	;;
-( update )
+(update)
 	git -C "$var_path" set-url origin "$var_url"
 	git -C "$var_path" fetch --all
 	;;

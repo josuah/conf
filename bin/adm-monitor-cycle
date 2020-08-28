@@ -17,12 +17,12 @@ write() {
 }
 
 for host in "$base/var/sys/host/"*; do
-	case $host in ( *"/*" ) continue ;; esac
+	case $host in (*"/*") continue ;; esac
 
 	host=${host##*/}
 
 	printf '%-15s ' "$host" >&2
-	"$base/bin/apply" monitor "host/$host" |
+	adm-do monitor "host/$host" |
 	while read result; do
 		printf '.'
 		now=$(date +%s)

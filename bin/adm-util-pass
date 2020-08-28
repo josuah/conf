@@ -1,6 +1,6 @@
 #!/bin/sh -eu
 
-. "${0%/*}/lib"
+. adm-lib
 
 for pass in "$@"; do
 	cd "$base/db"

@@ -3,7 +3,7 @@
 base=$(cd "${0%/*}/.."; pwd)
 
 for path in /var/spool/adm/*/current; do
-	case "$path" in ( *"/*/"* ) continue ;; esac
+	case "$path" in (*"/*/"*) continue ;; esac
 
 	host=${path%/current}
 	host=${host##*/}
@@ -11,6 +11,6 @@ for path in /var/spool/adm/*/current; do
 	echo
 	echo "$host"
 
-	"$base/bin/monitor-show" "$path"
+	adm-monitor-show "$path"
 done
 echo

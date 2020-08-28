@@ -1,0 +1,100 @@
+#!/bin/sh -eu
+
+list() {
+	local level="${1:?}" node="${2:?}"
+	shift 2
+
+	printf "%-$((level * 2))s%s" "" "$node"
+	printf " %s" "$@"
+	printf "\\n"
+
+	[ -f "$base/def/$node" ] || return 0
+
+	while read node args; do
+		list $((level + 1)) "$node" "$@" $args
+	done <$base/def/$node
+}
+
+apply() {
+	local root="$1" command="$2" node args exit
+	shift 2
+
+	while read node args; do
+		if command -v adm-do-${node%%/*} >/dev/null; then
+			echo >&2 ">>> $node"
+			"adm-do-${node%/*}" "$command" "$node" $args || exit=1
+		fi
+	done <<EOF
+	$(list "$root" "$@")
+EOF
+	return "${exit:-0}"
+}
+
+die() {
+	echo >&2 "error: $*"
+	exit 1
+}
+
+trap_add() {
+	trap="$trap; $1"
+	trap "$trap" INT TERM EXIT HUP
+}
+
+trap_pop() {
+	trap="${trap%; *}"
+	trap "$trap" INT TERM EXIT HUP
+}
+
+init() {
+	var_all=
+	tmp=$(mktemp -d)
+	base=$(cd "${0%/*}/.."; pwd)
+	trap=:
+
+	trap_add 'rm -rf "$tmp"'
+
+	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+	for path in adm /usr/*/bin /usr/*/sbin; do
+		[ ! -d "$path" ] || export PATH="$PATH:$path"
+	done
+
+	for var in "$@"; do
+		export "var_$var"
+		var_all="$var_all $var"
+	done
+
+	if [ -z "${var_host:-}" ]; then
+		return
+	fi
+
+	for path in "$base/var/sys/host/$host/"*; do
+		var=${path##*/}
+		case $var in ("*") continue ;; esac
+		read value <$path
+
+		export "var_$var=$value"
+		var_all="$var_all $var=$value"
+	done
+}
+
+main() {
+	local node="$1" command="$2"
+	shift 2
+
+	node=${node%/}
+	node=${node#def/}
+
+	init
+
+	case $command in
+	( install | enable | disable | start | stop | restart | reload \
+	| status | monitor )
+		apply "$node" "$command" "$@"
+		;;
+	( list )
+		list 0 "$node" "$@"
+		;;
+	esac
+}
+
+main "$@"

@@ -1,5 +1,6 @@
 [user]
-	name = Josuah Demangeon
-	email = me@josuah.net
+name = Josuah Demangeon
+email = me@josuah.net
+
 [color]
-	ui = auto
+ui = auto
