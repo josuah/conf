@@ -1,6 +1,6 @@
 #!/bin/sh -eu
 
-base=$(cd "${0%/*}/.."; pwd)
+etc=${ADM_CONFIG:-/etc/adm}
 
 write() {
 	local dir="$1" now="$2"
@@ -16,7 +16,7 @@ write() {
 	echo "$now" "$*" >>$dir/current
 }
 
-for host in "$base/var/sys/host/"*; do
+for host in "$etc/var/sys/host/"*; do
 	case $host in (*"/*") continue ;; esac
 
 	host=${host##*/}
