@@ -51,6 +51,12 @@ cmd_build_install() {
 		cp -r "$etc/build/$name/files/"* "$source"
 	fi
 
+	if [ -d "$etc/build/$name/patches" ]; then
+		for x in "$etc/build/$name/patches/"*; do
+			(cd "$source"; patch -p1 -N) <$x
+		done
+	fi
+
 	export PREFIX="$usr"
 	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
 
