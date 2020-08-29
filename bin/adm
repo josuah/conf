@@ -48,7 +48,7 @@ trap_pop() {
 }
 
 run() {
-	local command="$1" item="$2"
+	local command="$1" name="$2"
 	shift 2
 
 	for x in "$@"; do
@@ -58,8 +58,8 @@ run() {
 		export "var_$x"
 	done
 
-	log ">>> $part/$item"
-	"$command" "$item"
+	log ">>> $part/$name"
+	"$command" "$name"
 }
 
 apply() {
@@ -69,10 +69,10 @@ apply() {
 	local vars
 	while read node vars; do
 		local part=${node%/*}
-		local item=${node#*/}
+		local name=${node#*/}
 
 		if type "cmd_${part}_${command}" >/dev/null; then
-			(run cmd_${part}_${command} "$item" $vars "$@") || exit=1
+			(run cmd_${part}_${command} "$name" $vars "$@") || exit=1
 		fi
 	done
 

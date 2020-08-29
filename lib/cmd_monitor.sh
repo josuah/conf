@@ -1,5 +1,7 @@
 
 cmd_monitor_monitor() {
+	local name="$1"
+
 	var_timeout=5
 
 	. "$lib/monitor_$name" >&2 & pid=$!
