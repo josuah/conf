@@ -1,5 +1,2 @@
 . "$lib/service_runit.sh"
-
-cmd_ospack_install() {
-	xbps-install "${var_VoidLinux:-$1}"
-}
+. "$lib/cmd_service_xbps.sh"

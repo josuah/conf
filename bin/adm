@@ -1,13 +1,5 @@
 #!/bin/sh -eu
 
-lib=${0%/*/*}/lib/adm
-
-. "$lib/cmd_build.sh"
-. "$lib/cmd_golang.sh"
-. "$lib/cmd_module.sh"
-. "$lib/cmd_monitor.sh"
-. "$lib/cmd_repo.sh"
-
 log() {
 	echo "$1" >&2
 }
@@ -52,6 +44,9 @@ run() {
 	shift 2
 
 	for x in "$@"; do
+		if [ "${x%%=*}" = "$os" ]; then
+			export "var_this_os=${x#*=}"
+		fi
 		export "var_$x"
 	done
 
@@ -92,6 +87,8 @@ list() {
 }
 
 main() {
+	[ $# = 0 ] && exec "$0" help
+
 	local command="$1"
 	shift
 
@@ -110,9 +107,10 @@ main() {
 	done
 
 	export host="$(hostname | sed 's/[.].*//')"
-	export os=$(get_os)
-	export tmp=$(mktemp -d)
-	export etc=/etc/adm
+	export os="$(get_os)"
+	export tmp="$(mktemp -d)"
+	export etc="/etc/adm"
+	export lib="${0%/*/*}/lib/adm"
 
 	trap_add 'rm -rf "$tmp"'
 
@@ -132,10 +130,18 @@ main() {
 	case $command in
 	(install | enable | disable | start | stop | restart | reload \
 	| status | monitor)
+		if [ -f "$lib/cmd_$command.sh" ]; then
+			. "$lib/cmd_$command.sh"
+		fi
+
 		list 0 "$node" "$@" | apply "$command" "$node" "$@"
 		;;
 	(list)
 		list 0 "$node" "$@"
+		;;
+	(*)
+		echo "usage: ${0##*/} command [node] [key=value...]"
+		echo "command: list, monitor, install, enable, disable, start, stop, restart, reload, status"
 		;;
 	esac
 }
