@@ -1,0 +1,73 @@
+#!/usr/bin/awk -f
+
+function out(name, value)
+{
+	if (value)
+		print HOST "." name, $value, NOW
+}
+
+BEGIN {
+	cmd = "hostname"
+	cmd | getline HOST
+	close (cmd)
+
+	sub("\\..*", "", HOST)
+}
+
+$1 ~ /-*procs-*/ {
+	n = 1
+	for (i = 1; match(substr($0, i), "[^ ]+ *"); i += RSTART-1 + RLENGTH) {
+		header_start[n] = i
+		header_name[n] = substr($0, i)
+		sub("^[- ]*", "", header_name[n])
+		sub("[- ].*", "", header_name[n])
+		n++
+	}
+	next
+}
+
+$1 == "r" {
+	f = 1
+	for (i = 1; i in header_start; i++) {
+		end = ((i + 1) in header_start) ? header_start[i + 1] : 10000
+		section = substr($0, header_start[i], end - header_start[i] - 1)
+		while (sub(" *[^ ]+ *", "", section)) {
+			key = header_name[i] "." $f
+			F[key] = f++
+		}
+	}
+	next
+}
+
+NR > 3 {
+	cmd = "date +%s"
+	cmd | getline NOW
+	close(cmd)
+
+	gsub("k", "000")
+	gsub("M", "000000")
+	gsub("G", "000000000")
+	gsub("T", "000000000000")
+	gsub("E", "000000000000000")
+
+	print ""
+	for (i in F)
+		print i, "=", $F[i]
+
+	next
+	out("sys.proc.run", "procs.r")
+	out("sys.proc.back", "procs.b")
+	out("sys.mem.avail", "memory.avm")
+	out("sys.mem.free", "memory.fre")
+	out("sys.page.fault", "page.flt")
+	out("sys.interrupt", "int")
+	out("sys.syscall", "sy")
+	out("sys.ctxswitch", "ctx")
+	out("sys.cpu.user", "us")
+	out("sys.cpu.system", "su")
+
+	for (i in F) {
+		if (i ~ "^disks.[a-z][0-9]")
+			out("sys.disk." substr(i, length("disks.")), F[i])
+	}
+}

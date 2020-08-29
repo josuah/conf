@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 function replace(str, this,
-	head, tail, key, value, path)
+	head, tail, key, value, path, cmd, pass)
 {
 	tail = str
 	head = ""
@@ -38,7 +38,7 @@ function read_block(\
 function list_file(path, table,
 	i)
 {
-	if (system(("ls '" path "'") != 0)
+	if (system(("test -f '" path "'") != 0)
 		return -1
 	for (i = 1; (getline <path) == 0; i++)
 		table[i] = $0

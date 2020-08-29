@@ -22,7 +22,7 @@ for host in "$base/var/sys/host/"*; do
 	host=${host##*/}
 
 	printf '%-15s ' "$host" >&2
-	adm-do monitor "host/$host" |
+	adm monitor "host/$host" |
 	while read result; do
 		printf '.'
 		now=$(date +%s)

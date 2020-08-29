@@ -1,42 +1,44 @@
 #!/bin/sh -eu
 
-list() {
-	local level="${1:?}" node="${2:?}"
-	shift 2
+lib=${0%/*/*}/lib/adm
 
-	printf "%-$((level * 2))s%s" "" "$node"
-	printf " %s" "$@"
-	printf "\\n"
+. "$lib/cmd_build.sh"
+. "$lib/cmd_golang.sh"
+. "$lib/cmd_module.sh"
+. "$lib/cmd_monitor.sh"
+. "$lib/cmd_repo.sh"
 
-	[ -f "$base/def/$node" ] || return 0
-
-	while read node args; do
-		list $((level + 1)) "$node" "$@" $args
-	done <$base/def/$node
+log() {
+	echo "$1" >&2
 }
 
-apply() {
-	local root="$1" command="$2" node args exit
-	shift 2
-
-	while read node args; do
-		if command -v adm-do-${node%%/*} >/dev/null; then
-			echo >&2 ">>> $node"
-			"adm-do-${node%/*}" "$command" "$node" $args || exit=1
-		fi
-	done <<EOF
-	$(list "$root" "$@")
-EOF
-	return "${exit:-0}"
+check_package_manager() {
+	if type "$1" >/dev/null; then
+		exec echo "$2"
+	fi
 }
 
-die() {
-	echo >&2 "error: $*"
-	exit 1
+get_os() {
+	kernel=$(uname)
+
+	case $kernel in
+	(Linux)
+		check_package_manager	apt		DebianLinux
+		check_package_manager	apk		AlpineLinux
+		check_package_manager	pacman		ArchLinux
+		check_package_manager	yum		RedHatLinux
+		check_package_manager	zypper		SuseLinux
+		check_package_manager	emerge		GentooLinux
+		check_package_manager	xbps-install	VoidLinux
+		;;
+	(*)
+		exec echo "$kernel"
+		;;
+	esac
 }
 
 trap_add() {
-	trap="$trap; $1"
+	trap="${trap:-:}; $1"
 	trap "$trap" INT TERM EXIT HUP
 }
 
@@ -45,53 +47,94 @@ trap_pop() {
 	trap "$trap" INT TERM EXIT HUP
 }
 
-init() {
-	var_all=
-	tmp=$(mktemp -d)
-	base=$(cd "${0%/*}/.."; pwd)
-	trap=:
+run() {
+	local command="$1" item="$2"
+	shift 2
 
-	trap_add 'rm -rf "$tmp"'
-
-	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-	for path in adm /usr/*/bin /usr/*/sbin; do
-		[ ! -d "$path" ] || export PATH="$PATH:$path"
+	for x in "$@"; do
+		export "var_$x"
 	done
 
-	for var in "$@"; do
-		export "var_$var"
-		var_all="$var_all $var"
+	log ">>> $part/$item"
+	"$command" "$item"
+}
+
+apply() {
+	local command="$1" node="$2" vars exit
+	shift 2
+
+	local vars
+	while read node vars; do
+		local part=${node%/*}
+		local item=${node#*/}
+
+		if type "cmd_${part}_${command}" >/dev/null; then
+			(run cmd_${part}_${command} "$item" $vars "$@") || exit=1
+		fi
 	done
 
-	if [ -z "${var_host:-}" ]; then
-		return
-	fi
+	return "${exit:-0}"
+}
 
-	for path in "$base/var/sys/host/$host/"*; do
-		var=${path##*/}
-		case $var in ("*") continue ;; esac
-		read value <$path
+list() {
+	local level="$1" node="$2"
+	shift 2
 
-		export "var_$var=$value"
-		var_all="$var_all $var=$value"
-	done
+	printf "%-$((level * 2))s%s" "" "$node"
+	printf ' %s' "$@"
+	printf '\n'
+
+	[ -f "$etc/def/$node" ] || return 0
+
+	while read node vars; do
+		list $((level + 1)) "$node" "$@" $vars
+	done <$etc/def/$node
 }
 
 main() {
-	local node="$1" command="$2"
-	shift 2
+	local command="$1"
+	shift
 
-	node=${node%/}
-	node=${node#def/}
+	local i=$#
+	while [ $i -gt 0 ]; do i=$((i - 1))
+		case $1 in
+		(*=*) set -- "$@" "$1" ;;
+		(*) local node="$1" ;;
+		esac
+		shift
+	done
 
-	init
+	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+	for x in adm /usr/*/bin /usr/*/sbin; do
+		[ -d "$x" ] && export PATH="$PATH:$x"
+	done
+
+	export host="$(hostname | sed 's/[.].*//')"
+	export os=$(get_os)
+	export tmp=$(mktemp -d)
+	export etc=/etc/adm
+
+	trap_add 'rm -rf "$tmp"'
+
+	local key value
+	for x in "$etc/var/host/$host/"*; do
+		[ -f "$x" ] || continue
+		read -r value <$x
+		export "var_${x##*/}=$value"
+	done
+
+	if [ -f "$lib/os_$os.sh" ]; then
+		. "$lib/os_$os.sh"
+	fi
+
+	: ${node:=host/$host}
 
 	case $command in
-	( install | enable | disable | start | stop | restart | reload \
-	| status | monitor )
-		apply "$node" "$command" "$@"
+	(install | enable | disable | start | stop | restart | reload \
+	| status | monitor)
+		list 0 "$node" "$@" | apply "$command" "$node" "$@"
 		;;
-	( list )
+	(list)
 		list 0 "$node" "$@"
 		;;
 	esac
