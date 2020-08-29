@@ -117,7 +117,9 @@ main() {
 	export host="$(hostname | sed 's/[.].*//')"
 	export os="$(get_os)"
 	export tmp="$(mktemp -d)"
-	export etc="/etc/adm"
+	export etc="${ADM_CONFIG:-/etc/adm}"
+	export usr="${ADM_PREFIX:-/usr/local}"
+	export cache="${ADM_CACHE:-/var/cache/adm}"
 
 	trap_add 'rm -rf "$tmp"'
 

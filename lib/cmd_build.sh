@@ -1,7 +1,7 @@
 
 _build_git() {
-	local bare="/var/cache/adm/git/$name"
-	export source="/var/cache/adm/source/$name-$commit"
+	local bare="$cache/git/$name"
+	export source="$cache/source/$name-$commit"
 
 	[ -d "$bare" ] && exit 0
 	git clone --mirror "$url" "$bare"
@@ -14,14 +14,14 @@ _build_git() {
 }
 
 _build_tar() {
-	local archive="/var/cache/adm/archive/$name-$(basename "$url")"
-	export source=/var/cache/adm/source/$name-$v
+	local archive="$cache/archive/$name-$(basename "$url")"
+	export source=$cache/source/$name-$v
 
 	mkdir -p "$(dirname "$archive")"
 	curl -Ls -o "$archive" "$url"
 
 	openssl sha256 "$archive" \
-	| tee /dev/stderr | sed 's/.* //' | grep -qfx "$sha256" || {
+	| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
 		echo >&2 invalid checksum
 		exit 1
 	}
@@ -40,18 +40,18 @@ _build_tar() {
 }
 
 cmd_build_install() {
-	local name="$1" sha256 commit
+	local name="$1"
 
-	. "$base/build/$name/build.sh"
+	. "$etc/build/$name/build.sh"
 
-	[ "$sha256" ] && _build_tar
-	[ "$commit" ] && _build_git
+	[ "${sha256:-}" ] && _build_tar
+	[ "${commit:-}" ] && _build_git
 
-	if [ -d "$base/build/$name/files" ]; then
-		cp -r "$base/build/$name/files/"* "$source"
+	if [ -d "$etc/build/$name/files" ]; then
+		cp -r "$etc/build/$name/files/"* "$source"
 	fi
 
-	export PREFIX="$adm"
+	export PREFIX="$usr"
 	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
 
 	[ -d "$DESTDIR" ] && return 0
@@ -66,7 +66,7 @@ cmd_build_install() {
 
 	build
 
-	rm -rf "$source" "$DESTDIR/usr"
+	rm -rf "$DESTDIR/usr" "$source"
 
 	trap_pop
 
