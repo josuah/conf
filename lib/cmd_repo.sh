@@ -6,6 +6,6 @@ cmd_repo_install() {
 }
 
 cmd_repo_update() {
-	git -C "$var_path" set-url origin "$var_url"
+	git -C "$var_path" remote set-url origin "$var_url"
 	git -C "$var_path" fetch --all
 }

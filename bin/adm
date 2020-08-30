@@ -52,7 +52,7 @@ run() {
 	shift 3
 
 	for x in "$@"; do
-		if [ "${x%%=*}" = "$os" ]; then
+		if [ "${x%%=*}" = "os_$os" ]; then
 			export "var_this_os=${x#*=}"
 		fi
 		export "var_$x"
@@ -136,7 +136,7 @@ main() {
 	fi
 
 	case $command in
-	(install | enable | disable | start | stop | restart | reload | status | monitor)
+	(install | update | enable | disable | start | stop | restart | reload | status | monitor)
 		list 0 "$node" "$@" | apply "$command" "$node"
 		;;
 	(list)
@@ -144,7 +144,7 @@ main() {
 		;;
 	(*)
 		echo "usage: ${0##*/} command [type/name] [key=value...]"
-		echo "command: list, monitor, install, enable, disable, start, stop, restart, reload, status"
+		echo "command: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
 		;;
 	esac
 }
