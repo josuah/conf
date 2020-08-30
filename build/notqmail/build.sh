@@ -3,13 +3,14 @@ url=https://github.com/notqmail/notqmail/releases/download/notqmail-$v/notqmail-
 sha256=7b0d2153eedaa97988444334a24a0553ee25f58a6bb0521bc6d419bfa6bf7d10
 
 _build_symlink() {
-	mkdir -p "$1"
-	ln -s "$1" "$tmp/$(basename "$2")"
-	mkdir -p "$(dirname "$2")"
-	mv "$tmp/$(basename "$2")" "$(dirname "$2")"
+	mkdir -p tmp "$1" "$(dirname "$2")"
+	ln -s "$1" "tmp/$(basename "$2")"
+	mv "tmp/$(basename "$2")" "$(dirname "$2")"
 }
 
 build() {
+	echo /var/qmail >conf-qmail
+
 	make NROFF=true it man
 
 	_build_symlink	/etc/qmail/control	/var/qmail/control
