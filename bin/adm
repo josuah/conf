@@ -58,8 +58,8 @@ run() {
 		export "var_$x"
 	done
 
-	log ">>> $part/$name $var_export $*"
-	"$command" "$name"
+	log ">>> $part/$name $*"
+	"$command" "$name" "$@"
 }
 
 apply() {
@@ -72,7 +72,7 @@ apply() {
 		local name=${node#*/}
 
 		if type "cmd_${part}_${command}" >/dev/null; then
-			(run cmd_${part}_${command} "$name" $vars "$@") || exit=1
+			(run cmd_${part}_${command} "$name" $vars) || exit=1
 		fi
 	done
 
@@ -135,10 +135,9 @@ main() {
 
 	case $command in
 	(install | enable | disable | start | stop | restart | reload | status | monitor)
-		list 0 "$node" "$@" | apply "$command" "$node" "$@"
+		list 0 "$node" "$@" | apply "$command" "$node"
 		;;
 	(list)
-		echo ${var_export:-}
 		list 0 "$node" "$@"
 		;;
 	(*)
