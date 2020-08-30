@@ -7,22 +7,22 @@
 #	#for dir
 #
 #	x = {{ static/variable }}
-#	lines added to blk_text["1"]
+#	lines added to blk_texts["1"]
 #
 #	##for dir/%1/subdir
 #	y = {{ dir/%1/subdir/%2/name }}
-#	lines added to blk_text["1.1"]
+#	lines added to blk_texts["1.1"]
 #	##end
 #
 #	z = {{ still/%1/there }}
-#	line added to blk_text["2"]
+#	line added to blk_texts["2"]
 #
 #	##for dir/%1/subdir
 #	t = {{ dir/%1/subdir/%2/type }}
-#	lines added to blk_text["2.1"]
+#	lines added to blk_texts["2.1"]
 #	##end
 #
-#	lines added to blk_text["3"]
+#	lines added to blk_texts["3"]
 #	
 #	#end
 #
@@ -57,10 +57,10 @@ function replace_key(key, items,
 	return key
 }
 
-function replace_text(text, items,
+function replace_text(texts, items,
 	head, tail, key, value)
 {
-	tail = text
+	tail = texts
 	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
 		key = substr(tail, RSTART + 2, RLENGTH - 4)
 		sub("^ *", "", key)
@@ -84,9 +84,9 @@ function replace_text(text, items,
 	return head tail
 }
 
-function blk_print(text, items)
+function blk_print(texts, items)
 {
-	printf "%s", replace_text(text[blk], items)
+	printf "%s", replace_text(texts[blk], items)
 }
 
 function blk_inc_tail(blk,
@@ -134,10 +134,10 @@ function shell_escape(str)
 	return "'" str "'"
 }
 
-function blk_iterate(blk, text, path, items,
+function blk_iterate(blk, texts, paths, items,
 	this, cmd, line, array)
 {
-	this = replace_key(path[blk], items)
+	this = replace_key(paths[blk], items)
 
 	if (system("test -d " shell_escape(this)) == 0) {
 		cmd = "ls " shell_escape(this);
@@ -155,17 +155,21 @@ function blk_iterate(blk, text, path, items,
 	return 1
 }
 
-function blk_flush(text, path, blk,
-	item, i)
+function blk_flush(texts, paths, items, blk,
+	array, n)
 {
 	blk = blk_inc_level(blk)
-	if (!(blk in text))
+	if (!(blk in texts))
 		return
 
-	while (blk_iterate(blk, text, path, items)) {
-		printf "%s", replace_text(text[blk], items)
-		blk_flush(text, path, blk)
+	while (blk_iterate(blk, texts, paths, items)) {
+		printf "%s", replace_text(texts[blk], items)
+		blk_flush(texts, paths, items, blk)
 	}
+	n = split(blk, array, ".")
+	delete items[n]
+	delete paths[n]
+	delete texts[blk]
 }
 
 BEGIN {
@@ -183,7 +187,7 @@ BEGIN {
 
 /^#+for / {
 	blk = blk_inc_level(blk)
-	blk_path[blk] = $2
+	blk_paths[blk] = $2
 	blk_dirty = 1
 	next
 }
@@ -194,12 +198,12 @@ BEGIN {
 	blk = blk_dec_level(blk)
 
 	if (blk == "")
-		blk_flush(blk_text, blk_path, "")
+		blk_flush(blk_texts, blk_paths, blk_items, "")
 	next
 }
 
 blk != "" {
-	blk_text[blk] = blk_text[blk] $0 "\n"
+	blk_texts[blk] = blk_texts[blk] $0 "\n"
 }
 
 blk == "" {

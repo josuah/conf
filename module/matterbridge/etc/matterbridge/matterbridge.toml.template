@@ -17,7 +17,9 @@
   Token = "{{ discord/token }}"
   Server = "{{ discord/guild }}"
 
+# whatsapp chans
 #for whatsapp/chan
+
 [[gateway]]
   name = "#whatsapp-{{ 1 }}"
   enable = true
@@ -30,7 +32,9 @@
   channel = "{{ 1 }}"
 #end
 
+# discord chans
 #for discord/chan
+
 [[gateway]]
   name = "#discord-{{ 1 }}"
   enable = true

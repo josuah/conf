@@ -1,28 +1,29 @@
 
 _module_template() (
 	cd "$etc/data"
-	adm-template "$etc/module/$name/$1" >$tmp/module/${1%.template}
+	adm-template "$etc/module/$name/$1" >$tmp/module/$name/${1%.template}
 )
 
 cmd_module_install() {
-	local name="$1"
+	local name="$1" exit=0
+	set -e
 
 	if [ -d "$etc/module/$name/etc" ]; then
 		while read x; do
-			mkdir -p "$(dirname "$tmp/module/$x")"
+			mkdir -p "$(dirname "$tmp/module/$name/$x")"
 
 			case $x in
 			(*.template)
 				_module_template "$x" || exit 1
 				;;
 			(*)
-				cp "$etc/module/$name/$x" "$tmp/module/$x"
+				cp "$etc/module/$name/$x" "$tmp/module/$name/$x"
 				;;
 			esac
 		done <<EOF
 $(cd "$etc/module/$name"; find etc -type f)
 EOF
-		cp -r "$tmp/module/etc" "/"
+		cp -r "$tmp/module/$name/etc" "/"
 	fi
 
 	if [ -f "$etc/module/$name/deploy.sh" ]; then
