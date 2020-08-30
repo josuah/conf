@@ -1,4 +1,5 @@
-# generated from {{ path }} at {{ now }}
+# {{ path }}
+# {{ now }}
 
 [irc]
 [irc.local]

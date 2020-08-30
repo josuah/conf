@@ -1,4 +1,5 @@
-# generated from {{ path }} at {{ now }}
+# {{ path }}
+# {{ now }}
 
 max_bandwidth=48000;
 welcometext="Welcome to uMurmur!";

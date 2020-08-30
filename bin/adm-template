@@ -30,7 +30,7 @@
 
 function die(msg)
 {
-	print "fatal error msg=\"" msg "\""
+	print "error: " msg >"/dev/stderr"
 	exit(1)
 }
 
@@ -68,11 +68,14 @@ function replace_text(text, items,
 
 		if (key ~ /^[0-9]+$/) {
 			value = items[key]
+		} else if (key == "path") {
+			value = FILENAME
 		} else if (key == "now") {
 			value = NOW
 		} else {
 			key = replace_key(key, items)
-			getline value < key
+			if ((getline value <key) <= 0)
+				die("cannot read " key " or file empty")
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -136,7 +139,7 @@ function blk_iterate(blk, text, path, items,
 {
 	this = replace_key(path[blk], items)
 
-	if (system("test -d " shell_escape(this)) == 0)
+	if (system("test -d " shell_escape(this)) == 0) {
 		cmd = "ls " shell_escape(this);
 		if ((cmd | getline line) <= 0) {
 			close(cmd)

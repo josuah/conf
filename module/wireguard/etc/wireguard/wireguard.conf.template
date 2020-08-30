@@ -1,4 +1,5 @@
-# generated from {{ path }} at {{ now }}
+# {{ path }}
+# {{ now }}
 
 [Interface]
   PrivateKey = {{ wireguard/pass }}

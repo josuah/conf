@@ -1,4 +1,5 @@
-# generated from {{ path }} at {{ now }}
+# {{ path }}
+# {{ now }}
 #for /etc/inetd.d
 
 # {{ 1 }}
