@@ -3,24 +3,27 @@ _build_git() {
 	local bare="$cache/git/$name"
 	export source="$cache/source/$name-$commit"
 
-	[ -d "$bare" ] && exit 0
-	git clone --mirror "$url" "$bare"
+	if [ ! -d "$bare" ]; then
+		git clone --mirror "$url" "$bare"
+	fi
 
-	[ -d "$source" ] && exit 0
-	git -C "$bare" rev-parse "$commit" >/dev/null || git -C "$bare" fetch
-	git -C "$bare" rev-parse "$commit" >/dev/null || exit 1
-	mkdir -p "$source"
-	git -C "$bare" archive "$commit" | tar -C "$source" -xf -
+	if [ ! -d "$source" ]; then
+		git -C "$bare" rev-parse "$commit" >/dev/null ||
+			git -C "$bare" fetch
+		git -C "$bare" rev-parse "$commit" >/dev/null
+		mkdir -p "$source"
+		git -C "$bare" archive "$commit" | tar -C "$source" -xf -
+	fi
 }
 
 _build_tar() {
-	local archive="$cache/archive/$name-$(basename "$url")"
+	local tar="$cache/tar/$name-$(basename "$url")"
 	export source=$cache/source/$name-$v
 
-	mkdir -p "$(dirname "$archive")"
-	curl -Ls -o "$archive" "$url"
+	mkdir -p "$(dirname "$tar")"
+	curl -Ls -o "$tar" "$url"
 
-	openssl sha256 "$archive" \
+	openssl sha256 "$tar" \
 	| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
 		echo >&2 invalid checksum
 		exit 1
@@ -29,10 +32,10 @@ _build_tar() {
 	tmp=$(mktemp -d)
 	trap_add 'rm -rf "$tmp"'
 
-	case $archive in
-	(*gz) gzip -cd "$archive" ;;
-	(*xz) xz -cd "$archive" ;;
-	(*lz) lz -cd "$archive" ;;
+	case $tar in
+	(*gz) gzip -cd "$tar" ;;
+	(*xz) xz -cd "$tar" ;;
+	(*lz) lz -cd "$tar" ;;
 	esac | tar -x -f - -C "$tmp"
 	mkdir -p "$tmp" "$(dirname "$source")"
 	rm -rf "$source"
@@ -70,9 +73,10 @@ cmd_build_install() {
 	ln -sf "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
 	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
 
-	build
+	(cd "$source"; build)
 
-	rm -rf "$DESTDIR/usr" "$source"
+	rm -rf "$DESTDIR/$PREFIX" "$source"
+	! rmdir "$DESTDIR/"* 2>/dev/null
 
 	trap_pop
 

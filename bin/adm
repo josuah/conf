@@ -94,27 +94,23 @@ list() {
 	done <$etc/def/$node
 }
 
-export_path() {
+main() {
+	local command="$1"
+	shift
+
 	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 	for x in adm /usr/*/bin /usr/*/sbin; do
 		[ -d "$x" ] && export PATH="$PATH:$x"
 	done
-}
 
-export_var() {
-	local value
-	for x in "$etc/var/sys/host/$host/"*; do x=${x##*/}
-		[ -f "$etc/var/sys/host/$host/$x" ] || continue
-		read -r value <$etc/var/sys/host/$host/$x
-		export "var_$x=$value" var_export="${var_export:-} $x=$value"
-	done
-}
+	export host="$(hostname | sed 's/[.].*//')"
+	export os="$(get_os)"
+	export tmp="$(mktemp -d)"
+	export etc="${ADM_CONFIG:-/etc/adm}"
+	export usr="${ADM_PREFIX:-/usr/adm}"
+	export cache="${ADM_CACHE:-/var/cache/adm}"
 
-main() {
-	[ $# = 0 ] && exec "$0" help
-
-	local command="$1"
-	shift
+	trap_add 'rm -rf "$tmp"'
 
 	local i=$#
 	while [ $i -gt 0 ]; do i=$((i - 1))
@@ -124,23 +120,18 @@ main() {
 		esac
 		shift
 	done
+	: ${node:=host/$host}
 
-	export host="$(hostname | sed 's/[.].*//')"
-	export os="$(get_os)"
-	export tmp="$(mktemp -d)"
-	export etc="${ADM_CONFIG:-/etc/adm}"
-	export usr="${ADM_PREFIX:-/usr/local}"
-	export cache="${ADM_CACHE:-/var/cache/adm}"
-	export_path
-	export_var
-
-	trap_add 'rm -rf "$tmp"'
+	local value
+	for x in "$etc/var/sys/host/$host/"*; do x=${x##*/}
+		[ -f "$etc/var/sys/host/$host/$x" ] || continue
+		read -r value <$etc/var/sys/host/$host/$x
+		set -- "$@" "$x=$value"
+	done
 
 	if [ -f "$lib/os_$os.sh" ]; then
 		. "$lib/os_$os.sh"
 	fi
-
-	: ${node:=host/$host}
 
 	case $command in
 	(install | enable | disable | start | stop | restart | reload | status | monitor)
@@ -157,4 +148,4 @@ main() {
 	esac
 }
 
-main "$@"
+main "${@:-help}"
