@@ -1,4 +1,4 @@
-# generated from adm-config repo at {{ now }}
+# generated from {{ path }} at {{ now }}
 
 [global]
   listen = 127.0.0.1
@@ -44,7 +44,7 @@
 
 #for irc/chan
 [channel]
-  name = {{ this }}
+  name = {{ 1 }}
   modes = tnk
-  key = {{ irc/chan/%/key }}
+  key = {{ irc/chan/%1/key }}
 #end

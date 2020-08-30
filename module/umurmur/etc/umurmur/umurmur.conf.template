@@ -1,4 +1,4 @@
-# generated from adm-config repo at {{ now }}
+# generated from {{ path }} at {{ now }}
 
 max_bandwidth=48000;
 welcometext="Welcome to uMurmur!";
@@ -25,7 +25,7 @@ private_key="/etc/ssl/live/voice.z0.is/privkey.pem";
 channels=(
 	{ name="root"; parent=""; noenter=true; },
 #for murmur/chan
-	{ name="{{ this }}"; parent="root"; password="{{ murmur/chan/%/pass }}"; },
+	{ name="{{ 1 }}"; parent="root"; password="{{ murmur/chan/%1/pass }}"; },
 #end
 	{ name="open"; parent="root"; description="open-access channel to say hi"; }
 );

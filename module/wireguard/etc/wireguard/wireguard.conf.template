@@ -1,4 +1,4 @@
-# generated from adm-config repo at {{ now }}
+# generated from {{ path }} at {{ now }}
 
 [Interface]
   PrivateKey = {{ wireguard/pass }}
@@ -7,6 +7,6 @@
 #for wireguard/peer
 [Peer]
   PublicKey = {{ wireguard/public-key }}
-  Endpoint = {{ this }}.z0.is
-  AllowedIPs = {{ wireguard/host/%/net }}
+  Endpoint = {{ 1 }}.z0.is
+  AllowedIPs = {{ wireguard/host/%1/net }}
 #end

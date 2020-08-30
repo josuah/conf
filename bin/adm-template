@@ -66,8 +66,7 @@ function replace_text(text, items,
 		sub("^ *", "", key)
 		sub(" *$", "", key)
 
-		if (key ~ /^\$[0-9]+$/) {
-			sub(/\$/, "", key)
+		if (key ~ /^[0-9]+$/) {
 			value = items[key]
 		} else if (key == "now") {
 			value = NOW
@@ -137,15 +136,13 @@ function blk_iterate(blk, text, path, items,
 {
 	this = replace_key(path[blk], items)
 
-	if (this ~ "/$") {
+	if (system("test -d " shell_escape(this)) == 0)
 		cmd = "ls " shell_escape(this);
 		if ((cmd | getline line) <= 0) {
 			close(cmd)
 			return 0
 		}
 	} else {
-		if (system("test -f " shell_escape(this)) != 0)
-			die(this " is not a file")
 		if ((getline line <this) <= 0) {
 			close(this)
 			return 0

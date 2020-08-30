@@ -1,4 +1,4 @@
-# generated from adm-config repo at {{ now }}
+# generated from {{ path }} at {{ now }}
 
 [irc]
 [irc.local]
@@ -18,26 +18,26 @@
 
 #for whatsapp/chan
 [[gateway]]
-  name = "#whatsapp-{{ this }}"
+  name = "#whatsapp-{{ 1 }}"
   enable = true
 [[gateway.inout]]
   account = "irc.local"
-  channel = "#whatsapp-{{ this }}"
-  options = { key="{{ irc/chan/#whatsapp-%/pass }}" }
+  channel = "#whatsapp-{{ 1 }}"
+  options = { key="{{ irc/chan/#whatsapp-%1/pass }}" }
 [[gateway.inout]]
   account = "whatsapp.me"
-  channel = "{{ this }}"
+  channel = "{{ 1 }}"
 #end
 
 #for discord/chan
 [[gateway]]
-  name = "#discord-{{ this }}"
+  name = "#discord-{{ 1 }}"
   enable = true
 [[gateway.inout]]
   account = "irc.local"
-  channel = "#discord-{{ this }}"
-  options = { key="{{ irc/chan/#discord-%/pass }}" }
+  channel = "#discord-{{ 1 }}"
+  options = { key="{{ irc/chan/#discord-%1/pass }}" }
 [[gateway.inout]]
   account = "discord.me"
-  channel = "{{ this }}"
+  channel = "{{ 1 }}"
 #end

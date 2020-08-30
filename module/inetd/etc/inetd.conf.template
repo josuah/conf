@@ -1,4 +1,8 @@
+# generated from {{ path }} at {{ now }}
 #for /etc/inetd.d
-# /etc/inetd.d/{{ this }}
-{{ /etc/inetd.d/% }}
+
+# {{ 1 }}
+##for /etc/inetd.d/%1
+{{ 2 }}
+##end
 #end
