@@ -1,0 +1,12 @@
+umask 022
+
+export PATH=/bin:/sbin
+for x in /usr/*/bin /usr/*/sbin; do
+	[ -d "$x" ] || continue
+	export PATH="$PATH:$x"
+done
+
+for x in /etc/profile.d/*; do
+	[ -f "$x" ] || continue
+	. "$x"
+done

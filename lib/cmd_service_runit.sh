@@ -8,11 +8,19 @@ cmd_service_disable() {
 }
 
 cmd_service_start() {
-	sv up "$1"
+	sv start "$1"
 }
 
 cmd_service_stop() {
-	sv down "$1"
+	sv stop "$1"
+}
+
+cmd_service_restart() {
+	sv restart "$1"
+}
+
+cmd_service_reload() {
+	sv reload "$1"
 }
 
 cmd_service_status() {

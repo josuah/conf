@@ -1,7 +1,7 @@
 
 _build_git() {
 	local bare="$cache/git/$name"
-	export source="$cache/source/$name-$commit"
+	export source="$cache/src/$name-$commit"
 
 	if [ ! -d "$bare" ]; then
 		git clone --mirror "$url" "$bare"
@@ -18,10 +18,12 @@ _build_git() {
 
 _build_tar() {
 	local tar="$cache/tar/$name-$(basename "$url")"
-	export source=$cache/source/$name-$v
+	export source=$cache/src/$name-$v
 
-	mkdir -p "$(dirname "$tar")"
-	curl -Ls -o "$tar" "$url"
+	if [ ! -f "$tar" ]; then
+		mkdir -p "$(dirname "$tar")"
+		curl -Ls -o "$tar" "$url"
+	fi
 
 	openssl sha256 "$tar" \
 	| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {

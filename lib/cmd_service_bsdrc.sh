@@ -15,6 +15,14 @@ cmd_service_stop() {
 	"/etc/rc.d/$1" stop
 }
 
+cmd_service_restart() {
+	"/etc/rc.d/$1" restart
+}
+
+cmd_service_reload() {
+	"/etc/rc.d/$1" reload
+}
+
 cmd_service_status() {
 	"/etc/rc.d/$1" status
 }

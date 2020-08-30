@@ -1,2 +1,2 @@
-ospack/go
-golang/matterbridge
+module/go
+golang/github.com/42wim/matterbridge

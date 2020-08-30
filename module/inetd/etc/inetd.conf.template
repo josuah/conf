@@ -1,0 +1,4 @@
+#for /etc/inetd.d
+# /etc/inetd.d/{{ this }}
+{{ /etc/inetd.d/% }}
+#end

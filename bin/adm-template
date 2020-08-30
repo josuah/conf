@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 function replace(str, this,
-	head, tail, key, value, path, cmd, pass)
+	head, tail, key, value, line, path, cmd, pass)
 {
 	tail = str
 	head = ""
@@ -17,7 +17,10 @@ function replace(str, this,
 		} else if (key == "now") {
 			value = global["now"]
 		} else {
-			getline value <key
+			value = ""
+			while ((getline line <key) > 0)
+				value = value line "\n"
+			sub("\n$", "", value)
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -38,7 +41,7 @@ function read_block(\
 function list_file(path, table,
 	i)
 {
-	if (system(("test -f '" path "'") != 0)
+	if (system("test -f '" path "'") != 0)
 		return -1
 	for (i = 1; (getline <path) == 0; i++)
 		table[i] = $0
@@ -49,6 +52,8 @@ function list_file(path, table,
 function list_dir(path, table,
 	cmd, i)
 {
+	if (system("test -d '" path "'") != 0)
+		return -1
 	cmd = "ls '" path "'"
 	for (i = 1; cmd | getline > 0; i++)
 		table[i] = $0

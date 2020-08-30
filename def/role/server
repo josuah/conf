@@ -1,2 +1,3 @@
 module/ssh
+module/shell
 monitor/ping

@@ -15,6 +15,14 @@ cmd_service_stop() {
 	rc-service stop "$1"
 }
 
+cmd_service_restart() {
+	rc-service restart "$1"
+}
+
+cmd_service_reload() {
+	rc-service reload "$1"
+}
+
 cmd_service_status() {
 	rc-service status "$1"
 }
