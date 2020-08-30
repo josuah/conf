@@ -1,12 +1,12 @@
 # {{ path }}
 # {{ now }}
-#for mail/account
+#for /var/mail
 
 # {{ 1 }}
-##for mail/account/%1
+##for /var/mail/%1
 
 # {{ 2 }}@{{ 1 }}
-###for mail/account/%1/%2
+###for /var/mail/%1/%2/alias
 ={{ 3 }}:mail:1024:1012:/var/mail/{{ 1 }}/{{ 2 }}:::
 ###end
 ##end

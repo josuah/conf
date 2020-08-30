@@ -1,0 +1,6 @@
+#for db/dns/alias
+##for db/dns/alias
+{{ 1:host }} {{ 1:dom }}
+{{ 2:host }} {{ 2:dom }}
+##end
+#end

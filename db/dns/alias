@@ -1,0 +1,11 @@
+host=niger       dom=z0.is
+host=niger       dom=code.z0.is
+host=niger       dom=openpgpkey.z0.is
+host=niger       dom=openpgpkey.josuah.net
+host=taasmanicus dom=notqmail.z0.is
+host=niger       dom=duckless.z0.is
+host=niger       dom=*.duckless.z0.is
+host=niger       dom=josuah.net
+host=niger       dom=www.josuah.net
+host=niger       dom=atelier-fu.fr
+host=niger       dom=www.atelier-fu.fr

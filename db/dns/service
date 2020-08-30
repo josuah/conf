@@ -1,0 +1,5 @@
+host=niger dom=imap
+host=niger dom=smtp
+host=niger dom=irc
+host=niger dom=voice
+host=niger dom=cast

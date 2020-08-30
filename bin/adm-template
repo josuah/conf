@@ -1,32 +1,30 @@
 #!/usr/bin/awk -f
 
-# Example of #macros and {{ variables }}:
+# Example of #macros and {{ queries }}:
 #
 #	line printed directly
 #
-#	#for dir
+#	#for dir/file
 #
-#	x = {{ static/variable }}
+#	x = {{ static/variable:key key=value key={1:name} }}
 #	lines added to blk_texts["1"]
 #
-#	##for dir/%1/subdir
-#	y = {{ dir/%1/subdir/%2/name }}
+#	##for dir/file key={1:name}
+#	y = {{ dir/file key=test }}
 #	lines added to blk_texts["1.1"]
 #	##end
 #
-#	z = {{ still/%1/there }}
+#	z = {{ dir/file:key key=value }}
 #	line added to blk_texts["2"]
 #
-#	##for dir/%1/subdir
-#	t = {{ dir/%1/subdir/%2/type }}
+#	##for dir/file key={1:type}
+#	t = {{ dir/file key={2:name} }}
 #	lines added to blk_texts["2.1"]
 #	##end
 #
 #	lines added to blk_texts["3"]
 #	
 #	#end
-#
-#	line printed directly
 
 function die(msg)
 {
@@ -42,51 +40,125 @@ function join(array, sep,
 	return str
 }
 
-function replace_key(key, items,
-	i, n)
+function delete_beg(array, prefix,
+	i)
 {
-	for (i in items)
-		n++
-	for (i = n; i > 0; i--) {
-		gsub("%"i, items[i], key)
-		blk = blk_dec_level(blk)
-	}
-
-	gsub("@", HOSTNAME, key)
-
-	return key
+	for (i in array)
+		if (substr(i, 1, length(prefix)) == prefix)
+			delete array[i]
 }
 
-function replace_text(texts, items,
-	head, tail, key, value)
+function db_split(line, vars, pfx,
+	n, array, i, eq, key, val)
 {
-	tail = texts
-	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
-		key = substr(tail, RSTART + 2, RLENGTH - 4)
-		sub("^ *", "", key)
-		sub(" *$", "", key)
+	n, split(line, array, " ")
 
-		if (key ~ /^[0-9]+$/) {
-			value = items[key]
-		} else if (key == "path") {
-			value = FILENAME
-		} else if (key == "now") {
-			value = NOW
+	for (i in array) {
+		eq = index(array[i], "=")
+		if (eq == 0) {
+			vars[pfx array[i]] = 1
 		} else {
-			key = replace_key(key, items)
-			if ((getline value <key) <= 0)
-				die("cannot read " key " or file empty")
+			key = substr(array[i], 1, eq - 1)
+			val = substr(array[i], eq + 1)
+			vars[pfx key] = val
+		}
+	}
+	return n
+}
+
+function db_getline(path, vars, pfx,
+	array)
+{
+	if ((getline line <path) <= 0) {
+		close(path)
+		return 0
+	}
+	db_split(line, vars, pfx)
+	return 1
+}
+
+function db_match(query, vars, pfx,
+	matching, key)
+{
+	for (key in query)
+		if (!(pfx key) in vars || query[key] != vars[pfx key])
+			return 0
+	return 1
+}
+
+function db_getmatch(path, line, pfx, result,
+	array, path, get, key, val, i, query, found)
+{
+	db_split(line, query, "")
+	while (db_getline(path, result, pfx))
+		if (db_match(query, result, pfx))
+			return 1
+	return 0
+}
+
+function db_expand(str, vars,
+	i)
+{
+	sub("^ *", "", str)
+	sub(" *$", "", str)
+
+	for (i in vars)
+		gsub("\\{" i "\\}", vars[i], str)
+	return str
+}
+
+function db_query(line, result,
+	sp, col, path, ret)
+{
+	sp = index(line, " ")
+	if (sp == 0) {
+		sub(":.*", "", line)
+		return db_getline(result)
+	} else {
+		path = substr(line, 1, sp - 1)
+		line = substr(line, sp + 1)
+		sub(":.*", "", path)
+		return db_getmatch(path, line, result, n":") ? ret : 0
+	}
+}
+
+function db_ssearch(line, result,
+	col, key)
+{
+	if (!db_query(line, result))
+		die("no value found for " line)
+
+	sub(" .*", "", line)
+	col = index(line, ":")
+	if (! col)
+		die("missing a :key to " line)
+
+	key = substr(line, col + 1)
+	return result[key]
+}
+
+function replace_text(text, vars,
+	head, tail, line, result, key, value)
+{
+	tail = text
+	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
+		line = substr(tail, RSTART + 2, RLENGTH - 4)
+		line = db_expand(key, vars)
+
+		if (line in DYNAMIC) {
+			value = DYNAMIC[key]
+		} else if (line in vars) {
+			value = vars[line]
+		} else {
+			value = db_search(line)
+			if (!value)
+				die("no result for " line)
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
 		tail = substr(tail, RSTART + RLENGTH)
 	}
 	return head tail
-}
-
-function blk_print(texts, items)
-{
-	printf "%s", replace_text(texts[blk], items)
 }
 
 function blk_inc_tail(blk,
@@ -113,81 +185,42 @@ function blk_dec_level(blk,
 	return join(array, ".")
 }
 
-function blk_get_next(map, blk,
-	str)
-{
-	str = blk_inc_level(blk)
-	if (str in map)
-		return str
-
-	str = blk_dec_level(blk)
-	str = blk_inc_tail(str)
-	if (str in map)
-		return str
-
-	return ""
-}
-
-function shell_escape(str)
-{
-	gsub("'", "'\\''", str);
-	return "'" str "'"
-}
-
-function blk_iterate(blk, texts, paths, items,
-	this, cmd, line, array)
-{
-	this = replace_key(paths[blk], items)
-
-	if (system("test -d " shell_escape(this)) == 0) {
-		cmd = "ls " shell_escape(this);
-		if ((cmd | getline line) <= 0) {
-			close(cmd)
-			return 0
-		}
-	} else {
-		if ((getline line <this) <= 0) {
-			close(this)
-			return 0
-		}
-	}
-	items[split(blk, array, ".")] = line
-	return 1
-}
-
-function blk_flush(texts, paths, items, blk,
-	array, n)
+function blk_flush(texts, queries, vars, blk,
+	n, array, sp)
 {
 	blk = blk_inc_level(blk)
-	if (!(blk in texts))
+	if (! blk in texts)
 		return
 
-	while (blk_iterate(blk, texts, paths, items)) {
-		printf "%s", replace_text(texts[blk], items)
-		blk_flush(texts, paths, items, blk)
-	}
 	n = split(blk, array, ".")
-	delete items[n]
-	delete paths[n]
+
+	while (db_query(queries[n]) ) {
+		printf "%s", replace_text(texts[blk], vars)
+		blk_flush(texts, queries, vars, blk)
+	}
+
+	delete_beg(vars, n":")
+	delete queries[n]
 	delete texts[blk]
 }
 
 BEGIN {
 	cmd = "date +'%Y/%m/%d %H:%M:%S %z'"
-	cmd | getline NOW
+	cmd | getline DYNAMIC["now"]
 	close(cmd)
 
 	cmd = "hostname -s"
-	cmd | getline HOSTNAME
+	cmd | getline DYNAMIC["host"]
 	close(cmd)
+}
 
-	EMPTY["none"] = 0
-	delete EMPTY["none"]
+{
+	DYNAMIC["queries"] = FILENAME
 }
 
 /^#+for / {
 	blk = blk_inc_level(blk)
-	blk_paths[blk] = $2
+	blk_queries[blk] = $2
 	blk_dirty = 1
 	next
 }
@@ -198,7 +231,7 @@ BEGIN {
 	blk = blk_dec_level(blk)
 
 	if (blk == "")
-		blk_flush(blk_texts, blk_paths, blk_items, "")
+		blk_flush(blk_texts, blk_queries)
 	next
 }
 
