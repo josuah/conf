@@ -1,26 +1,79 @@
 #!/usr/bin/awk -f
 
-function replace(str, this,
-	head, tail, key, value, line, path, cmd, pass)
+# Example of #macros and {{ variables }}:
+#
+#	line printed directly
+#
+#	#for dir
+#
+#	x = {{ static/variable }}
+#	lines added to blk_text["1"]
+#
+#	##for dir/%1/subdir
+#	y = {{ dir/%1/subdir/%2/name }}
+#	lines added to blk_text["1.1"]
+#	##end
+#
+#	z = {{ still/%1/there }}
+#	line added to blk_text["2"]
+#
+#	##for dir/%1/subdir
+#	t = {{ dir/%1/subdir/%2/type }}
+#	lines added to blk_text["2.1"]
+#	##end
+#
+#	lines added to blk_text["3"]
+#	
+#	#end
+#
+#	line printed directly
+
+function die(msg)
 {
-	tail = str
-	head = ""
+	print "fatal error msg=\"" msg "\""
+	exit(1)
+}
+
+function join(array, sep,
+	i, str)
+{
+	for (i = 1; i in array; i++)
+		str = (i == 1) ? (array[i]) : (str sep array[i])
+	return str
+}
+
+function replace_key(key, items,
+	i, n)
+{
+	for (i in items)
+		n++
+	for (i = n; i > 0; i--) {
+		gsub("%"i, items[i], key)
+		blk = blk_dec_level(blk)
+	}
+
+	gsub("@", HOSTNAME, key)
+
+	return key
+}
+
+function replace_text(text, items,
+	head, tail, key, value)
+{
+	tail = text
 	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
 		key = substr(tail, RSTART + 2, RLENGTH - 4)
-		gsub("%", this, key)
-		gsub("@", global["hostname"], key)
 		sub("^ *", "", key)
 		sub(" *$", "", key)
 
-		if (key == "this") {
-			value = this
+		if (key ~ /^\$[0-9]+$/) {
+			sub(/\$/, "", key)
+			value = items[key]
 		} else if (key == "now") {
-			value = global["now"]
+			value = NOW
 		} else {
-			value = ""
-			while ((getline line <key) > 0)
-				value = value line "\n"
-			sub("\n$", "", value)
+			key = replace_key(key, items)
+			getline value < key
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -29,62 +82,126 @@ function replace(str, this,
 	return head tail
 }
 
-function read_block(\
-	str, line)
+function blk_print(text, items)
 {
-	str = ""
-	while (getline line && line !~ /^#end/)
-		str = str line "\n"
-	return str
+	printf "%s", replace_text(text[blk], items)
 }
 
-function list_file(path, table,
-	i)
+function blk_inc_tail(blk,
+	n, array)
 {
-	if (system("test -f '" path "'") != 0)
-		return -1
-	for (i = 1; (getline <path) == 0; i++)
-		table[i] = $0
-	close(path)
-	return 0
+	n = split(blk, array, ".")
+	array[n]++
+	return join(array, ".")
 }
 
-function list_dir(path, table,
-	cmd, i)
+function blk_inc_level(blk,
+	n, array)
 {
-	if (system("test -d '" path "'") != 0)
-		return -1
-	cmd = "ls '" path "'"
-	for (i = 1; cmd | getline > 0; i++)
-		table[i] = $0
-	close(cmd)
+	n = split(blk, array, ".")
+	array[n + 1] = 1
+	return join(array, ".")
 }
 
-function print_block(str, table,
-	i)
+function blk_dec_level(blk,
+	n, array)
 {
-	for (i in table)
-		printf "%s", replace(str, table[i])
+	n = split(blk, array, ".")
+	delete array[n]
+	return join(array, ".")
+}
+
+function blk_get_next(map, blk,
+	str)
+{
+	str = blk_inc_level(blk)
+	if (str in map)
+		return str
+
+	str = blk_dec_level(blk)
+	str = blk_inc_tail(str)
+	if (str in map)
+		return str
+
+	return ""
+}
+
+function shell_escape(str)
+{
+	gsub("'", "'\\''", str);
+	return "'" str "'"
+}
+
+function blk_iterate(blk, text, path, items,
+	this, cmd, line, array)
+{
+	this = replace_key(path[blk], items)
+
+	if (this ~ "/$") {
+		cmd = "ls " shell_escape(this);
+		if ((cmd | getline line) <= 0) {
+			close(cmd)
+			return 0
+		}
+	} else {
+		if (system("test -f " shell_escape(this)) != 0)
+			die(this " is not a file")
+		if ((getline line <this) <= 0) {
+			close(this)
+			return 0
+		}
+	}
+	items[split(blk, array, ".")] = line
+	return 1
+}
+
+function blk_flush(text, path, blk,
+	item, i)
+{
+	blk = blk_inc_level(blk)
+	if (!(blk in text))
+		return
+
+	while (blk_iterate(blk, text, path, items)) {
+		printf "%s", replace_text(text[blk], items)
+		blk_flush(text, path, blk)
+	}
 }
 
 BEGIN {
 	cmd = "date +'%Y/%m/%d %H:%M:%S %z'"
-	cmd | getline global["now"]
+	cmd | getline NOW
 	close(cmd)
 
 	cmd = "hostname -s"
-	cmd | getline global["hostname"]
+	cmd | getline HOSTNAME
 	close(cmd)
+
+	EMPTY["none"] = 0
+	delete EMPTY["none"]
 }
 
-/^#for / {
-	list_file($2, table)
-	list_dir($2, table)
-	print_block(read_block(), table)
-	delete table
+/^#+for / {
+	blk = blk_inc_level(blk)
+	blk_path[blk] = $2
+	blk_dirty = 1
 	next
 }
 
-{
-	print replace($0)
+/^#+end/ {
+	if (blk == "")
+		die("more #end than #for")
+	blk = blk_dec_level(blk)
+
+	if (blk == "")
+		blk_flush(blk_text, blk_path, "")
+	next
+}
+
+blk != "" {
+	blk_text[blk] = blk_text[blk] $0 "\n"
+}
+
+blk == "" {
+		print replace_text($0)
 }

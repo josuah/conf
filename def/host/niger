@@ -6,3 +6,4 @@ role/openbsd
 role/voice
 role/git
 role/http
+role/vpn

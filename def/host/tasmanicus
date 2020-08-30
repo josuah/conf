@@ -4,3 +4,4 @@ role/mail
 role/openbsd
 role/server
 role/voice
+role/vpn
