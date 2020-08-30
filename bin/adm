@@ -117,16 +117,17 @@ main() {
 	while [ $i -gt 0 ]; do i=$((i - 1))
 		case $1 in
 		(*=*) set -- "$@" "$1" ;;
-		(*) local node="$1" ;;
+		(*/*) local node="$1" ;;
+		(*) exec "$0" usage ;;
 		esac
 		shift
 	done
 	: ${node:=host/$host}
 
 	local value
-	for x in "$etc/var/sys/host/$host/"*; do x=${x##*/}
-		[ -f "$etc/var/sys/host/$host/$x" ] || continue
-		read -r value <$etc/var/sys/host/$host/$x
+	for x in "$etc/data/sys/host/$host/"*; do x=${x##*/}
+		[ -f "$etc/data/sys/host/$host/$x" ] || continue
+		read -r value <$etc/data/sys/host/$host/$x
 		set -- "$@" "$x=$value"
 	done
 
@@ -142,7 +143,7 @@ main() {
 		list 0 "$node" "$@"
 		;;
 	(*)
-		echo "usage: ${0##*/} command [node] [key=value...]"
+		echo "usage: ${0##*/} command [type/name] [key=value...]"
 		echo "command: list, monitor, install, enable, disable, start, stop, restart, reload, status"
 		;;
 	esac

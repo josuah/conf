@@ -9,7 +9,7 @@ cmd_module_install() {
 
 			case $x in
 			(*.template)
-				(cd "$etc/var"; adm-template) \
+				(cd "$etc/data"; adm-template) \
 				  <$etc/module/$name/$x \
 				  >$tmp/module/${x%.template}
 				;;

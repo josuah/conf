@@ -7,7 +7,7 @@ _build_git() {
 		git clone --mirror "$url" "$bare"
 	fi
 
-	if [ ! -d "$source" ]; then
+	if [ ! -d "$DESTDIR" ]; then
 		git -C "$bare" rev-parse "$commit" >/dev/null ||
 			git -C "$bare" fetch
 		git -C "$bare" rev-parse "$commit" >/dev/null
@@ -25,29 +25,34 @@ _build_tar() {
 		curl -Ls -o "$tar" "$url"
 	fi
 
-	openssl sha256 "$tar" \
-	| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
-		echo >&2 invalid checksum
-		exit 1
-	}
+	if [ ! -d "$DESTDIR" ]; then
+		openssl sha256 "$tar" \
+		| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
+			echo >&2 invalid checksum
+			exit 1
+		}
 
-	tmp=$(mktemp -d)
-	trap_add 'rm -rf "$tmp"'
+		tmp=$(mktemp -d)
+		trap_add 'rm -rf "$tmp"'
 
-	case $tar in
-	(*gz) gzip -cd "$tar" ;;
-	(*xz) xz -cd "$tar" ;;
-	(*lz) lz -cd "$tar" ;;
-	esac | tar -x -f - -C "$tmp"
-	mkdir -p "$tmp" "$(dirname "$source")"
-	rm -rf "$source"
-	mv "$tmp/"* "$source"
+		case $tar in
+		(*gz) gzip -cd "$tar" ;;
+		(*xz) xz -cd "$tar" ;;
+		(*lz) lz -cd "$tar" ;;
+		esac | tar -x -f - -C "$tmp"
+		mkdir -p "$tmp" "$(dirname "$source")"
+		rm -rf "$source"
+		mv "$tmp/"* "$source"
+	fi
 }
 
 cmd_build_install() {
 	local name="$1"
 
 	. "$etc/build/$name/build.sh"
+
+	export PREFIX="$usr"
+	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
 
 	[ "${sha256:-}" ] && _build_tar
 	[ "${commit:-}" ] && _build_git
@@ -61,9 +66,6 @@ cmd_build_install() {
 			(cd "$source"; patch -p1 -N) <$x
 		done
 	fi
-
-	export PREFIX="$usr"
-	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
 
 	[ -d "$DESTDIR" ] && return 0
 
