@@ -68,22 +68,22 @@ function db_split(line, vars, pfx,
 	}
 }
 
-function db_getline(path, vars, pfx,
+function db_getline(path, pfx, result,
 	array)
 {
 	if ((getline line <path) <= 0) {
 		close(path)
 		return 0
 	}
-	db_split(line, vars, pfx)
+	db_split(line, result, pfx)
 	return 1
 }
 
 function db_match(query, vars, pfx,
-	matching, key)
+	key)
 {
 	for (key in query)
-		if (!(pfx key) in vars || query[key] != vars[pfx key])
+		if (!(pfx key in vars) || query[key] != vars[pfx key])
 			return 0
 	return 1
 }
@@ -92,7 +92,7 @@ function db_getmatch(path, line, pfx, result,
 	query)
 {
 	db_split(line, query, "")
-	while (db_getline(path, result, pfx)) {
+	while (db_getline(path, pfx, result)) {
 		if (db_match(query, result, pfx))
 			return 1
 		delete_array(result)
@@ -104,30 +104,30 @@ function db_expand(str, vars,
 	i)
 {
 	for (i in vars)
-		gsub("\\{" i "\\}", vars[i], str)
+		gsub("\\[" i "\\]", vars[i], str)
 	return str
 }
 
-function db_query(line, result, pfx,
+function db_query(line, pfx, result,
 	sp, col, path, ret)
 {
 	sp = index(line, " ")
 	if (sp == 0) {
 		sub(":.*", "", line)
-		return db_getline(line, result, pfx)
+		return db_getline(line, pfx, result)
 	} else {
 		path = substr(line, 1, sp - 1)
 		line = substr(line, sp + 1)
 		sub(":.*", "", path)
-		return db_getmatch(path, line, result, pfx) ? ret : 0
+		return db_getmatch(path, line, pfx, result)
 	}
 }
 
-function db_search(line,
+function db_search(line, pfx,
 	result, col, key)
 {
-	if (!db_query(line, result))
-		die("no value found for " line)
+	if (!db_query(line, pfx, result))
+		die("no entry found for " line)
 
 	sub(" .*", "", line)
 	col = index(line, ":")
@@ -155,7 +155,7 @@ function replace_text(text, vars,
 		} else {
 			value = db_search(line)
 			if (!value)
-				die("no result for " line)
+				die("no value found for " line)
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -195,7 +195,7 @@ function blk_flush(texts, queries, blk, vars,
 		return
 
 	n = split(blk, array, ".")
-	while (db_query(queries[n], vars, n":")) {
+	while (db_query(queries[n], n":", vars)) {
 		str = blk
 		while (str in texts) {
 			printf "%s", replace_text(texts[str], vars)
@@ -203,7 +203,6 @@ function blk_flush(texts, queries, blk, vars,
 			str = blk_inc_tail(str)
 		}
 	}
-
 	delete_array(vars, n":")
 }
 
@@ -218,7 +217,7 @@ BEGIN {
 }
 
 {
-	DYNAMIC["queries"] = FILENAME
+	DYNAMIC["path"] = FILENAME
 }
 
 /^#+for / {
@@ -236,8 +235,8 @@ BEGIN {
 
 	if (blk == "") {
 		blk_flush(blk_texts, blk_queries, "1")
-		#delete_array(queries)
-		#delete_array(texts)
+		delete_array(queries)
+		delete_array(texts)
 	}
 	next
 }

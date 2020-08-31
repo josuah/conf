@@ -9,27 +9,27 @@
 
 [whatsapp]
 [whatsapp.me]
-  Number = "{{ whatsapp/number }}"
+  Number = "{{ whatsapp/var:tel }}"
   SessionFile = "/var/cache/matterbridge/whatsapp.gob"
 
 [discord]
 [discord.me]
-  Token = "{{ discord/token }}"
-  Server = "{{ discord/guild }}"
+  Token = "{{ discord/var:token }}"
+  Server = "{{ discord/var:guild }}"
 
 # whatsapp chans
 #for whatsapp/chan
 
 [[gateway]]
-  name = "#whatsapp-{{ 1 }}"
+  name = "#whatsapp-{{ 1:name }}"
   enable = true
 [[gateway.inout]]
   account = "irc.local"
-  channel = "#whatsapp-{{ 1 }}"
-  options = { key="{{ irc/chan/#whatsapp-%1/pass }}" }
+  channel = "#whatsapp-{{ 1:name }}"
+  options = { key="{{ irc/chan:pass name=#whatsapp-[1:name] }}" }
 [[gateway.inout]]
   account = "whatsapp.me"
-  channel = "{{ 1 }}"
+  channel = "{{ 1:name }}"
 #end
 
 # discord chans
