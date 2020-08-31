@@ -40,19 +40,22 @@ function join(array, sep,
 	return str
 }
 
-function delete_beg(array, prefix,
+function delete_array(array, pfx,
 	i)
 {
 	for (i in array)
-		if (substr(i, 1, length(prefix)) == prefix)
+		if (substr(i, 1, length(pfx)) == pfx)
 			delete array[i]
 }
 
 function db_split(line, vars, pfx,
-	n, array, i, eq, key, val)
+	array, i, eq, key, val)
 {
-	n, split(line, array, " ")
+	gsub("  +", " ", line)
+	sub("^ *", "", line)
+	sub(" *$", "", line)
 
+	split(line, array, " ")
 	for (i in array) {
 		eq = index(array[i], "=")
 		if (eq == 0) {
@@ -63,7 +66,6 @@ function db_split(line, vars, pfx,
 			vars[pfx key] = val
 		}
 	}
-	return n
 }
 
 function db_getline(path, vars, pfx,
@@ -87,50 +89,49 @@ function db_match(query, vars, pfx,
 }
 
 function db_getmatch(path, line, pfx, result,
-	array, path, get, key, val, i, query, found)
+	query)
 {
 	db_split(line, query, "")
-	while (db_getline(path, result, pfx))
+	while (db_getline(path, result, pfx)) {
 		if (db_match(query, result, pfx))
 			return 1
+		delete_array(result)
+	}
 	return 0
 }
 
 function db_expand(str, vars,
 	i)
 {
-	sub("^ *", "", str)
-	sub(" *$", "", str)
-
 	for (i in vars)
 		gsub("\\{" i "\\}", vars[i], str)
 	return str
 }
 
-function db_query(line, result,
+function db_query(line, result, pfx,
 	sp, col, path, ret)
 {
 	sp = index(line, " ")
 	if (sp == 0) {
 		sub(":.*", "", line)
-		return db_getline(result)
+		return db_getline(line, result, pfx)
 	} else {
 		path = substr(line, 1, sp - 1)
 		line = substr(line, sp + 1)
 		sub(":.*", "", path)
-		return db_getmatch(path, line, result, n":") ? ret : 0
+		return db_getmatch(path, line, result, pfx) ? ret : 0
 	}
 }
 
-function db_ssearch(line, result,
-	col, key)
+function db_search(line,
+	result, col, key)
 {
 	if (!db_query(line, result))
 		die("no value found for " line)
 
 	sub(" .*", "", line)
 	col = index(line, ":")
-	if (! col)
+	if (!col)
 		die("missing a :key to " line)
 
 	key = substr(line, col + 1)
@@ -143,7 +144,9 @@ function replace_text(text, vars,
 	tail = text
 	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
 		line = substr(tail, RSTART + 2, RLENGTH - 4)
-		line = db_expand(key, vars)
+		sub("^ *", "", line)
+		sub(" *$", "", line)
+		line = db_expand(line, vars)
 
 		if (line in DYNAMIC) {
 			value = DYNAMIC[key]
@@ -185,23 +188,23 @@ function blk_dec_level(blk,
 	return join(array, ".")
 }
 
-function blk_flush(texts, queries, vars, blk,
-	n, array, sp)
+function blk_flush(texts, queries, blk, vars,
+	n, array, str)
 {
-	blk = blk_inc_level(blk)
-	if (! blk in texts)
+	if (!(blk in texts))
 		return
 
 	n = split(blk, array, ".")
-
-	while (db_query(queries[n]) ) {
-		printf "%s", replace_text(texts[blk], vars)
-		blk_flush(texts, queries, vars, blk)
+	while (db_query(queries[n], vars, n":")) {
+		str = blk
+		while (str in texts) {
+			printf "%s", replace_text(texts[str], vars)
+			blk_flush(texts, queries, blk_inc_level(str), vars)
+			str = blk_inc_tail(str)
+		}
 	}
 
-	delete_beg(vars, n":")
-	delete queries[n]
-	delete texts[blk]
+	delete_array(vars, n":")
 }
 
 BEGIN {
@@ -220,7 +223,7 @@ BEGIN {
 
 /^#+for / {
 	blk = blk_inc_level(blk)
-	blk_queries[blk] = $2
+	blk_queries[split(blk, array, ".")] = $2
 	blk_dirty = 1
 	next
 }
@@ -229,9 +232,13 @@ BEGIN {
 	if (blk == "")
 		die("more #end than #for")
 	blk = blk_dec_level(blk)
+	blk = blk_inc_tail(blk)
 
-	if (blk == "")
-		blk_flush(blk_texts, blk_queries)
+	if (blk == "") {
+		blk_flush(blk_texts, blk_queries, "1")
+		#delete_array(queries)
+		#delete_array(texts)
+	}
 	next
 }
 
@@ -240,5 +247,5 @@ blk != "" {
 }
 
 blk == "" {
-		print replace_text($0)
+	print replace_text($0)
 }
