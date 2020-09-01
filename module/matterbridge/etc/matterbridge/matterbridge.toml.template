@@ -36,13 +36,13 @@
 #for discord/chan
 
 [[gateway]]
-  name = "#discord-{{ 1 }}"
+  name = "#discord-{{ 1:name }}"
   enable = true
 [[gateway.inout]]
   account = "irc.local"
-  channel = "#discord-{{ 1 }}"
-  options = { key="{{ irc/chan/#discord-%1/pass }}" }
+  channel = "#discord-{{ 1:name }}"
+  options = { key="{{ irc/chan:pass name=#discord-[1:name] }}" }
 [[gateway.inout]]
   account = "discord.me"
-  channel = "{{ 1 }}"
+  channel = "{{ 1:name }}"
 #end

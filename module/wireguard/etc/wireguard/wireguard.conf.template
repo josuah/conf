@@ -2,12 +2,12 @@
 # {{ now }}
 
 [Interface]
-  PrivateKey = {{ wireguard/pass }}
+  PrivateKey = {{ wireguard/var:privkey }}
   ListenPort = 51820
 
 #for wireguard/peer
 [Peer]
-  PublicKey = {{ wireguard/public-key }}
-  Endpoint = {{ 1 }}.z0.is
-  AllowedIPs = {{ wireguard/host/%1/net }}
+  PublicKey = {{ 1:pubkey }}
+  Endpoint = {{ 1:host }}.z0.is
+  AllowedIPs = {{ 1:net }}
 #end

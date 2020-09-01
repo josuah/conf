@@ -4,7 +4,7 @@
 max_bandwidth=48000;
 welcometext="Welcome to uMurmur!";
 password="";
-admin_password="{{ murmur/pass }}"
+admin_password="{{ murmur/var:pass }}"
 
 # ban_length=0;            # Length in seconds for a ban. Default is 0. 0=forever.
 # enable_ban=false;        # Default is false
@@ -26,7 +26,7 @@ private_key="/etc/ssl/live/voice.z0.is/privkey.pem";
 channels=(
 	{ name="root"; parent=""; noenter=true; },
 #for murmur/chan
-	{ name="{{ 1 }}"; parent="root"; password="{{ murmur/chan/%1/pass }}"; },
+	{ name="{{ 1:name }}"; parent="root"; password="{{ 1:pass }}"; },
 #end
 	{ name="open"; parent="root"; description="open-access channel to say hi"; }
 );

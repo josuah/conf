@@ -37,7 +37,7 @@
 
 [operator]
   name = josuah
-  password = {{ irc/pass }}
+  password = {{ irc/var:pass }}
 
 [channel]
   name = #general
@@ -45,7 +45,7 @@
 
 #for irc/chan
 [channel]
-  name = {{ 1 }}
+  name = {{ 1:name }}
   modes = tnk
-  key = {{ irc/chan/%1/key }}
+  key = {{ 1:key }}
 #end
