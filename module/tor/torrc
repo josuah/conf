@@ -1,7 +1,0 @@
-RunAsDaemon	0
-DataDirectory	/var/lib/tor
-User		_tor
-
-Log		notice stderr
-
-%include /etc/tor/hs

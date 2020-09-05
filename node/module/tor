@@ -1,3 +1,0 @@
-package/tor
-service/tor
-monitor/tcp port=9150

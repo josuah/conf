@@ -69,12 +69,16 @@ function db_split(line, vars, pfx,
 }
 
 function db_getline(path, pfx, result,
-	array)
+	array, line, n)
 {
 	if ((getline line <path) <= 0) {
 		close(path)
 		return 0
 	}
+	sub("#.*", "", line)
+	if (line ~ "^[ \t]*?$")
+		return db_getline(path, pfx, result)
+
 	db_split(line, result, pfx)
 	return 1
 }

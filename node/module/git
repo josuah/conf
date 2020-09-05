@@ -1,3 +1,0 @@
-package/git
-service/gitdaemon
-monitor/tcp port=9318

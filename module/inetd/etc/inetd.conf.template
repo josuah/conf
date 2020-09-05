@@ -1,9 +1,0 @@
-# {{ path }}
-# {{ now }}
-#for /etc/inetd.d
-
-# {{ 1 }}
-##for /etc/inetd.d/%1
-{{ 2 }}
-##end
-#end
