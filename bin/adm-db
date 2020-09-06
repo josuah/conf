@@ -1,0 +1,318 @@
+#!/usr/bin/awk -f
+
+function usage()
+{
+	print "usage:"					>"/dev/stderr"
+	print " adm-db list <path> [<query>]"		>"/dev/stderr"
+	print " adm-db get <query>"			>"/dev/stderr"
+	print " adm-db set <n>,... <key>=<value>..."	>"/dev/stderr"
+	print " adm-db new <n> <key>=<value>..."	>"/dev/stderr"
+	print " adm-db add <key>=<value>..."		>"/dev/stderr"
+	print " adm-db move <n1> <n2>"			>"/dev/stderr"
+	print " adm-db template <file.template>"	>"/dev/stderr"
+	exit(1)
+}
+
+
+## util ##
+
+function die(msg)
+{
+	print "error: " msg >"/dev/stderr"
+	exit(1)
+}
+
+function join(table, sep,
+	i, str)
+{
+	for (i = 1; i in table; i++)
+		str = (i == 1) ? (table[i]) : (str sep table[i])
+	return str
+}
+
+function swap(table, a, b,
+	tmp)
+{
+	tmp = table[a]
+	table[a] = table[b]
+	table[b] = tmp
+}
+
+function qsort(table, beg, end)
+{
+	if (beg >= end)					# end recursion
+		return
+
+	a = beg + 1					# 1st is the pivot
+	b = end
+	while (a < b) {
+		while (a < b && table[a] <= table[beg])	# beg: skip lesser
+			a++
+		while (a < b && table[b] > table[beg])	# end: skip greater
+			b--
+		swap(table, a, b)			# found 2 misplaced
+	}
+
+	if (table[beg] > table[a])			# put the pivot back
+		swap(table, beg, a)
+
+	sort(table, beg, a - 1)				# sort top half
+	sort(table, a, end)				# sort bottom half
+}
+
+function delete_table(table, pfx,
+	i)
+{
+	for (i in table)
+		if (substr(i, 1, length(pfx)) == pfx)
+			delete table[i]
+}
+
+
+## db ##
+
+function db_clean(line)
+{
+	gsub("[ \t]+", " ", line)
+	sub("^ *", "", line)
+	sub(" *$", "", line)
+	return line
+}
+
+function db_split(line, row, pfx,
+	table, i, eq, key, val)
+{
+	split(db_clean(line), table, " ")
+	for (i in table) {
+		eq = index(table[i], "=")
+		if (eq == 0) {
+			row[pfx table[i]] = 1
+		} else {
+			key = substr(table[i], 1, eq - 1)
+			val = substr(table[i], eq + 1)
+			row[pfx key] = val
+		}
+	}
+}
+
+function db_getline(path, pfx, row,
+	table, line, n)
+{
+	if ((getline line <path) <= 0) {
+		close(path)
+		return 0
+	}
+	if (line ~ /^[ \t]*#/)
+		return db_getline(path, pfx, row)
+
+	db_split(line, row, pfx)
+	return 1
+}
+
+function db_match(query, row, pfx,
+	key)
+{
+	for (key in query)
+		if (!(pfx key in row) || query[key] != row[pfx key])
+			return 0
+	return 1
+}
+
+function db_getmatch(path, query, pfx, row)
+{
+	while (db_getline(path, pfx, row))
+		if (db_match(query, row, pfx))
+			return 1
+	return 0
+}
+
+function db_expand(str, vars,
+	i)
+{
+	for (i in vars)
+		gsub("\\[" i "\\]", vars[i], str)
+	return str
+}
+
+function db_query(line, pfx, row,
+	sp, col, path, ret)
+{
+	sp = index(line, " ")
+	if (sp) {
+		path = substr(line, 1, sp - 1)
+		line = substr(line, sp + 1)
+		sub(/:.*/, "", path)
+		return db_getmatch(path, line, pfx, row)
+	} else {
+		path = line
+		sub(/:.*/, "", path)
+		return db_getline(path, pfx, row)
+	}
+}
+
+function db_search(line, pfx, result,
+	n, key, row)
+{
+	key = line
+	sub(/ .*/, "", key)
+	if (sub(/.*:/, "", key) == 0)
+		die("missing :key selector in " line)
+
+	split("", result)
+	while (db_query(line, pfx, row))
+		if (key in row)
+			result[++n] = row[key]
+	return n
+}
+
+
+## tpl ##
+
+function tpl_replace(text, vars,
+	head, tail, line, result, value, n)
+{
+	tail = text
+	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
+		line = substr(tail, RSTART + 2, RLENGTH - 4)
+		sub("^ *", "", line)
+		sub(" *$", "", line)
+		line = db_expand(line, vars)
+
+		if (line in DYNAMIC) {
+			value = DYNAMIC[line]
+		} else if (line in vars) {
+			value = vars[line]
+		} else {
+			n = db_search(line, result, pfx)
+			if (n == 0)
+				die("no result for " line)
+			for (n in result)
+				break
+			value = result[n]
+		}
+
+		head = head substr(tail, 1, RSTART - 1) value
+		tail = substr(tail, RSTART + RLENGTH)
+	}
+	return head tail
+}
+
+function tpl_inc_tail(lv,
+	n, table)
+{
+	n = split(lv, table, ".")
+	table[n]++
+	return join(table, ".")
+}
+
+function tpl_inc_level(lv,
+	n, table)
+{
+	n = split(lv, table, ".")
+	table[n + 1] = 1
+	return join(table, ".")
+}
+
+function tpl_dec_level(lv,
+	n, table)
+{
+	n = split(lv, table, ".")
+	delete table[n]
+	return join(table, ".")
+}
+
+function tpl_flush(texts, queries, lv, vars,
+	n, table, str)
+{
+	if (!(lv in texts))
+		return
+
+	n = split(lv, table, ".")
+	while (db_query(queries[n], n ":", vars)) {
+		str = lv
+		while (str in texts) {
+			printf "%s", tpl_replace(texts[str], vars)
+			tpl_flush(texts, queries, tpl_inc_level(str), vars)
+			str = tpl_inc_tail(str)
+		}
+	}
+	delete_table(vars, n ":")
+}
+
+
+## cmd ##
+
+function cmd_template(argv,
+	path, line, lv, queries, texts)
+{
+	if (!(2 in argv) || (3 in argv))
+		usage()
+
+	DYNAMIC["path"] = path = argv[2]
+
+	while (getline line <path) {
+
+		if (sub(/^#+for /, "", line)) {
+			lv = tpl_inc_level(lv)
+			queries[split(lv, table, ".")] = line
+
+		} else if (line ~ /^#+end/) {
+			if (lv == "")
+				die("more #end than #for")
+			lv = tpl_dec_level(lv)
+			lv = tpl_inc_tail(lv)
+
+			if (lv == "") {
+				tpl_flush(texts, queries, "1")
+				delete_table(queries)
+				delete_table(texts)
+			}
+
+		} else if (lv == "") {
+			print tpl_replace(line)
+
+		} else {
+			texts[lv] = texts[lv] line "\n"
+		}
+	}
+}
+
+function cmd_get(argv,
+	query, result, i, n)
+{
+	for (i = 2; i in argv; i++)
+		query = query " " argv[i]
+
+	query = db_clean(query)
+	query = db_expand(query)
+	n = db_search(query, "", result)
+
+	for (i = 1; i <= n; i++)
+		if (i in result)
+			print result[i]
+}
+
+
+## main ##
+
+BEGIN {
+	cmd = "date +%s"
+	cmd | getline DYNAMIC["now"]
+	close(cmd)
+
+	cmd = "hostname -s"
+	cmd | getline DYNAMIC["host"]
+	close(cmd)
+
+	if (ARGV[1] == "get")
+		cmd_get(ARGV)
+
+	if (ARGV[1] == "template")
+		cmd_template(ARGV)
+
+	if (ARGV[1] == "set")
+		cmd_set(ARGV)
+
+	if (ARGV[1] == "add")
+		cmd_set(ARGV)
+}

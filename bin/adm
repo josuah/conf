@@ -48,7 +48,7 @@ trap_pop() {
 }
 
 run() {
-	local command="$1" type="$2" name="$3"
+	local command="$1" node="$2"
 	shift 3
 
 	for x in "$@"; do
@@ -58,8 +58,8 @@ run() {
 		export "var_$x"
 	done
 
-	echo ">>> $type/$name $*" >&2
-	"$command" "$name" "$@"
+	echo ">>> $node $*" >&2
+	"$command" "$node" "$@"
 }
 
 apply() {
@@ -88,15 +88,15 @@ list() {
 	printf ' %s' "$@"
 	printf '\n'
 
-	[ -f "$etc/def/$node" ] || return 0
+	[ -f "$etc/node/$node" ] || return 0
 
 	while read node vars; do
 		list $((level + 1)) "$node" "$@" $vars
-	done <$etc/def/$node
+	done <$etc/node/$type/$name
 }
 
 main() {
-	local command="$1"
+	local command="$1" node="${2:-host/$(hostname -s)}"
 	shift
 
 	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
@@ -113,23 +113,9 @@ main() {
 
 	trap_add 'rm -rf "$tmp"'
 
-	local i=$#
-	while [ $i -gt 0 ]; do i=$((i - 1))
-		case $1 in
-		(*=*) set -- "$@" "$1" ;;
-		(*/*) local node="$1" ;;
-		(*) exec "$0" usage ;;
-		esac
-		shift
-	done
-	: ${node:=host/$host}
-
-	local value
-	for x in "$etc/data/sys/host/$host/"*; do x=${x##*/}
-		[ -f "$etc/data/sys/host/$host/$x" ] || continue
-		read -r value <$etc/data/sys/host/$host/$x
-		set -- "$@" "$x=$value"
-	done
+	if [ -f "$etc/node/host/ip" ]; then
+		set -- "$@" $(h="$host" )
+	fi
 
 	if [ -f "$lib/os_$os.sh" ]; then
 		. "$lib/os_$os.sh"
@@ -137,13 +123,13 @@ main() {
 
 	case $command in
 	(install | update | enable | disable | start | stop | restart | reload | status | monitor)
-		list 0 "$node" "$@" | apply "$command" "$node"
+		list 0 "$node" "$name" "$@" | apply "$command" "$node"
 		;;
 	(list)
-		list 0 "$node" "$@"
+		list 0 "$node" "$name" "$@"
 		;;
 	(*)
-		echo "usage: ${0##*/} command [type/name] [key=value...]"
+		echo "usage: ${0##*/} command [node/name] [key=value...]"
 		echo "command: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
 		;;
 	esac
