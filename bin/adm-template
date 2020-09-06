@@ -75,8 +75,7 @@ function db_getline(path, pfx, result,
 		close(path)
 		return 0
 	}
-	sub("#.*", "", line)
-	if (line ~ "^[ \t]*?$")
+	if (line ~ /^[ \t]*(#.*)?$/)
 		return db_getline(path, pfx, result)
 
 	db_split(line, result, pfx)

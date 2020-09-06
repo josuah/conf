@@ -7,8 +7,8 @@ list() {
 set -- "${@:-help}"
 case $1 in
 
-## adm-release init <url> - setup release directories and git repo
-(init)
+## adm-release new <url> - setup release directories and git repo
+(new)
 	if [ ! -d repo ]; then
 		git clone --mirror "$2" repo
 	else
@@ -17,16 +17,8 @@ case $1 in
 	fi
 	;;
 
-## adm-release deploy <branch> - deploy <branch> as a new release
+## adm-release get       - list available releases
 (get)
-	v=$(list | awk -F v '$2 > n { n = $2 } END { print "v" (n + 1) }')
-	git -C repo archive
-	"$0" clear 10
-	"$0" link "$v"
-	;;
-
-## adm-release list - list available releases
-(list)
 	list | sort -n -k 2,2 -t v |
 	while read v; do
 		read commit	<$v/.adm/commit
@@ -36,20 +28,29 @@ case $1 in
 	done
 	;;
 
-## adm-release release <v> - move current release to <v>
+## adm-release put <ref> - deploy git <ref> as a new release
+(put)
+	v=$(list | awk -F v '$2 > n { n = $2 } END { print "v" (n + 1) }')
+	git -C repo archive
+	"$0" del 10
+	"$0" set "$v"
+	;;
+
+## adm-release set <v>   - move current release to <v>
 (set)
 	ls "$2/" >/dev/null
 	ln -s "$2" repo/current
 	mv -f repo/current .
 	;;
 
-(clear)
+## adm-release del <n>   - keep only the lasts and the current one
+(del)
 	v=$(readlink current | sed 's,.*/,,')
 	list | sort -rn -k 2,2 -t v | grep -Fvx "$v" | sed 1,10 d | xargs rm -rf
 	;;
 
 (*)
 	echo "usage:"
-	sed -n 's/^##// p'
+	sed -n 's/^##// p' "$0"
 	;;
 esac
