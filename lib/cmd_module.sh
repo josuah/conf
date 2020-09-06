@@ -1,7 +1,8 @@
 
 _module_template() (
-	cd "$etc/data"
-	adm-template "$etc/module/$name/$1" >$tmp/module/$name/${1%.template}
+	cd "$etc/db"
+	exec >$tmp/module/$name/${1%.template}
+	adm-db template "$etc/module/$name/$1"
 )
 
 cmd_module_install() {
