@@ -1,0 +1,55 @@
+#!/bin/sh -eu
+
+list() {
+	ls | grep -F '^v[0-9]\+$'
+}
+
+set -- "${@:-help}"
+case $1 in
+
+## adm-release init <url> - setup release directories and git repo
+(init)
+	if [ ! -d repo ]; then
+		git clone --mirror "$2" repo
+	else
+		git -C repo set-url origin "$2"
+		git -C repo fetch origin "$2"
+	fi
+	;;
+
+## adm-release deploy <branch> - deploy <branch> as a new release
+(get)
+	v=$(list | awk -F v '$2 > n { n = $2 } END { print "v" (n + 1) }')
+	git -C repo archive
+	"$0" clear 10
+	"$0" link "$v"
+	;;
+
+## adm-release list - list available releases
+(list)
+	list | sort -n -k 2,2 -t v |
+	while read v; do
+		read commit	<$v/.adm/commit
+		read date	<$v/.adm/date
+		read ref	<$v/.adm/ref
+		printf ' %3s  %s  %s  %s\n' "$v" "$date" "$commit"
+	done
+	;;
+
+## adm-release release <v> - move current release to <v>
+(set)
+	ls "$2/" >/dev/null
+	ln -s "$2" repo/current
+	mv -f repo/current .
+	;;
+
+(clear)
+	v=$(readlink current | sed 's,.*/,,')
+	list | sort -rn -k 2,2 -t v | grep -Fvx "$v" | sed 1,10 d | xargs rm -rf
+	;;
+
+(*)
+	echo "usage:"
+	sed -n 's/^##// p'
+	;;
+esac
