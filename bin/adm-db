@@ -109,19 +109,20 @@ function db_getline(path, pfx, row,
 	return 1
 }
 
-function db_match(query, row, pfx,
+function db_match(line, row, pfx,
 	key)
 {
+	db_split(line, query)
 	for (key in query)
 		if (!(pfx key in row) || query[key] != row[pfx key])
 			return 0
 	return 1
 }
 
-function db_getmatch(path, query, pfx, row)
+function db_getmatch(path, line, pfx, row)
 {
 	while (db_getline(path, pfx, row))
-		if (db_match(query, row, pfx))
+		if (db_match(line, row, pfx))
 			return 1
 	return 0
 }
@@ -184,6 +185,7 @@ function tpl_replace(text, vars,
 			value = vars[line]
 		} else {
 			n = db_search(line, result, pfx)
+
 			if (n == 0)
 				die("no result for " line)
 			for (n in result)
@@ -304,15 +306,19 @@ BEGIN {
 	cmd | getline DYNAMIC["host"]
 	close(cmd)
 
-	if (ARGV[1] == "get")
+	if (ARGV[1] == "get") {
 		cmd_get(ARGV)
 
-	if (ARGV[1] == "template")
+	} else if (ARGV[1] == "template") {
 		cmd_template(ARGV)
 
-	if (ARGV[1] == "set")
+	} else if (ARGV[1] == "set") {
 		cmd_set(ARGV)
 
-	if (ARGV[1] == "add")
+	} else if (ARGV[1] == "add") {
 		cmd_set(ARGV)
+
+	} else {
+		usage()
+	}
 }
