@@ -46,7 +46,7 @@ cmd() {
 }
 
 apply() {
-	local command="$1" node="$2" vars exit
+	local cmd="$1" node="$2" vars exit
 	shift 2
 
 	local vars
@@ -54,8 +54,8 @@ apply() {
 		local type=${node%%/*}
 		local name=${node#*/}
 
-		if type "cmd_${type}_${command}" >/dev/null; then
-			(cmd "$type" "$command" "$name" $vars) || exit=1
+		if type "cmd_${type}_${cmd}" >/dev/null; then
+			(cmd "$type" "$cmd" "$name" $vars) || exit=1
 		fi
 	done
 
@@ -84,17 +84,17 @@ done
 export os="$(get_os)"
 export etc="${ADM_CONFIG:-/etc/adm/current}"
 export usr="${ADM_PREFIX:-/usr/adm}"
-export tmp="$(mktemp -d)"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"
+export tmp="$(mktemp -d)"
 
 trap_add 'rm -rf "$tmp"'
 
-command="${1:-help}" node="${2:-host/$(hostname -s)}"
+cmd="${1:-help}" node="${2:-host/$(hostname -s)}"
 [ $# = 1 ] && shift 1
 [ $# = 2 ] && shift 2
 
-case $command in
+case $cmd in
 (install | update | enable | disable | start | stop | restart | reload | status | monitor)
 
 	. "$lib/cmd_build.sh"
@@ -102,12 +102,9 @@ case $command in
 	. "$lib/cmd_module.sh"
 	. "$lib/cmd_monitor.sh"
 	. "$lib/cmd_repo.sh"
+	. "$lib/os_$os.sh"
 
-	if [ -f "$lib/os_$os.sh" ]; then
-		. "$lib/os_$os.sh"
-	fi
-
-	list 0 "$node" "$@" | apply "$command" "$node"
+	list 0 "$node" "$@" | apply "$cmd" "$node"
 	;;
 
 (list)
@@ -115,9 +112,7 @@ case $command in
 	;;
 
 (*)
-
-	echo "usage: ${0##*/} command [node/name] [key=value...]"
-	echo "command: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
+	echo "usage: ${0##*/} cmd [node/name] [key=value...]"
+	echo "cmd: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
 	;;
-
 esac
