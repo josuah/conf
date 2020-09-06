@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 
 list() {
-	ls | grep -F '^v[0-9]\+$'
+	ls | grep -Ex 'v[0-9]+' | sort -n -k 2,2 -t v "$@"
 }
 
 set -- "${@:-help}"
@@ -9,6 +9,8 @@ case $1 in
 
 ## adm-release new <url> - setup release directories and git repo
 (new)
+	[ $# = 2 ] || exec "$0" usage
+
 	if [ ! -d repo ]; then
 		git clone --mirror "$2" repo
 	else
@@ -19,25 +21,41 @@ case $1 in
 
 ## adm-release get       - list available releases
 (get)
-	list | sort -n -k 2,2 -t v |
-	while read v; do
-		read commit	<$v/.adm/commit
+	[ $# = 1 ] || exec "$0" usage
+
+	[ -h current ] && cur=$(readlink current) || cur=
+	list | while read v; do
 		read date	<$v/.adm/date
+		read commit	<$v/.adm/commit
 		read ref	<$v/.adm/ref
-		printf ' %3s  %s  %s  %s\n' "$v" "$date" "$commit"
+		[ "$v" = "$cur" ] && x=">" || x="-"
+		printf ' %s %4s %s %s %s\n' "$x" "$v" "$date" "$commit" "$ref"
 	done
 	;;
 
 ## adm-release put <ref> - deploy git <ref> as a new release
 (put)
-	v=$(list | awk -F v '$2 > n { n = $2 } END { print "v" (n + 1) }')
-	git -C repo archive
-	"$0" del 10
+	[ $# = 2 ] || exec "$0" usage
+
+	v=$(list | awk -F v '$2 > n { n = $2 } END { print "v"(n + 1) }')
+
+	git -C repo fetch origin "$2"
+	commit=$(git -C repo rev-parse "$2")
+
+	mkdir -p "$v/.adm"
+	echo "$commit"			>$v/.adm/commit
+	date +"%Y-%m-%d %H:%M:%S %z"	>$v/.adm/date
+	echo "$2"			>$v/.adm/ref
+	
+	git -C repo archive "$commit" | tar -x -f - -C "$v"
 	"$0" set "$v"
+	"$0" del 5
 	;;
 
 ## adm-release set <v>   - move current release to <v>
 (set)
+	[ $# = 2 ] || exec "$0" usage
+
 	ls "$2/" >/dev/null
 	ln -s "$2" repo/current
 	mv -f repo/current .
@@ -45,8 +63,11 @@ case $1 in
 
 ## adm-release del <n>   - keep only the lasts and the current one
 (del)
+	[ $# = 2 ] && [ $2 -gt 0 ] || exec "$0" usage
+
 	v=$(readlink current | sed 's,.*/,,')
-	list | sort -rn -k 2,2 -t v | grep -Fvx "$v" | sed 1,10 d | xargs rm -rf
+	list -r | grep -Fvx "$v" | sed "1,$2 d" | xargs rm -rf
+	"$0" get
 	;;
 
 (*)
