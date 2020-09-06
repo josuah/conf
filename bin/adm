@@ -1,23 +1,5 @@
 #!/bin/sh -eu
 
-lib="${0%/*/*}/lib/adm"
-
-. "$lib/cmd_build.sh"
-. "$lib/cmd_golang.sh"
-. "$lib/cmd_module.sh"
-. "$lib/cmd_monitor.sh"
-. "$lib/cmd_repo.sh"
-
-log() {
-	echo "$1" >&2
-}
-
-check_package_manager() {
-	if type "$1" >/dev/null; then
-		exec echo "$2"
-	fi
-}
-
 get_os() {
 	kernel=$(uname)
 
@@ -47,9 +29,11 @@ trap_pop() {
 	trap "$trap" INT TERM EXIT HUP
 }
 
-run() {
-	local command="$1" node="$2"
+cmd() {
+	local type="$1" cmd="$2" name="$3"
 	shift 3
+
+	echo ">>> $cmd $type/$name $*" >&2
 
 	for x in "$@"; do
 		if [ "${x%%=*}" = "os_$os" ]; then
@@ -58,8 +42,7 @@ run() {
 		export "var_$x"
 	done
 
-	echo ">>> $node $*" >&2
-	"$command" "$node" "$@"
+	"cmd_${type}_${cmd}" "$name"
 }
 
 apply() {
@@ -72,8 +55,7 @@ apply() {
 		local name=${node#*/}
 
 		if type "cmd_${type}_${command}" >/dev/null; then
-			(run cmd_${type}_${command} "$type" "$name" $vars) ||
-			  exit=1
+			(cmd "$type" "$command" "$name" $vars) || exit=1
 		fi
 	done
 
@@ -84,55 +66,58 @@ list() {
 	local level="$1" node="$2"
 	shift 2
 
-	printf "%-$((level * 2))s%s" "" "$node"
-	printf ' %s' "$@"
-	printf '\n'
+	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
 
-	[ -f "$etc/node/$node" ] || return 0
-
+	if [ ! -f "$etc/node/$node" ]; then
+		return
+	fi
 	while read node vars; do
 		list $((level + 1)) "$node" "$@" $vars
-	done <$etc/node/$type/$name
+	done <$etc/node/$node
 }
 
-main() {
-	local command="$1" node="${2:-host/$(hostname -s)}"
-	shift
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+for x in adm /usr/*/bin /usr/*/sbin; do
+	export PATH="$PATH:$x/"
+done
 
-	export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-	for x in adm /usr/*/bin /usr/*/sbin; do
-		[ -d "$x" ] && export PATH="$PATH:$x"
-	done
+export os="$(get_os)"
+export etc="${ADM_CONFIG:-/etc/adm/current}"
+export usr="${ADM_PREFIX:-/usr/adm}"
+export tmp="$(mktemp -d)"
+export cache="${ADM_CACHE:-/var/cache/adm}"
+export lib="${0%/*/*}/lib/adm"
 
-	export host="$(hostname | sed 's/[.].*//')"
-	export os="$(get_os)"
-	export tmp="$(mktemp -d)"
-	export etc="${ADM_CONFIG:-/etc/adm}"
-	export usr="${ADM_PREFIX:-/usr/adm}"
-	export cache="${ADM_CACHE:-/var/cache/adm}"
+trap_add 'rm -rf "$tmp"'
 
-	trap_add 'rm -rf "$tmp"'
+command="${1:-help}" node="${2:-host/$(hostname -s)}"
+[ $# = 1 ] && shift 1
+[ $# = 2 ] && shift 2
 
-	if [ -f "$etc/node/host/ip" ]; then
-		set -- "$@" $(h="$host" )
-	fi
+case $command in
+(install | update | enable | disable | start | stop | restart | reload | status | monitor)
+
+	. "$lib/cmd_build.sh"
+	. "$lib/cmd_golang.sh"
+	. "$lib/cmd_module.sh"
+	. "$lib/cmd_monitor.sh"
+	. "$lib/cmd_repo.sh"
 
 	if [ -f "$lib/os_$os.sh" ]; then
 		. "$lib/os_$os.sh"
 	fi
 
-	case $command in
-	(install | update | enable | disable | start | stop | restart | reload | status | monitor)
-		list 0 "$node" "$name" "$@" | apply "$command" "$node"
-		;;
-	(list)
-		list 0 "$node" "$name" "$@"
-		;;
-	(*)
-		echo "usage: ${0##*/} command [node/name] [key=value...]"
-		echo "command: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
-		;;
-	esac
-}
+	list 0 "$node" "$@" | apply "$command" "$node"
+	;;
 
-main "${@:-help}"
+(list)
+	list 0 "$node" "$@"
+	;;
+
+(*)
+
+	echo "usage: ${0##*/} command [node/name] [key=value...]"
+	echo "command: list, install, update, enable, disable, start, stop, restart, reload, status, monitor"
+	;;
+
+esac
