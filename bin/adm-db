@@ -60,12 +60,19 @@ function qsort(table, beg, end)
 	sort(table, a, end)				# sort bottom half
 }
 
-function delete_table(table, pfx,
+function table_delete(table, pfx,
 	i)
 {
 	for (i in table)
 		if (substr(i, 1, length(pfx)) == pfx)
 			delete table[i]
+}
+
+function table_copy(dst, src,
+	x)
+{
+	for (x in src)
+		dst[x] = src[x]
 }
 
 
@@ -110,7 +117,7 @@ function db_getline(path, pfx, row,
 }
 
 function db_match(line, row, pfx,
-	key)
+	query, x, key)
 {
 	db_split(line, query)
 	for (key in query)
@@ -224,21 +231,20 @@ function tpl_dec_level(lv,
 }
 
 function tpl_flush(texts, queries, lv, vars,
-	n, table, str)
+	n, x, table)
 {
 	if (!(lv in texts))
 		return
 
 	n = split(lv, table, ".")
-	while (db_query(queries[n], n ":", vars)) {
-		str = lv
-		while (str in texts) {
-			printf "%s", tpl_replace(texts[str], vars)
-			tpl_flush(texts, queries, tpl_inc_level(str), vars)
-			str = tpl_inc_tail(str)
+	while (db_query(db_expand(queries[n], vars), n ":", table)) {
+		table_copy(vars, table)
+		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
+			printf "%s", tpl_replace(texts[x], vars)
+			tpl_flush(texts, queries, tpl_inc_level(x), vars)
 		}
 	}
-	delete_table(vars, n ":")
+	table_delete(vars, n ":")
 }
 
 
@@ -266,8 +272,8 @@ function cmd_template(argv,
 
 			if (lv == "") {
 				tpl_flush(texts, queries, "1")
-				delete_table(queries)
-				delete_table(texts)
+				table_delete(queries)
+				table_delete(texts)
 			}
 
 		} else if (lv == "") {
