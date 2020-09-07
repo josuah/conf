@@ -91,8 +91,11 @@ export tmp="$(mktemp -d)"
 trap_add 'rm -rf "$tmp"'
 
 cmd="${1:-help}" node="${2:-host/$(hostname -s)}"
-[ $# = 1 ] && shift 1
-[ $# = 2 ] && shift 2
+if [ $# -ge 2 ]; then
+	shift 2
+elif [ $# -ge 2 ]; then
+	shift 2
+fi
 
 case $cmd in
 (install | update | enable | disable | start | stop | restart | reload | status | monitor)
@@ -109,6 +112,11 @@ case $cmd in
 
 (list)
 	list 0 "$node" "$@"
+	;;
+
+(db)
+	cd /etc/adm/current/db
+	exec adm-db "$node" "$@"
 	;;
 
 (*)
