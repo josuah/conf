@@ -1,24 +1,18 @@
 #!/usr/bin/awk -f
 
-function usage()
-{
-	print "usage:"					>"/dev/stderr"
-	print " adm-db list <path> [<query>]"		>"/dev/stderr"
-	print " adm-db get <query>"			>"/dev/stderr"
-	print " adm-db set <n> <key>=<value>..."	>"/dev/stderr"
-	print " adm-db add <key>=<value>..."		>"/dev/stderr"
-	print " adm-db move <n1> <n2>"			>"/dev/stderr"
-	print " adm-db template <file.template>"	>"/dev/stderr"
-	exit(1)
-}
 
-
-## util ##
+## utilities ##
 
 function die(msg)
 {
 	print "error: " msg >"/dev/stderr"
 	exit(1)
+}
+
+function assert(expr, fn)
+{
+	if (!expr)
+		die(fn ": assert failed")
 }
 
 function join(array, sep,
@@ -60,11 +54,11 @@ function qsort(array, beg, end)
 }
 
 function delete_prefix(array, prefix,
-	i)
+	x)
 {
-	for (i in array)
-		if (substr(i, 1, length(prefix)) == prefix)
-			delete array[i]
+	for (x in array)
+		if (substr(x, 1, length(prefix)) == prefix)
+			delete array[x]
 }
 
 function array_length(array,
@@ -76,15 +70,15 @@ function array_length(array,
 }
 
 function shift(array,
-	tmp, i)
+	first, i)
 {
-	tmp = array[1]
+	first = array[1]
 	for (i = 1; i + 1 in array; i++)
 		array[i] = array[i + 1]
 	delete array[i]
-	return tmp
+	return first
 }
-
+ 
 function copy(dst, src,
 	x)
 {
@@ -98,7 +92,7 @@ function color(n)
 }
 
 
-## db ##
+## database ##
 
 function db_clean(line)
 {
@@ -108,14 +102,13 @@ function db_clean(line)
 	return line
 }
 
-function db_split(line, row, prefix,
-	array, i, eq, key, val)
+function db_split(array, keys, row, prefix,
+	i, n, key, eq, val)
 {
-	split(db_clean(line), array, " ")
-	for (i in array) {
+	for (i = 1; i in array; i++) {
 		eq = index(array[i], "=")
 		if (eq == 0) {
-			row[prefix array[i]] = "true"
+			keys[++n] = array[i]
 		} else {
 			key = substr(array[i], 1, eq - 1)
 			val = substr(array[i], eq + 1)
@@ -125,7 +118,7 @@ function db_split(line, row, prefix,
 }
 
 function db_getline(path, prefix, row,
-	array, line, n)
+	array, _, line, n)
 {
 	if ((getline line <path) <= 0) {
 		close(path)
@@ -135,77 +128,67 @@ function db_getline(path, prefix, row,
 		return db_getline(path, prefix, row)
 
 	n = row[""]
-	db_split(line, row, prefix)
+	split(db_clean(line), array, " ")
+	db_split(array, _, row, prefix)
 	row[""] = n + 1
 	return 1
 }
 
-function db_match(line, row, prefix,
-	query, x, key)
+function db_match(query, row, prefix,
+	array, rowq, x, _)
 {
-	db_split(line, query)
-	for (key in query)
-		if (!(prefix key in row) || query[key] != row[prefix key])
+	db_split(query, _, qrow)
+	for (x in qrow) {
+		print x "=" qrow[x]
+		if (!(prefix x in row) || row[prefix x] != qrow[x])
 			return 0
+	}
 	return 1
 }
 
-function db_getmatch(path, line, prefix, row)
+function db_getmatch(path, query, row, prefix)
 {
 	while (db_getline(path, prefix, row))
-		if (db_match(line, row, prefix))
+		if (db_match(query, row, prefix))
 			return 1
 	return 0
 }
 
 function db_expand(str, vars,
-	i)
+	x)
 {
-	for (i in vars)
-		gsub("\\[" i "\\]", vars[i], str)
+	for (x in vars)
+		gsub("\\[" x "\\]", vars[x], str)
 	return str
 }
 
-function db_query(line, prefix, row,
-	sp, col, path, ret)
+function db_query(path, keys, query, result, prefix,
+	i, x, row, n)
 {
-	sp = index(line, " ")
-	if (sp) {
-		path = substr(line, 1, sp - 1)
-		line = substr(line, sp + 1)
-		sub(/:.*/, "", path)
-		return db_getmatch(path, line, prefix, row)
-	} else {
-		path = line
-		sub(/:.*/, "", path)
-		return db_getline(path, prefix, row)
-	}
+	split("", result)
+	if (db_getmatch(path, query, row, prefix) == 0)
+		return 0
+	for (i = 1; i in keys; i++)
+		result[++n] = row[keys[i]]
+	return 1
 }
 
-function db_search(line, prefix, result,
-	n, key, row)
+function db_sort(row, keys,
+	x, n)
 {
-	key = line
-	sub(/ .*/, "", key)
-	if (sub(/.*:/, "", key) == 0)
-		die("missing :key selector in " line)
-
-	split("", result)
-	while (db_query(line, prefix, row))
-		if (key in row)
-			result[++n] = row[key]
+	for (x in row)
+		keys[++n] = x
+	qsort(keys, 1, n)
 	return n
 }
 
 function db_pprint(row, width,
 	i, n, put, len, col, keys)
 {
-	for (x in array)
-		keys[++i] = x
-	qsort(keys, 1, i)
-
 	printf("%3d ", row[""])
 	col = 4
+
+	n = db_sort(row, keys)
 
 	for (i = 2; i <= n; i++) {
 		len = 1 + length(keys[i]) + 1 + length(row[keys[i]])
@@ -216,31 +199,32 @@ function db_pprint(row, width,
 		printf " " color(36) "%s=" color(0) "%s", keys[i], row[keys[i]]
 		col += len
 	}
+
 	printf "\n"
 }
 
 
-## tpl ##
+## templates ##
 
 function tpl_replace(text, vars,
-	head, tail, line, result, value, n)
+	head, tail, query, result, value, n)
 {
 	tail = text
 	while (match(tail, "\\{\\{[^}]+\\}\\}")) {
-		line = substr(tail, RSTART + 2, RLENGTH - 4)
-		sub("^ *", "", line)
-		sub(" *$", "", line)
-		line = db_expand(line, vars)
+		query = substr(tail, RSTART + 2, RLENGTH - 4)
+		sub("^ *", "", query)
+		sub(" *$", "", query)
+		query = db_expand(query, vars)
 
-		if (line in G) {
-			value = VAR[line]
-		} else if (line in vars) {
-			value = vars[line]
+		if (query in G) {
+			value = VAR[query]
+		} else if (query in vars) {
+			value = vars[query]
 		} else {
-			n = db_search(line, result, prefix)
+			n = tpl_query(query, result, prefix)
 
 			if (n == 0)
-				die("no result for " line)
+				die("no result for " query)
 			for (n in result)
 				break
 			value = result[n]
@@ -276,6 +260,16 @@ function tpl_dec_level(lv,
 	return join(array, ".")
 }
 
+function tpl_query(strq, prefix, row,
+	n, path, query)
+{
+	sub(":", " ", strq)
+	n = split(strq, query, " ")
+	assert(n >= 2, "tpl_query")
+	path = shift(query)
+	return db_getmatch(path, query, row, prefix)
+}
+
 function tpl_flush(texts, queries, lv, vars,
 	n, x, array)
 {
@@ -283,7 +277,7 @@ function tpl_flush(texts, queries, lv, vars,
 		return
 
 	n = split(lv, array, ".")
-	while (db_query(db_expand(queries[lv], vars), n ":", array)) {
+	while (tpl_query(db_expand(queries[lv], vars), n ":", array)) {
 		copy(vars, array)
 		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x], vars)
@@ -294,7 +288,7 @@ function tpl_flush(texts, queries, lv, vars,
 }
 
 
-## cmd ##
+## commands ##
 
 function cmd_template(argv,
 	path, line, lv, queries, texts)
@@ -331,25 +325,23 @@ function cmd_template(argv,
 	}
 }
 
-function cmd_get(argv,
-	query, result, i, n)
+function cmd_get(path, argv,
+	keys, query, result, i, n)
 {
 	if (!(1 in argv))
 		usage()
 
-	n = db_search(join(argv, " "), "", result)
-
-	for (i = 1; i <= n; i++)
-		if (i in result)
-			print result[i]
+	db_split(argv, keys, query)
+	while (db_query(path, keys, query, result)) {
+		for (i = 1; i in result; i++)
+			printf "%s%s", (i == 1 ? "" : "\t"), result[i]
+		printf "\n"
+	}
 }
 
-function cmd_list(argv,
-	cmd, path, row, width)
+function cmd_list(path, argv,
+	cmd, query, row, width)
 {
-	if (!(1 in argv))
-		usage()
-
 	cmd = "stty size 2>/dev/null"
 	cmd | getline width
 	close(cmd)
@@ -357,20 +349,18 @@ function cmd_list(argv,
 	width = (width == "" ? 80 : width + 0)
 
 	printf "\n"
-	path = shift(argv)
-	while (db_getmatch(path, join(argv), "", row)) {
+	while (db_getmatch(path, argv, row)) {
 		db_pprint(row, width)
 		printf "\n"
 	}
 }
 
-function cmd_add(argv,
-	path, i, out, keys)
+function cmd_add(path, argv,
+	i, out, keys)
 {
-	if (!(1 in argv) || !(2 in argv))
+	if (!(1 in argv))
 		usage()
 
-	path = shift(argv)
 	qsort(argv, 1, array_length(argv))
 
 	if (system("test -f '" path "'") != 0)
@@ -382,22 +372,33 @@ function cmd_add(argv,
 	fflush(path)
 }
 
-function cmd_set(argv,
-	tmp, num, path, i, row)
+function cmd_set(path, argv,
+	tmp, num, i, keys, row)
 {
-	if (!(1 in argv) || !(2 in argv) || !(3 in argv))
+	if (!(3 in argv))
 		usage()
 
-	path = shift(argv)
-	qsort(arg
+	qsort(argv, 1, array_length(argv))
 	split(shift(argv), num, ",")
-	db_split(join(argv, " "), row)
+	db_split(argv, keys, row)
 
 	db_getnum()
 }
 
 
 ## main ##
+
+function usage()
+{
+	print "usage:"						>"/dev/stderr"
+	print " adm-db <db> list [<key>=<value>...]"		>"/dev/stderr"
+	print " adm-db <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
+	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> add <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> move <n1> <n2>"			>"/dev/stderr"
+	print " adm-db <template> template"			>"/dev/stderr"
+	exit(1)
+}
 
 BEGIN {
 	cmd = "date +%s"
@@ -409,16 +410,23 @@ BEGIN {
 	close(cmd)
 
 	delete ARGV[0]
+	path = shift(ARGV)
 	cmd = shift(ARGV)
 
-	if (cmd == "get") {
-		cmd_get(ARGV)
+	if (cmd == "list") {
+		cmd_list(path, ARGV)
 
-	} else if (cmd == "list") {
-		cmd_list(ARGV)
+	} else if (cmd == "get") {
+		cmd_get(path, ARGV)
+
+	} else if (cmd == "set") {
+		cmd_set(path, ARGV)
+
+	} else if (cmd == "move") {
+		cmd_move(path, ARGV)
 
 	} else if (cmd == "template") {
-		cmd_template(ARGV)
+		cmd_template(path, ARGV)
 
 	} else {
 		usage()
