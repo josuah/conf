@@ -72,6 +72,7 @@ function array_length(array,
 function shift(array,
 	first, i)
 {
+	assert(1 in array)
 	first = array[1]
 	for (i = 1; i + 1 in array; i++)
 		array[i] = array[i + 1]
@@ -135,14 +136,11 @@ function db_getline(path, prefix, row,
 }
 
 function db_match(query, row, prefix,
-	array, rowq, x, _)
+	array, x, _)
 {
-	db_split(query, _, qrow)
-	for (x in qrow) {
-		print x "=" qrow[x]
-		if (!(prefix x in row) || row[prefix x] != qrow[x])
+	for (x in query)
+		if (!(prefix x in row) || row[prefix x] != query[x])
 			return 0
-	}
 	return 1
 }
 
@@ -216,7 +214,7 @@ function tpl_replace(text, vars,
 		sub(" *$", "", query)
 		query = db_expand(query, vars)
 
-		if (query in G) {
+		if (query in VAR) {
 			value = VAR[query]
 		} else if (query in vars) {
 			value = vars[query]
@@ -261,12 +259,12 @@ function tpl_dec_level(lv,
 }
 
 function tpl_query(strq, prefix, row,
-	n, path, query)
+	n, path, argv, query)
 {
 	sub(":", " ", strq)
-	n = split(strq, query, " ")
-	assert(n >= 2, "tpl_query")
-	path = shift(query)
+	split(strq, argv, " ")
+	path = shift(argv)
+	db_split(argv, _, query)
 	return db_getmatch(path, query, row, prefix)
 }
 
@@ -290,13 +288,13 @@ function tpl_flush(texts, queries, lv, vars,
 
 ## commands ##
 
-function cmd_template(argv,
-	path, line, lv, queries, texts)
+function cmd_template(path, argv,
+	line, lv, queries, texts)
 {
-	if (!(1 in argv) || (2 in argv))
+	if (1 in argv)
 		usage()
 
-	VAR["path"] = path = argv[1]
+	VAR["path"] = path
 
 	while (getline line <path) {
 
@@ -349,7 +347,8 @@ function cmd_list(path, argv,
 	width = (width == "" ? 80 : width + 0)
 
 	printf "\n"
-	while (db_getmatch(path, argv, row)) {
+	db_split(argv, query)
+	while (db_getmatch(path, query, row)) {
 		db_pprint(row, width)
 		printf "\n"
 	}
