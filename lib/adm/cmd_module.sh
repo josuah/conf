@@ -4,17 +4,18 @@ cmd_module_install() {
 	local i="$etc/module/$name"
 	local o="$tmp/module/$name"
 
-	if [ -d "$i/etc" ]; then
-		while read x; do
-			mkdir -p "$(dirname "$o/$x")"
-			(cd "$etc/db"; adm-db "$i/$x" template) >$o/$x
-		done <<EOF
-$(cd "$i"; find etc -type f)
-EOF
-		cp -r "$o/etc" /
-	fi
+	mkdir -p "$o/etc" "$o/var"
 
 	if [ -f "$i/deploy.sh" ]; then
 		(cd "$i"; . ./deploy.sh)
 	fi
+
+	while read x; do
+		[ -f "$i/$x" ] || continue
+		mkdir -p "$(dirname "$o/$x")"
+		(cd "$etc/db"; adm-db "$i/$x" template) >$o/$x
+	done <<EOF
+$(cd "$i" && find etc var -type f 2>/dev/null)
+EOF
+	cp -r "$o/etc" "$o/var" /
 }

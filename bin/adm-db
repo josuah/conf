@@ -3,6 +3,16 @@
 
 ## utilities ##
 
+function ip6_hex(ip6,
+	hex, i, arr)
+{
+	sub("::", substr("::::::::", split(ip6, arr, ":") - 1), ip6)
+	split(ip6, arr, ":")
+	for (i = 1; i <= 8; i++)
+		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
+	return hex
+}
+
 function die(msg)
 {
 	print "error: " msg >"/dev/stderr"
@@ -136,7 +146,7 @@ function db_split(array, row, keys,
 }
 
 function db_getline(path, row,
-	array, _, line, n)
+	array, line, n)
 {
 	if ((getline line <path) <= 0) {
 		close(path)
@@ -154,7 +164,7 @@ function db_getline(path, row,
 }
 
 function db_match(query, row,
-	array, x, _)
+	array, x)
 {
 	for (x in query)
 		if (!(x in row) || row[x] != query[x])
@@ -175,17 +185,22 @@ function db_expand(str, vars,
 {
 	for (x in vars)
 		gsub("\\[" x "\\]", vars[x], str)
+	for (x in ENVIRON)
+		gsub("\\[" x "\\]", ENVIRON[x], str)
 	return str
 }
 
 function db_query(path, keys, query, result,
-	row, i, n)
+	row, found, i, n)
 {
 	array_delete(result)
 	while (db_getmatch(path, query, row)) {
-		for (i = 1; i in keys; i++)
+		for (i = 1; i in keys; i++) {
+			if (keys[i] in row)
+				found = 1
 			result[++n] = row[keys[i]]
-		if (i > 1)
+		}
+		if (found)
 			return 1
 	}
 	return 0
@@ -241,7 +256,9 @@ function tpl_replace(text, vars,
 		sub(" *$", "", str)
 		str = db_expand(str, vars)
 
-		if (str in VAR) {
+		if (str in ENVIRON) {
+			value = ENVIRON[str]
+		} else if (str in VAR) {
 			value = VAR[str]
 		} else if (str in vars) {
 			value = vars[str]
@@ -282,10 +299,12 @@ function tpl_dec_level(lv,
 }
 
 function tpl_getmatch(str, row, prefix,
-	array)
+	path, argv, query)
 {
-	split(str, array, " ")
-	if (db_getmatch(array_shift(array), array, row) == 0)
+	split(str, argv, " ")
+	path = array_shift(argv)
+	db_split(argv, query)
+	if (db_getmatch(path, query, row) == 0)
 		return 0
 	return 1
 }
@@ -306,13 +325,14 @@ function tpl_query(str, result,
 function tpl_flush(texts, queries, lv, vars,
 	n, x, _, row)
 {
-	if (!(lv in texts))
+	print "=>", lv
+	if (!(lv in queries))
 		return
 
 	n = split(lv, _, ".")
 	while (tpl_getmatch(db_expand(queries[lv], vars), row)) {
 		array_prefix_keys(row, vars, n ":")
-		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
+		for (x = lv; x in queries; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x], vars)
 			tpl_flush(texts, queries, tpl_inc_level(x), vars)
 		}
@@ -373,7 +393,7 @@ function cmd_get(path, argv,
 }
 
 function cmd_list(path, argv,
-	cmd, _, query, row, width)
+	cmd, query, row, width)
 {
 	cmd = "stty size 2>/dev/null"
 	cmd | getline width
@@ -390,7 +410,7 @@ function cmd_list(path, argv,
 }
 
 function cmd_add(path, argv,
-	row, _)
+	row)
 {
 	if (!(1 in argv))
 		usage()
@@ -421,7 +441,7 @@ function cmd_del(path, argv,
 }
 
 function cmd_set(path, argv,
-	x, array, num, row, _, tmp)
+	x, array, num, row, tmp)
 {
 	if (!(2 in argv))
 		usage()

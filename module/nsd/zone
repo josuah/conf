@@ -1,0 +1,44 @@
+; {{ path }}
+; {{ now }}
+
+$ORIGIN {{ zone }}.
+
+@	3600 IN SOA {{ dns/ns:host }}.{{ zone }}. hostmaster.{{ zone }}. (
+	{{ now }}	; serial
+	14400		; refresh
+	3600		; retry
+	604800		; expire
+	86400		; minttl
+)
+
+; NS - name servers
+#for dns/ns soa=[zone]
+	86400	IN	NS	{{ 1:host }}.{{ zone }}.
+#end
+
+; MX - mail exchangers
+#for dns/mx soa=[zone]
+@	86400	IN	MX	{{ 1:pref }} {{ 1:host }}.{{ zone }}.
+#end
+
+; A - host IPv4 addresses
+#for host/ip pub=true v=4
+{{ 1:host }}	86400	IN	A	{{ 1:ip }}
+#end
+
+; AAAA - host IPv6 addresses
+#for host/ip pub=true v=6
+{{ 1:host }}	86400	IN	AAAA	{{ 1:ip }}
+#end
+
+; PTR - reverse DNS for hosts
+
+; A/AAAA - alias addresses
+#for dns/alias soa=[zone]
+##for host/ip host=[1:host] pub=true v=4
+{{ 1:dom }}  86400  IN  A  {{ 2:ip }}
+##end
+##for host/ip host=[1:host] pub=true v=6
+{{ 1:dom }}  86400  IN  AAAA  {{ 2:ip }}
+##end
+#end

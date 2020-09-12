@@ -1,3 +1,4 @@
 add=module/dotfiles
 add=module/shell
 add=package/ldns
+add=module/monitor

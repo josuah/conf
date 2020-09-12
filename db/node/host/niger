@@ -7,3 +7,4 @@ add=role/voice
 add=role/git
 add=role/http
 add=role/vpn
+add=role/dns-slave
