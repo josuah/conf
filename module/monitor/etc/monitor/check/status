@@ -2,8 +2,8 @@
 
 base=$(cd "${0%/*}/.."; pwd)
 
-for path in /var/spool/adm/*/current; do
-	case "$path" in (*"/*/"*) continue ;; esac
+for path in /var/spool/monitor/*/current; do
+	[ -f "$path" ] || continue
 
 	host=${path%/current}
 	host=${host##*/}

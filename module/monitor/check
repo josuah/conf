@@ -1,0 +1,14 @@
+#!/bin/sh -eu
+
+name="$1"
+shift 1
+
+var_timeout=5
+
+ls /etc/monitor/host
+ls /etc/monitor/check
+
+"check-$name" >&2 & pid=$!
+sleep "$var_timeout" && kill "$pid" 2>/dev/null &
+wait "$pid" && state=ok || state=err
+echo "time=$(date +%s) state=$state name=$name"

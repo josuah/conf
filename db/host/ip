@@ -1,4 +1,4 @@
-name=niger ip=136.244.112.11 v=4
-name=niger ip=2001:19f0:6801:14ef:5400:2ff:feba:162e v=6
-name=olor ip=45.32.148.148 v=4
-name=olor ip=2001:19f0:6801:186d:5400:2ff:feef:74fc v=6
+host=niger ip=136.244.112.11 pub=true v=4
+host=niger ip=2001:19f0:6801:14ef:5400:2ff:feba:162e pub=true v=6
+host=olor ip=45.32.148.148 pub=true v=4
+host=olor ip=2001:19f0:6801:186d:5400:2ff:feef:74fc pub=true v=6
