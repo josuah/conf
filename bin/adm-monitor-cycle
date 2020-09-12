@@ -17,7 +17,7 @@ write() {
 }
 
 for host in "$etc/var/sys/host/"*; do
-	case $host in (*"/*") continue ;; esac
+	test -f "$host" || continue
 
 	host=${host##*/}
 
@@ -26,7 +26,7 @@ for host in "$etc/var/sys/host/"*; do
 	while read result; do
 		printf '.'
 		now=$(date +%s)
-		dir=/var/spool/adm/$host
+		dir=/var/spool/adm/monit/$host
 		mkdir -p "$dir"
 		write "$dir" "$now" $result
 	done

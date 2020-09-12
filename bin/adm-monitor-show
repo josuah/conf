@@ -8,10 +8,7 @@ function swap(array, a, b,
 	array[b] = tmp
 }
 
-# We need sorting for making sure we have stables IDs, which are concatenated
-# strings, without predetermined order
-
-function sort(array, beg, end)
+function qsort(array, beg, end)
 {
 	if (beg >= end)					# end recursion
 		return
@@ -29,8 +26,8 @@ function sort(array, beg, end)
 	if (array[beg] > array[a])			# put the pivot back
 		swap(array, beg, a)
 
-	sort(array, beg, a - 1)				# sort top half
-	sort(array, a, end)				# sort bottom half
+	qsort(array, beg, a - 1)			# sort top half
+	qsort(array, a, end)				# sort bottom half
 }
 
 function flush_values(id, progress, sum, num, out,
@@ -75,7 +72,8 @@ function id_short(id,
 function id_full(fields, n, vars,
 	id)
 {
-	sort(fields, 1, n)
+	# to make sure we have stable IDs
+	qsort(fields, 1, n)
 	for (i = 1; i <= n; i++)
 		id = id (i > 1 ? " " : "") fields[i]
 	return id

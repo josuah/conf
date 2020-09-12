@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!-- {{ path }} -->
+<!-- {{ now }} -->
+
+<icecast>
+	<location>@</location>
+	<admin>admin@cast.z0.is</admin>
+
+	<limits>
+		<clients>100</clients>
+		<sources>2</sources>
+		<queue-size>524288</queue-size>
+		<client-timeout>30</client-timeout>
+		<header-timeout>15</header-timeout>
+		<source-timeout>10</source-timeout>
+		<burst-on-connect>1</burst-on-connect>
+		<burst-size>65535</burst-size>
+	</limits>
+
+	<authentication>
+		<source-password>hackme</source-password>
+		<relay-password>hackme</relay-password>
+		<admin-user>admin</admin-user>
+		<admin-password>{{ icecast/var:pass }}</admin-password>
+	</authentication>
+
+	<hostname>cast.z0.is</hostname>
+
+	<listen-socket>
+		<port>8000</port>
+	</listen-socket>
+
+	<http-headers>
+		<header name="Access-Control-Allow-Origin" value="*" />
+	</http-headers>
+
+	<fileserve>1</fileserve>
+
+	<mount>
+		<mount-name>/play.ogg</mount-name>
+		<no-mount>1</no-mount>
+	</mount>
+
+	<paths>
+		<basedir>/var/lib/icecast</basedir>
+		<webroot>/web</webroot>
+		<adminroot>/admin</adminroot>
+		<alias source="/" destination="/status.xsl"/>
+	</paths>
+
+	<logging>
+		<accesslog>-</accesslog>
+		<errorlog>-</errorlog>
+		<loglevel>3</loglevel>
+	</logging>
+
+	<security>
+		<chroot>1</chroot>  
+		<changeowner>
+			<user>_icecast</user>
+			<group>_icecast</group>
+		</changeowner>
+	</security>
+</icecast>

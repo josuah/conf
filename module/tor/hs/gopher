@@ -1,0 +1,2 @@
+HiddenServiceDir /var/lib/tor/hs/gopher
+HiddenServicePort 70 127.0.0.1:70

@@ -1,0 +1,3 @@
+add=ospack/liblzma
+add=ospack/cmake
+add=build/lwan

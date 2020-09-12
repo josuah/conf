@@ -1,0 +1,3 @@
+add=module/inetd
+add=package/notqmail
+add=monitor/tcp port=25

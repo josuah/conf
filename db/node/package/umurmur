@@ -1,0 +1,4 @@
+add=build/libmbedtls
+add=build/libprotobuf-c
+add=build/libconfig
+add=build/umurmur os_OpenBSD=audio/umurmur

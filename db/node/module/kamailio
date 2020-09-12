@@ -1,0 +1,4 @@
+add=package/kamailio
+add=service/kamailio
+add=monitor/tcp port=5060
+add=monitor/tls port=5061

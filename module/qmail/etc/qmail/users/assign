@@ -1,0 +1,9 @@
+# {{ path }}
+# {{ now }}
+#for db/mail/account
+
+# {{ 1:user }}@{{ 1:dom }}
+##for /var/mail/alias dom=[1:dom] user=[1:user]
+={{ 1:dom }}--{{ 1:user }}:mail:1024:1012:/var/mail/{{ 1:dom }}/{{ 2:user }}:::
+##end
+#end

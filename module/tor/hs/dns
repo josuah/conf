@@ -1,0 +1,2 @@
+HiddenServiceDir /var/lib/tor/hs/dns
+HiddenServicePort 53 127.0.0.53:53
