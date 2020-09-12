@@ -288,15 +288,16 @@ function tpl_getmatch(str, row, prefix,
 }
  
 function tpl_query(str, result,
-	path, keys, query, argv)
+	path, keys, query, argv, e)
 {
 	if (sub(":", " ", str) == 0)
 		die("missing : delimiter")
 	split(str, argv, " ")
 	path = array_shift(argv)
-	keys[1] = array_shift(argv)
 	db_split(argv, query, keys)
-	return db_query(path, keys, query, result)
+	e = db_query(path, keys, query, result)
+	close(path)
+	return e
 }
 
 function tpl_flush(texts, queries, lv, vars,
