@@ -11,6 +11,6 @@ for path in /var/spool/adm/*/current; do
 	echo
 	echo "$host"
 
-	adm-monitor-show "$path"
+	monitor-show "$path"
 done
 echo

@@ -1,12 +1,7 @@
 
-cmd_monitor_monitor() {
+cmd_monitor_update() {
 	local name="$1"
-	shift 1
+	shift
 
-	var_timeout=5
-
-	"check-$name" >&2 & pid=$!
-	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
-	wait "$pid" && status=ok || status=err
-	echo $status do=monitor name=$name "$@"
+	echo "name=$name" "$@"
 }
