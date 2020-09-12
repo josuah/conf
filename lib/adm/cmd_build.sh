@@ -51,7 +51,7 @@ cmd_build_install() {
 
 	set -e
 
-	. "$current/build/$name/build.sh"
+	. "$etc/build/$name/build.sh"
 
 	export PREFIX="$usr"
 	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
@@ -59,12 +59,12 @@ cmd_build_install() {
 	[ "${sha256:-}" ] && _build_tar
 	[ "${commit:-}" ] && _build_git
 
-	if [ -d "$current/build/$name/files" ]; then
-		cp -r "$current/build/$name/files/"* "$source"
+	if [ -d "$etc/build/$name/files" ]; then
+		cp -r "$etc/build/$name/files/"* "$source"
 	fi
 
-	if [ -d "$current/build/$name/patches" ]; then
-		for x in "$current/build/$name/patches/"*; do
+	if [ -d "$etc/build/$name/patches" ]; then
+		for x in "$etc/build/$name/patches/"*; do
 			(cd "$source"; patch -p1 -N) <$x
 		done
 	fi
