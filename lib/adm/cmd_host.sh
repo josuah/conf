@@ -8,12 +8,10 @@ cmd_host_sync() {
 	git -c tar.umask=022 archive --prefix="$dest/$archive/" "$commit" \
 	| ssh "$host" "
 		tar -x -C / -f -
-		ln -s '$archive' '/$dest/$archive/current'
 		cd '/$dest'
+		ln -s '$archive' '$archive/current'
 		mv '$archive/current' .
-		ls -r | grep '^archive-' | grep -Fvx "$archive" | sed '1,4 d' | xargs rm -rf
-
-		current/bin/adm install 'host/$host'
-		current/bin/adm enable 'host/$host'
+		ls -r | grep '^archive-' | grep -Fvx "$archive" | sed 1,4d | xargs rm -rf
+		make -C current update
 	"
 }
