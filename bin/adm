@@ -62,19 +62,19 @@ list() {
 	shift 2
 
 	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
-	if [ -f "$etc/db/node/$node" ]; then
+	if [ -f "$current/db/node/$node" ]; then
 		while read node vars; do
 			list $((level + 1)) "${node#add=}" "$@" $vars
-		done <$etc/db/node/$node
+		done <$current/db/node/$node
 	fi
 }
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 for x in adm /usr/*/bin /usr/*/sbin; do
-	export PATH="$PATH:$x/"
+	export PATH="$PATH:$x"
 done
 export os="$(get_os)"
-export etc="${ADM_CONFIG:-/etc/adm/current}"
+export current="${ADM_PATH:-/var/lib/adm/current}"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"

@@ -1,1 +1,1 @@
-add=ospack/wireguard cmd=wg os_OpenBSD=wireguard-tools os_AlpineLinux=wireguard-tools
+add=ospack/wireguard cmd=wg os_OpenBSD=net/wireguard-tools os_AlpineLinux=wireguard-tools
