@@ -1,0 +1,6 @@
+#!/bin/sh -e
+# generate a random mac addresses from /dev/urandom
+
+dd if=/dev/urandom bs=6 count="${1:-10000}" 2>/dev/null |
+	od -An -x | tr -cd '0-9a-f' |
+	sed -r 's/(..)(..)(..)(..)(..)(..)/00:\2:\3:\4:\5:\6$/g' | tr '$' '\n'

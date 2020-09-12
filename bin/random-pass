@@ -1,0 +1,6 @@
+#!/bin/sh -e
+
+od -A n -t x1 /dev/urandom \
+| tr -cd '0-9a-f\n' \
+| head -n "${1:-100}" \
+| sed "s,^,$(date +%Y-%m-%d-),"
