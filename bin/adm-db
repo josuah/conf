@@ -182,11 +182,13 @@ function db_query(path, keys, query, result,
 	row, i, n)
 {
 	array_delete(result)
-	if (db_getmatch(path, query, row) == 0)
-		return 0
-	for (i = 1; i in keys; i++)
-		result[++n] = row[keys[i]]
-	return 1
+	while (db_getmatch(path, query, row)) {
+		for (i = 1; i in keys; i++)
+			result[++n] = row[keys[i]]
+		if (i > 1)
+			return 1
+	}
+	return 0
 }
 
 function db_pprint(row, width,
@@ -213,7 +215,8 @@ function db_pprint(row, width,
 function db_print(row, path,
 	i, keys, sp)
 {
-	array_keys(row, keys)
+	if (array_keys(row, keys) == 0)
+		return
 	for (i = 1; i in keys; i++) {
 		if (keys[i] == "")
 			continue
