@@ -1,3 +1,5 @@
-if [ ! -f "$db/wireguard/private-key" ]; then
-	(umask 600; wg genkey >$db/wireguard/private-key)
+cd "$current"
+
+if [ -z "$(bin/adm-db db/wireguard/key get privkey)" ]; then
+	bin/adm-db db/wireguard/key add privkey="$(wg genkey)"
 fi
