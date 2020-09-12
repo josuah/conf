@@ -48,8 +48,8 @@ apply() {
 	shift 2
 
 	while read node vars; do
-		local type=${add=%%/*}
-		local name=${add=#*/}
+		local type=${node%%/*}
+		local name=${node#*/}
 		if type "cmd_${type}_${cmd}" >/dev/null; then
 			(cmd "$type" "$cmd" "$name" $vars) || exit=1
 		fi
@@ -74,7 +74,7 @@ for x in adm /usr/*/bin /usr/*/sbin; do
 	export PATH="$PATH:$x/"
 done
 export os="$(get_os)"
-export etc="${ADM_CONFIG:-/etc/adm}"
+export etc="${ADM_CONFIG:-/etc/adm/current}"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"

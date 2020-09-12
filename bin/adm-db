@@ -327,7 +327,7 @@ function cmd_template(path, argv,
 
 	VAR["path"] = path
 
-	while (getline line <path) {
+	while ((getline line <path) > 0) {
 
 		if (sub(/^#+for /, "", line)) {
 			lv = tpl_inc_level(lv)

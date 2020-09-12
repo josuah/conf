@@ -1,33 +1,20 @@
 
-_module_template() (
-	cd "$etc/db"
-	exec >$tmp/module/$name/${1%.template}
-	adm-db template "$etc/module/$name/$1"
-)
-
 cmd_module_install() {
-	local name="$1" exit=0
-	set -e
+	local name="$1"
+	local _etc="$etc/module/$name"
+	local _tmp="$tmp/module/$name"
 
-	if [ -d "$etc/module/$name/etc" ]; then
+	if [ -d "$_etc/etc" ]; then
 		while read x; do
-			mkdir -p "$(dirname "$tmp/module/$name/$x")"
-
-			case $x in
-			(*.template)
-				_module_template "$x" || exit 1
-				;;
-			(*)
-				cp "$etc/module/$name/$x" "$tmp/module/$name/$x"
-				;;
-			esac
+			mkdir -p "$(dirname "$_tmp/$x")"
+			(cd "$etc/db"; adm-db "$_etc/$x" template) >$_tmp/$x
 		done <<EOF
-$(cd "$etc/module/$name"; find etc -type f)
+$(cd "$_etc"; find etc -type f)
 EOF
-		cp -r "$tmp/module/$name/etc" "/"
+		cp -r "$_tmp/etc" /
 	fi
 
-	if [ -f "$etc/module/$name/deploy.sh" ]; then
-		(cd "$etc/module/$name"; . "$etc/module/$name/deploy.sh")
+	if [ -f "$_etc/deploy.sh" ]; then
+		(cd "$_etc"; . ./deploy.sh)
 	fi
 }
