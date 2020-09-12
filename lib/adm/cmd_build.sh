@@ -49,6 +49,8 @@ _build_tar() {
 cmd_build_install() {
 	local name="$1"
 
+	set -e
+
 	. "$current/build/$name/build.sh"
 
 	export PREFIX="$usr"
@@ -85,6 +87,6 @@ cmd_build_install() {
 	trap_pop
 
 	cd "$DESTDIR"
-	find *	-type d -exec mkdir -p "$PWD/{}" \; -o \
+	find *	-type d -exec mkdir -p "$PREFIX/{}" \; -o \
 		-type f -exec ln -sf "$PWD/{}" "$PREFIX/{}" \;
 }
