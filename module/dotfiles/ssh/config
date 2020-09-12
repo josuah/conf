@@ -2,6 +2,6 @@ ForwardAgent	yes
 AddKeysToAgent	yes
 Include		~/.ssh/config.local
 User		root
-ControlMaster	yes
+ControlMaster	auto
 ControlPath	~/.ssh/master-%h-%p
 ControlPersist	30

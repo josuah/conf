@@ -85,9 +85,10 @@ cmd="${1:-help}" node="${2:-host/$(hostname -s)}"
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in
-(install | update | enable | disable | start | stop | restart | reload | status | monitor)
+(sync | install | update | enable | disable | start | stop | restart | reload | status | monitor)
 	. "$lib/cmd_build.sh"
 	. "$lib/cmd_golang.sh"
+	. "$lib/cmd_host.sh"
 	. "$lib/cmd_module.sh"
 	. "$lib/cmd_monitor.sh"
 	. "$lib/cmd_repo.sh"
