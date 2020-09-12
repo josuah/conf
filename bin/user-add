@@ -1,0 +1,20 @@
+#!/bin/sh -e
+# mostly portably add a system user
+
+user=${1:?}
+
+getent passwd "$user" && exec echo "user $user already exist"
+
+nologin="$(command -v nologin)"
+
+if command -v pw >/dev/null; then
+	exec pw useradd "$user" -d "/var/empty" -s "$nologin" -g "nogroup"
+elif command -v user >/dev/null; then
+	exec user add -d "/var/empty" -s "$nologin" -g "nogroup" "$user"
+elif command -v useradd >/dev/null; then
+	exec useradd -d "/var/empty" -s "$nologin" -g "nogroup" "$user"
+elif command -v adduser >/dev/null; then 
+	exec adduser -D -h "/var/empty" -s "$nologin" -g "nogroup" "$user"
+fi
+
+exit 1

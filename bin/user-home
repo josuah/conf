@@ -1,0 +1,24 @@
+#!/bin/sh -e
+# mostly portably edit an user to set its home directory
+
+user=${1:?} home=${2:?}
+
+if command -v pw >/dev/null; then
+	exec pw usermod "$user" -d "$home"
+elif command -v user >/dev/null; then
+	exec user mod -d "$home" "$user"
+elif command -v usermod >/dev/null; then
+	exec usermod -d "$home" "$user"
+elif command -v adduser >/dev/null; then 
+	tmp=$(mktemp)
+	trap 'rm -f "$tmp"' INT TERM EXIT HUP
+	awk -F ':' -v u="$user" -v h="$home" '
+		BEGIN { FS = OFS = ":" }
+		$1 == u { print $1, $2, $3, $4, $5, h, $7; next } 1
+	' /etc/passwd >$tmp
+	chmod 444 "$tmp"
+	mv -f "$tmp" "/etc/passwd"
+	exit 0
+fi
+
+exit 1
