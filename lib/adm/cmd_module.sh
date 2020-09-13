@@ -27,4 +27,6 @@ EOF
 	cp -r "$dest/etc" "$dest/var" /
 
 	_module_hook "$conf" deploy.post.sh
+
+	true
 }
