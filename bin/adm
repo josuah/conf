@@ -1,27 +1,30 @@
 #!/bin/sh -eu
 
 cmd() { set -eu
-	local type="$1" cmd="$2" name="$3"
-	shift 3
+	local type="$1" cmd="$2" name="$3" args="$4"
 
 	echo "-- $cmd $type/$name" "$@" >&2
-	for x in "$@"; do
+
+	echo "$args" #| xargs printf '%s\n'
+	for x in $(echo "$args" | xargs printf '%s\t'); do
 		if [ "${x%%=*}" = "os_$os" ]; then
 			export "var_this_os=${x#*=}"
 		fi
 		export "var_$x"
 	done
+	unset IFS
+
 	"cmd_${type}_${cmd}" "$name"
 }
 
 apply() { set -eu
 	local cmd="$1" node="$2" vars exit
 
-	while read node vars; do
+	while read -r node vars; do
 		local type=${node%%/*}
 		local name=${node#*/}
 		if type "cmd_${type}_${cmd}" >/dev/null; then
-			if ! (cmd "$type" "$cmd" "$name" $vars); then
+			if ! (cmd "$type" "$cmd" "$name" "$vars"); then
 				echo error
 				exit=1
 			fi
@@ -36,8 +39,8 @@ list() { set -eu
 
 	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
 	if [ -f "$etc/db/node/$node" ]; then
-		while read node vars; do
-			list $((level + 1)) "${node#add=}" "$@" $vars
+		while read -r node vars; do
+			list $((level + 1)) "${node#add=}" "$@" 
 		done <$etc/db/node/$node
 	fi
 }
@@ -79,6 +82,7 @@ case $cmd in
 	. "$lib/cmd_module.sh"
 	. "$lib/cmd_monitor.sh"
 	. "$lib/cmd_repo.sh"
+	. "$lib/cmd_exec.sh"
 	. "$lib/os_$os.sh"
 	list 0 "$node" "$@" | apply "$cmd" "$node"
 	;;

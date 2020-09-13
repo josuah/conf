@@ -1,0 +1,2 @@
+add=build/lwan
+add=exec/lwan argv="-c /etc/lwan/lwan.conf"
