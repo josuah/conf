@@ -1,0 +1,3 @@
+add=package/s6
+add=package/libbearssl
+add=build/s6-networking
