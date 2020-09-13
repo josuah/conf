@@ -1,0 +1,3 @@
+#for dns/mx
+{{ 1:host }}.{{ 1:soa }}
+#end

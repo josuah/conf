@@ -3,7 +3,7 @@
 #for db/mail/account
 
 # {{ 1:user }}@{{ 1:dom }}
-##for /var/mail/alias dom=[1:dom] user=[1:user]
-={{ 1:dom }}--{{ 1:user }}:mail:1024:1012:/var/mail/{{ 1:dom }}/{{ 2:user }}:::
+##for db/mail/alias dom=[1:dom] user=[1:user]
+={{ 2:alias-dom }}--{{ 2:alias-user }}:mail:1024:1012:/var/mail/{{ 1:dom }}/{{ 1:user }}:::
 ##end
 #end
