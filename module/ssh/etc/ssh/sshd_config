@@ -12,11 +12,11 @@ HostKey			/etc/ssh/ssh_host_ed25519_key
 HostKey			/etc/ssh/ssh_host_ecdsa_key
 HostKey			/etc/ssh/ssh_host_rsa_key
 
-Subsystem		sftp /usr/libexec/sftp-server
+Subsystem sftp		/usr/libexec/sftp-server
 
-Match			Group sftp
-X11Forwarding		no
-AllowTcpForwarding	no
-PermitTTY		no
-ChrootDirectory		%h
-ForceCommand		internal-sftp -u 007
+Match Group sftp
+ X11Forwarding		no
+ AllowTcpForwarding	no
+ PermitTTY		no
+ ChrootDirectory	%h
+ ForceCommand		internal-sftp -u 007

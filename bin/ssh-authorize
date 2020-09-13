@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+cat "$@" | while read x; do
+	fp=$(echo "$x" | ssh-keygen -lf- | sed 's,/,-,g; s,^[^:]*:,,; s, .*,,')
+	echo "$x" >$fp.pub
+done
