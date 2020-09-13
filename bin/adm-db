@@ -3,16 +3,6 @@
 
 ## utilities ##
 
-function ip6_hex(ip6,
-	hex, i, arr)
-{
-	sub("::", substr("::::::::", split(ip6, arr, ":") - 1), ip6)
-	split(ip6, arr, ":")
-	for (i = 1; i <= 8; i++)
-		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
-	return hex
-}
-
 function die(msg)
 {
 	print "error: " msg >"/dev/stderr"
@@ -119,34 +109,64 @@ function array_shift(array,
 	return first
 }
 
+## tools ##
+
+function ip6_hex(ip6,
+	hex, i, arr)
+{
+	sub("::", substr("::::::::", split(ip6, arr, ":") - 1), ip6)
+	split(ip6, arr, ":")
+	for (i = 1; i <= 8; i++)
+		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
+	return hex
+}
+
 
 ## database ##
 
-function db_clean(line)
+function db_split(str, argv)
 {
-	gsub("[ \t]+", " ", line)
-	sub("^ *", "", line)
-	sub(" *$", "", line)
-	return line
+	# escape special characters
+	gsub(/\t/, " ", str)
+	gsub(/\\\\/, "\\s", str)
+	gsub(/\\"/, "\\q", str)
+
+        # match key or key=value or key="value value"
+        gsub(/[^= \t]+(="[^"]*"|=[^" \t]*)?/, "\t&\t", str)
+
+	# cleanup
+        gsub(/[ \t]*\t[ \t]*/, "\t", str)
+	sub("^[ \t]*", "", str)
+	sub("[ \t]*$", "", str)
+
+	# split into argv
+	split(str, argv, "\t")
+
+	# restore escaped inline characters
+	for (x in argv) {
+		gsub(/"/, "", argv[x])
+		gsub(/\\q/, "\"", argv[x])
+		gsub(/\\s/, "\\", argv[x])
+	}
 }
 
-function db_split(array, row, keys,
+function db_keyval(argv, row, keys,
 	i, n, key, eq, val)
 {
-	for (i = 1; i in array; i++) {
-		eq = index(array[i], "=")
+	for (i = 1; i in argv; i++) {
+		eq = index(argv[i], "=")
 		if (eq == 0) {
-			keys[++n] = array[i]
+			keys[++n] = argv[i]
 		} else {
-			key = substr(array[i], 1, eq - 1)
-			val = substr(array[i], eq + 1)
+			key = substr(argv[i], 1, eq - 1)
+			val = substr(argv[i], eq + 1)
 			row[key] = val
 		}
 	}
 }
 
 function db_getline(path, row,
-	array, line, n)
+	argv, line, n)
 {
 	if ((getline line <path) <= 0) {
 		close(path)
@@ -157,14 +177,14 @@ function db_getline(path, row,
 
 	n = row[""]
 	array_delete(row)
-	split(db_clean(line), array, " ")
-	db_split(array, row)
+	db_split(line, argv)
+	db_keyval(argv, row)
 	row[""] = n + 1
 	return 1
 }
 
 function db_match(query, row,
-	array, x)
+	x)
 {
 	for (x in query)
 		if (!(x in row) || row[x] != query[x])
@@ -206,8 +226,14 @@ function db_query(path, keys, query, result,
 	return 0
 }
 
+function db_fmt(val)
+{
+	gsub("\t", " ", val)
+	return index(val, " ") ? "\"" val "\"" : val
+}
+
 function db_pprint(row, width,
-	i, n, put, len, col, keys)
+	i, n, put, len, col, keys, val)
 {
 	printf("%3d ", row[""])
 	col = 4
@@ -220,7 +246,8 @@ function db_pprint(row, width,
 			printf "\n    "
 			col = 4
 		}
-		printf " " color(36) "%s=" color(0) "%s", keys[i], row[keys[i]]
+		val = db_fmt(row[keys[i]])
+		printf " " color(36) "%s=" color(0) "%s", keys[i], val
 		col += len
 	}
 
@@ -237,7 +264,8 @@ function db_print(row, path,
 			continue
 		if (sp)
 			printf " " >>path
-		printf "%s=%s", keys[i], row[keys[i]] >>path
+		val = db_fmt(row[keys[i]])
+		printf "%s=%s", keys[i], val >>path
 		sp = 1
 	}
 	printf "\n" >>path
@@ -301,9 +329,9 @@ function tpl_dec_level(lv,
 function tpl_getmatch(str, row, prefix,
 	path, argv, query)
 {
-	split(str, argv, " ")
+	db_split(str, argv)
 	path = array_shift(argv)
-	db_split(argv, query)
+	db_keyval(argv, query)
 	if (db_getmatch(path, query, row) == 0)
 		return 0
 	return 1
@@ -314,9 +342,9 @@ function tpl_query(str, result,
 {
 	if (sub(":", " ", str) == 0)
 		die("unrecognized parameter: " str)
-	split(str, argv, " ")
+	db_split(str, argv)
 	path = array_shift(argv)
-	db_split(argv, query, keys)
+	db_keyval(argv, query, keys)
 	e = db_query(path, keys, query, result)
 	close(path)
 	return e
@@ -383,7 +411,7 @@ function cmd_get(path, argv,
 	if (!(1 in argv))
 		usage()
 
-	db_split(argv, query, keys)
+	db_keyval(argv, query, keys)
 	while (db_query(path, keys, query, result)) {
 		for (i = 1; i in result; i++)
 			printf "%s%s", (i == 1 ? "" : "\t"), result[i]
@@ -401,7 +429,7 @@ function cmd_list(path, argv,
 	width = (width == "" ? 80 : width + 0)
 
 	printf "\n"
-	db_split(argv, query)
+	db_keyval(argv, query)
 	while (db_getmatch(path, query, row)) {
 		db_pprint(row, width)
 		printf "\n"
@@ -414,7 +442,7 @@ function cmd_add(path, argv,
 	if (!(1 in argv))
 		usage()
 
-	db_split(argv, row)
+	db_keyval(argv, row)
 	db_print(row, path)
 }
 
@@ -455,7 +483,7 @@ function cmd_set(path, argv,
 	while (db_getline(path, row)) {
 		if (row[""] in num) {
 			array_delete(keys)
-			db_split(argv, row, keys)
+			db_keyval(argv, row, keys)
 			for (x in keys)
 				delete row[keys[x]]
 		}

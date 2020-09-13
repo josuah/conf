@@ -1,2 +1,2 @@
 add=package/geomyidae
-add=service/geomyidae
+add=service/geomyidae argv="-u geomyidae -g nobody -b /srv/www"
