@@ -1,6 +1,6 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for path in adm /usr/*/bin /usr/*/sbin; do
-	[ ! -d "$path" ] || export PATH="$PATH:$path"
+for path in /usr/*/bin /usr/*/sbin; do
+	[ -d "$path" ] || export PATH="$PATH:$path"
 done
 
 export MAIL="/var/mail/$USER/Maildir"

@@ -1,9 +1,9 @@
 
-cmd_service_enable() { set -eu
+cmd_service_install() { set -eu
 	ln -sf "/etc/runit/sv/$1" "/run/runit/service"
 }
 
-cmd_service_disable() { set -eu
+cmd_service_uninstall() { set -eu
 	rm -f "/run/runit/service/$1"
 }
 

@@ -1,9 +1,9 @@
 
-cmd_service_enable() { set -eu
+cmd_service_install() { set -eu
 	echo "$1=YES" >"/etc/rc.conf.d/$1"
 }
 
-cmd_service_disable() { set -eu
+cmd_service_uninstall() { set -eu
 	rm "/etc/rc.conf.d/$1"
 }
 

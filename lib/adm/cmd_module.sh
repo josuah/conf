@@ -1,13 +1,4 @@
 
-_module_hook() {
-	local path="$1" hook="$2" pwd="$PWD"
-
-	[ -f "$path/$hook" ] || return
-	cd "$path"
-	. "./$hook"
-	cd "$pwd"
-}
-
 cmd_module_install() { set -eu
 	local name="$1"
 	local conf="$etc/module/$name"
@@ -15,7 +6,11 @@ cmd_module_install() { set -eu
 
 	mkdir -p "$dest/etc" "$dest/var"
 
-	_module_hook "$conf" deploy.pre.sh
+	if [ -f "$conf/deploy.sh" ]; then
+		. "$conf/deploy.sh"
+	fi
+
+	(type deploy_pre >/dev/null && cd "$conf" && deploy_pre)
 
 	while read x; do
 		[ -f "$conf/$x" ] || continue
@@ -26,7 +21,7 @@ $(cd "$conf" && find etc var -type f 2>/dev/null)
 EOF
 	cp -r "$dest/etc" "$dest/var" /
 
-	_module_hook "$conf" deploy.post.sh
+	(type deploy_post >/dev/null && cd "$conf" && deploy_post)
 
 	true
 }

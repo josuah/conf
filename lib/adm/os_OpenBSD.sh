@@ -3,11 +3,11 @@
 . "$lib/cmd_user_useradd.sh"
 . "$lib/cmd_group_groupadd.sh"
 
-cmd_service_enable() {
+cmd_service_install() {
        rcctl enable "$1"
 }
 
-cmd_service_disable() {
+cmd_service_uninstall() {
        rcctl disable "$1"
 }
 

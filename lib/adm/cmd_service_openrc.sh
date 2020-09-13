@@ -1,9 +1,9 @@
 
-cmd_service_enable() { set -eu
+cmd_service_install() { set -eu
 	rc-update add "$1" default
 }
 
-cmd_service_disable() { set -eu
+cmd_service_uninstall() { set -eu
 	rc-update del "$1" default
 }
 

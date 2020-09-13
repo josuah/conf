@@ -1,9 +1,9 @@
 
-cmd_service_enable() { set -eu
+cmd_service_install() { set -eu
 	systemctl enable "$1"
 }
 
-cmd_service_disable() { set -eu
+cmd_service_uninstall() { set -eu
 	systemctl disable "$1"
 }
 
