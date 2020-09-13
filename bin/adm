@@ -4,7 +4,7 @@ cmd() { set -eu
 	local type="$1" cmd="$2" name="$3"
 	shift 3
 
-	echo ">>> $cmd $type/$name" "$@" >&2
+	echo "-- $cmd $type/$name" "$@" >&2
 	for x in "$@"; do
 		if [ "${x%%=*}" = "os_$os" ]; then
 			export "var_this_os=${x#*=}"
