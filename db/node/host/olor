@@ -8,3 +8,4 @@ add=role/git
 add=role/http
 add=role/vpn
 add=role/dns-auth
+add=role/www
