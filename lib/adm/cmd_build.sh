@@ -32,14 +32,12 @@ _build_tar() {
 			exit 1
 		}
 
-		tmp=$(mktemp -d)
-		trap_add 'rm -rf "$tmp"'
-
+		mkdir -p "$tmp/build/source"
 		case $tar in
 		(*gz) gzip -cd "$tar" ;;
 		(*xz) xz -cd "$tar" ;;
 		(*lz) lz -cd "$tar" ;;
-		esac | tar -x -f - -C "$tmp"
+		esac | tar -x -f - -C "$tmp/build/source"
 		mkdir -p "$tmp" "$(dirname "$source")"
 		rm -rf "$source"
 		mv "$tmp/"* "$source"
@@ -48,14 +46,17 @@ _build_tar() {
 
 cmd_build_install() {
 	local name="$1"
+	local opt
 
 	set -e
 
 	. "$etc/build/$name/build.sh"
 
 	export PREFIX="$usr"
-	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
+	export DESTDIR="$PREFIX/opt/${sha256:-$commit}"
+	export opt="$PREFIX/opt/$name-${v:-$commit}"
 
+	[ -d "$opt" ] && return 0
 	[ "${sha256:-}" ] && _build_tar
 	[ "${commit:-}" ] && _build_git
 
@@ -69,24 +70,19 @@ cmd_build_install() {
 		done
 	fi
 
-	[ -d "$DESTDIR" ] && return 0
-
-	trap_add 'rm -rf "$DESTDIR"'
-
 	mkdir -p "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
 	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
 
 	ln -sf "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
 	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
 
-	(cd "$source"; build)
+	(cd "$source"; build) || exit "$?"
 
 	rm -rf "$DESTDIR/$PREFIX" "$source"
 	! rmdir "$DESTDIR/"* 2>/dev/null
 
-	trap_pop
-
-	cd "$DESTDIR"
+	mv "$DESTDIR" "$opt"
+	cd "$opt"
 	find *	-type d -exec mkdir -p "$PREFIX/{}" \; -o \
 		-type f -exec ln -sf "$PWD/{}" "$PREFIX/{}" \;
 }

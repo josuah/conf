@@ -19,16 +19,6 @@ get_os() {
 	esac
 }
 
-trap_add() {
-	trap="${trap:-:}; $1"
-	trap "$trap" INT TERM EXIT HUP
-}
-
-trap_pop() {
-	trap="${trap%; *}"
-	trap "$trap" INT TERM EXIT HUP
-}
-
 cmd() {
 	local type="$1" cmd="$2" name="$3"
 	shift 3
@@ -79,7 +69,8 @@ export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"
 export tmp="$(mktemp -d)"
-trap_add 'rm -rf "$tmp"'
+
+trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 cmd="${1:-help}" node="${2:-host/$(hostname -s)}"
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
