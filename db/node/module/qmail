@@ -1,3 +1,12 @@
-add=module/inetd
+add=group/nofiles
+add=group/qmail
+add=user/alias group=nofiles home=/var/qmail/alias
+add=user/qmaild group=nofiles home=/var/qmail
+add=user/qmaill group=nofiles home=/var/qmail
+add=user/qmailp group=nofiles home=/var/qmail
+add=user/qmailq group=qmail home=/var/qmail
+add=user/qmailr group=qmail home=/var/qmail
+add=user/qmails group=qmail home=/var/qmail
 add=package/notqmail
 add=monitor/tcp port=25
+add=module/inetd

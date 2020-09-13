@@ -6,6 +6,6 @@ cmd_user_install() {
 	local g="${var_group:-nogroup}"
 	local cmd
 
-	id -u "$user" >/dev/null && cmd=usermod || cmd=useradd
+	id -u "$user" >/dev/null 2>&1 && cmd=usermod || cmd=useradd
 	"$cmd" -d "$h" -s "$s" -g "$g" "$user"
 }

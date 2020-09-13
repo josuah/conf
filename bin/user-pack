@@ -1,8 +1,0 @@
-#!/bin/sh -ex
-user-add "_$1"
-<<<<<<< HEAD
-user-home "/opt/$1/current"
-=======
-user-home "/opt/$1"
->>>>>>> 943b257... user-pack for package-specific users
-user-shell "/bin/sh"
