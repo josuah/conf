@@ -1,1 +1,1 @@
-add=ospack/ldns cmd=ldns-version os_OpenBSD=net/ldns
+add=ospack/ldns cmd=ldns-version

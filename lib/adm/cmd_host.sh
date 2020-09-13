@@ -10,7 +10,7 @@ cmd_host_sync() {
 		tar -x -C / -f -
 		mkdir -p /etc/adm/local
 		ln -sf '/$dest/$archive/'* /etc/adm
-		ls -r '/$dest/$archive/' | grep '^archive-' | grep -Fvx "$archive" | sed 1,4d | xargs rm -rf
+		ls -rd '/$dest/'* | sed 1,4d | xargs rm -rf
 		make -C /etc/adm update
 	"
 }

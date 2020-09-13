@@ -1,10 +1,5 @@
 add=role/base
 add=role/server
-add=role/chat
-add=role/mail
 add=role/openbsd
-add=role/voice
-add=role/git
-add=role/http
 add=role/vpn
 add=role/dns-axfr

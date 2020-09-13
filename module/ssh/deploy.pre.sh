@@ -5,8 +5,9 @@ fi
 for dir in /root /srv/git; do
 	mkdir -p	"$dir/.ssh/sock"
 	touch		"$dir/.ssh/authorized_keys"
-	chmod 600 	"$dir/.ssh/"*
-	chmod 700	"$dir/.ssh/"*"/" "$dir/.ssh"
-	chown root	"$dir/.ssh/authorized_keys"
+	chmod 644 	"$dir/.ssh/"*
+	chmod 700	"$dir/.ssh/"*"/"
+	chmod 755	"$dir/.ssh"
+	chown -R 0:0	"$dir/.ssh"
 	cat keys/*	>$dir/.ssh/authorized_keys
 done
