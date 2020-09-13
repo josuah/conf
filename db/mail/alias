@@ -1,5 +1,4 @@
-acc-dom=josuah.net acc-user=me dom=josuah.net user=mail
-acc-dom=josuah.net acc-user=me dom=josuah.net user=account
-acc-dom=josuah.net acc-user=me dom=josuah.net user=josuah
-acc-dom=josuah.net acc-user=me dom=z0.is user=josuah
-acc-dom=josuah.net acc-user=me dom=z0.is user=me
+dom=josuah.net goto=me match=me
+dom=josuah.net goto=me match=mail
+dom=josuah.net goto=me match=account
+dom=josuah.net goto=me match=josuah

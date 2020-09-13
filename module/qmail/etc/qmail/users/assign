@@ -1,9 +1,5 @@
-# {{ path }}
-# {{ now }}
-#for db/mail/account
-
-# {{ 1:user }}@{{ 1:dom }}
-##for db/mail/alias dom=[1:dom] user=[1:user]
-={{ 2:alias-dom }}--{{ 2:alias-user }}:mail:1024:1012:/var/mail/{{ 1:dom }}/{{ 1:user }}:::
-##end
+#for mail/alias
+={{ 1:dom }}--{{ 1:match }}:mail:1024:1024:/var/mail/{{ 1:dom }}/{{ 1:goto }}:::
 #end
+.
+# generated from {{ path }} at {{ now }}
