@@ -10,3 +10,6 @@ ln -fs /var/qmail/queue /etc/qmail/qmail
 mv -f /etc/qmail/qmail /var/spool
 
 hostname >/etc/qmail/control/me
+
+export uid="$(id -u mail)"
+export gid="$(id -g mail)"

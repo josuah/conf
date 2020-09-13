@@ -21,7 +21,10 @@ apply() { set -eu
 		local type=${node%%/*}
 		local name=${node#*/}
 		if type "cmd_${type}_${cmd}" >/dev/null; then
-			(cmd "$type" "$cmd" "$name" $vars) || exit=1
+			if ! (cmd "$type" "$cmd" "$name" $vars); then
+				echo error status=$?
+				exit=1
+			fi
 		fi
 	done
 	return "${exit:-0}"

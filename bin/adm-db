@@ -313,7 +313,7 @@ function tpl_query(str, result,
 	path, keys, query, argv, e)
 {
 	if (sub(":", " ", str) == 0)
-		die("missing : delimiter")
+		die("unrecognized parameter: " str)
 	split(str, argv, " ")
 	path = array_shift(argv)
 	db_split(argv, query, keys)

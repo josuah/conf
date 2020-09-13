@@ -1,25 +1,30 @@
 
+_module_hook() {
+	local path="$1" hook="$2" pwd="$PWD"
+
+	[ -f "$path/$hook" ] || return
+	cd "$path"
+	. "./$hook"
+	cd "$pwd"
+}
+
 cmd_module_install() { set -eu
 	local name="$1"
-	local i="$etc/module/$name"
-	local o="$tmp/module/$name"
+	local conf="$etc/module/$name"
+	local dest="$tmp/module/$name"
 
-	mkdir -p "$o/etc" "$o/var"
+	mkdir -p "$dest/etc" "$dest/var"
 
-	if [ -f "$i/deploy.pre.sh" ]; then
-		(cd "$i"; . ./deploy.pre.sh)
-	fi
+	_module_hook "$conf" deploy.pre.sh
 
 	while read x; do
-		[ -f "$i/$x" ] || continue
-		mkdir -p "$(dirname "$o/$x")"
-		(cd "$etc/db"; adm-db "$i/$x" template) >$o/$x
+		[ -f "$conf/$x" ] || continue
+		mkdir -p "$(dirname "$dest/$x")"
+		(cd "$etc/db" && adm-db "$conf/$x" template >$dest/$x)
 	done <<EOF
-$(cd "$i" && find etc var -type f 2>/dev/null)
+$(cd "$conf" && find etc var -type f 2>/dev/null)
 EOF
-	cp -r "$o/etc" "$o/var" /
+	cp -r "$dest/etc" "$dest/var" /
 
-	if [ -f "$i/deploy.post.sh" ]; then
-		(cd "$i"; . ./deploy.post.sh)
-	fi
+	_module_hook "$conf" deploy.post.sh
 }
