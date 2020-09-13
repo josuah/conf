@@ -6,8 +6,8 @@ cmd_module_install() {
 
 	mkdir -p "$o/etc" "$o/var"
 
-	if [ -f "$i/deploy.sh" ]; then
-		(cd "$i"; . ./deploy.sh)
+	if [ -f "$i/deploy.pre.sh" ]; then
+		(cd "$i"; . ./deploy.pre.sh)
 	fi
 
 	while read x; do
@@ -18,4 +18,8 @@ cmd_module_install() {
 $(cd "$i" && find etc var -type f 2>/dev/null)
 EOF
 	cp -r "$o/etc" "$o/var" /
+
+	if [ -f "$i/deploy.post.sh" ]; then
+		(cd "$i"; . ./deploy.post.sh)
+	fi
 }

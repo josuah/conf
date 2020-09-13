@@ -325,7 +325,6 @@ function tpl_query(str, result,
 function tpl_flush(texts, queries, lv, vars,
 	n, x, _, row)
 {
-	print "=>", lv
 	if (!(lv in queries))
 		return
 

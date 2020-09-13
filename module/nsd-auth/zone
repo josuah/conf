@@ -12,7 +12,7 @@ $ORIGIN {{ zone }}.
 )
 
 ; NS - name servers
-#for dns/ns soa=[zone]
+#for dns/ns
 	86400	IN	NS	{{ 1:host }}.{{ zone }}.
 #end
 

@@ -1,0 +1,2 @@
+add=monitor/dns
+add=module/nsd-auth
