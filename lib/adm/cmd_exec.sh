@@ -4,7 +4,7 @@ cmd_exec_start() { set -eu
 	local argv="$cmd${var_argv:+ $var_argv}"
 	local pexp="${var_pexp:-$argv}"
 
-	pgrep -f "$pexp" && return
+	pgrep -f "$pexp" >/dev/null && return
 	$argv 2>&1 | logger -t "$cmd" &
 	cmd_exec_status "$cmd"
 }

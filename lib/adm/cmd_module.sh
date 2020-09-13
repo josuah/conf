@@ -17,7 +17,7 @@ cmd_module_install() { set -eu
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$etc/db" && adm-db "$conf/$x" template >$dest/$x)
 	done <<EOF
-$(cd "$conf" && find etc var -type f 2>/dev/null)
+$(test -d "$conf" && cd "$conf" && find etc var -type f 2>/dev/null)
 EOF
 	cp -r "$dest/etc" "$dest/var" /
 
