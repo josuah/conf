@@ -1,5 +1,5 @@
 
-cmd_monitor_monitor() {
+cmd_monitor_monitor() { set -eu
 	local name="$1" ip
 	shift
 

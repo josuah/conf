@@ -1,5 +1,5 @@
 
-cmd_user_install() {
+cmd_user_install() { set -eu
 	local user="$1"
 	local h="${var_path:-/var/empty}"
 	local s="${var_shell:-/sbin/nologin}"

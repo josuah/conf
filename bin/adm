@@ -1,25 +1,6 @@
 #!/bin/sh -eu
 
-get_os() {
-	kernel=$(uname)
-
-	case $kernel in
-	(Linux)
-		check_package_manager	apt		DebianLinux
-		check_package_manager	apk		AlpineLinux
-		check_package_manager	pacman		ArchLinux
-		check_package_manager	yum		RedHatLinux
-		check_package_manager	zypper		SuseLinux
-		check_package_manager	emerge		GentooLinux
-		check_package_manager	xbps-install	VoidLinux
-		;;
-	(*)
-		exec echo "$kernel"
-		;;
-	esac
-}
-
-cmd() {
+cmd() { set -eu
 	local type="$1" cmd="$2" name="$3"
 	shift 3
 
@@ -33,7 +14,7 @@ cmd() {
 	"cmd_${type}_${cmd}" "$name"
 }
 
-apply() {
+apply() { set -eu
 	local cmd="$1" node="$2" vars exit
 	shift 2
 
@@ -47,7 +28,7 @@ apply() {
 	return "${exit:-0}"
 }
 
-list() {
+list() { set -eu
 	local level="$1" node="$2"
 	shift 2
 
@@ -59,20 +40,33 @@ list() {
 	fi
 }
 
+export etc="${ADM_CONFIG:-/etc/adm}"
+
+export usr="${ADM_PREFIX:-/usr/adm}"
+
+export cache="${ADM_CACHE:-/var/cache/adm}"
+
+export lib="${0%/*/*}/lib/adm"
+
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 for x in adm /usr/*/bin /usr/*/sbin; do
 	export PATH="$PATH:$x"
 done
-export os="$(get_os)"
-export etc="${ADM_CONFIG:-/etc/adm}"
-export usr="${ADM_PREFIX:-/usr/adm}"
-export cache="${ADM_CACHE:-/var/cache/adm}"
-export lib="${0%/*/*}/lib/adm"
-export tmp="$(mktemp -d)"
 
+export os=$(uname)
+type >/dev/null apt		&& export os=DebianLinux
+type >/dev/null apk		&& export os=AlpineLinux
+type >/dev/null pacman		&& export os=ArchLinux
+type >/dev/null yum		&& export os=RedHatLinux
+type >/dev/null zypper		&& export os=SuseLinux
+type >/dev/null emerge		&& export os=GentooLinux
+type >/dev/null xbps-install	&& export os=VoidLinux
+
+export tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
-cmd="${1:-help}" node="${2:-host/$(hostname -s)}"
+cmd="${1:-help}"
+node="${2:-host/$(hostname -s)}"
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in

@@ -44,11 +44,9 @@ _build_tar() {
 	fi
 }
 
-cmd_build_install() {
+cmd_build_install() { set -eu
 	local name="$1"
 	local opt
-
-	set -e
 
 	. "$etc/build/$name/build.sh"
 

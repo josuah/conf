@@ -1,5 +1,5 @@
 
-cmd_host_sync() {
+cmd_host_sync() { set -eu
 	local host="$1" ref=${var_git:-master}
 	local dest=var/lib/adm
 	local commit=$(git rev-parse "$ref")

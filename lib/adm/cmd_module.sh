@@ -1,5 +1,5 @@
 
-cmd_module_install() {
+cmd_module_install() { set -eu
 	local name="$1"
 	local i="$etc/module/$name"
 	local o="$tmp/module/$name"
