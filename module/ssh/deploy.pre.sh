@@ -3,7 +3,7 @@ if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
 fi
 
 for dir in /root /srv/git; do
-	mkdir -p	"$dir/.ssh"
+	mkdir -p	"$dir/.ssh/sock"
 	touch		"$dir/.ssh/authorized_keys"
 	chmod 600 	"$dir/.ssh/"*
 	chmod 700	"$dir/.ssh/"*"/" "$dir/.ssh"

@@ -27,7 +27,7 @@ case $- in
 (*i*)
 	export TERM="xterm-256color"
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
-	export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
+	export SSH_AUTH_SOCK="$HOME/.ssh/sock/agent"
 
 	set -o emacs 2>"/dev/null"
 

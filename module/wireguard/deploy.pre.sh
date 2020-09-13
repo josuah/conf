@@ -1,5 +1,6 @@
 cd "$etc"
 
-if [ -z "$(bin/adm-db db/wireguard/key get privkey)" ]; then
-	bin/adm-db db/wireguard/key add privkey="$(wg genkey)"
+mkdir -p db/local/wireguard
+if [ -z "$(bin/adm-db local/wireguard/pass get privkey)" ]; then
+	bin/adm-db local/wireguard/pass add privkey="$(wg genkey)"
 fi
