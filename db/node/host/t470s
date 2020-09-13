@@ -1,3 +1,2 @@
 add=role/base
 add=role/netbsd
-add=role/server
