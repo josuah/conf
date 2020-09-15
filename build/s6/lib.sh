@@ -4,7 +4,11 @@ sha256=05e259532c6db8cb23f5f79938669cee30152008ac9e792ff4acb26db9a01ff7
 
 build() { set -eux
 	./configure --prefix="$PREFIX" \
-	  --enable-static-libc
+	  --with-include="$PREFIX/include" \
+	  --with-lib="$PREFIX/lib" \
+	  --enable-static-libc \
+	  --enable-static \
+	  --disable-shared
 	gmake
 	gmake DESTDIR="$DESTDIR" install
 }

@@ -1,2 +1,2 @@
-add=package/execline
+add=package/libskarnet
 add=build/s6

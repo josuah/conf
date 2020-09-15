@@ -11,6 +11,7 @@ _build_git() {
 		git -C "$bare" rev-parse "$commit" >/dev/null ||
 			git -C "$bare" fetch
 		git -C "$bare" rev-parse "$commit" >/dev/null
+		rm -rf "$src"
 		mkdir -p "$src"
 		git -C "$bare" archive "$commit" | tar -C "$src" -xf -
 	fi
@@ -32,6 +33,7 @@ _build_tar() {
 			exit 1
 		}
 
+		rm -rf "$src"
 		mkdir -p "$tmp/build/src" "$src"
 		case $tar in
 		(*gz) gzip -cd "$tar" ;;
