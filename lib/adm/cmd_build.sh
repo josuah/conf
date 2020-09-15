@@ -47,7 +47,7 @@ cmd_build_install() { set -eu
 	local name="$1"
 	local opt
 
-	. "$etc/build/$name/build.sh"
+	. "$etc/build/$name/lib.sh"
 
 	export PREFIX="$usr"
 	export DESTDIR="$PREFIX/opt/${sha256:-$commit}"

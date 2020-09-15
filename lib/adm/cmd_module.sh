@@ -6,9 +6,7 @@ cmd_module_install() { set -eu
 
 	mkdir -p "$dest/etc" "$dest/var"
 
-	if [ -f "$conf/deploy.sh" ]; then
-		. "$conf/deploy.sh"
-	fi
+	. "$conf/lib.sh"
 
 	(type deploy_pre >/dev/null && cd "$conf" && deploy_pre)
 
@@ -17,7 +15,7 @@ cmd_module_install() { set -eu
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$etc/db" && adm-db "$conf/$x" template >$dest/$x)
 	done <<EOF
-$(test -d "$conf" && cd "$conf" && find etc var -type f 2>/dev/null)
+$(cd "$conf" && find etc var -type f 2>/dev/null)
 EOF
 	cp -r "$dest/etc" "$dest/var" /
 
