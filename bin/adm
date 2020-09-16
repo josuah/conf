@@ -90,6 +90,6 @@ case $cmd in
 
 (*)
 	echo "usage: ${0##*/} cmd [node/name] [key=value...]"
-	echo "cmd: list, install, update, uninstall, start, stop, restart, reload, status, monitor"
+	echo "list, install, update, uninstall, start, stop, restart, reload, status"
 	;;
 esac

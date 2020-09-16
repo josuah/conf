@@ -1,2 +1,3 @@
-add=build/lwan
+add=package/lwan
 add=exec/lwan argv="-c /etc/lwan/lwan.conf"
+add=package/s6-networking

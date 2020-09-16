@@ -1,7 +1,6 @@
 
-_build_git() {
+_build_git() { set -eu
 	local bare="$cache/git/$name"
-	export src="$cache/src/$name-$commit"
 
 	if [ ! -d "$bare" ]; then
 		git clone --mirror "$url" "$bare"
@@ -10,16 +9,14 @@ _build_git() {
 	if [ ! -d "$DESTDIR" ]; then
 		git -C "$bare" rev-parse "$commit" >/dev/null ||
 			git -C "$bare" fetch
-		git -C "$bare" rev-parse "$commit" >/dev/null
-		rm -rf "$src"
-		mkdir -p "$src"
-		git -C "$bare" archive "$commit" | tar -C "$src" -xf -
+		rm -rf "$SOURCE"
+		mkdir -p "$SOURCE"
+		git -C "$bare" archive "$commit" | tar -C "$SOURCE" -xf -
 	fi
 }
 
-_build_tar() {
-	local tar="$cache/tar/$name-$(basename "$url")"
-	export src="$cache/src/$name-$v"
+_build_tar() { set -eu
+	local tar="$cache/tar/$(basename "$url")"
 
 	if [ ! -f "$tar" ]; then
 		mkdir -p "$(dirname "$tar")"
@@ -33,39 +30,39 @@ _build_tar() {
 			exit 1
 		}
 
-		rm -rf "$src"
-		mkdir -p "$tmp/build/src" "$src"
+		mkdir -p "$SOURCE.tmp.$$" "$SOURCE"
+		rm -rf "$SOURCE"
+
 		case $tar in
 		(*gz) gzip -cd "$tar" ;;
 		(*xz) xz -cd "$tar" ;;
 		(*lz) lz -cd "$tar" ;;
-		esac | tar -x -f - -C "$tmp/build/src"
-		rm -rf "$src"
-		mv "$tmp/build/src/"* "$src"
+		esac | tar -x -f - -C "$SOURCE.tmp.$$"
+
+		mv "$SOURCE.tmp.$$/"* "$SOURCE"
 	fi
 }
 
 cmd_build_install() { set -eu
 	local name="$1"
-	local opt
 
 	. "$etc/build/$name/lib.sh"
 
 	export PREFIX="$usr"
-	export DESTDIR="$PREFIX/opt/${sha256:-$commit}"
-	export opt="$PREFIX/opt/$name-${v:-$commit}"
+	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
+	export SOURCE="$cache/src/$name-${v:-$commit}"
 
-	[ -d "$opt" ] && return 0
+	[ -d "$DESTDIR" ] && return 0
 	[ "${sha256:-}" ] && _build_tar
 	[ "${commit:-}" ] && _build_git
 
 	if [ -d "$etc/build/$name/files" ]; then
-		cp -r "$etc/build/$name/files/"* "$src"
+		cp -r "$etc/build/$name/files/"* "$SOURCE"
 	fi
 
 	if [ -d "$etc/build/$name/patches" ]; then
 		for x in "$etc/build/$name/patches/"*; do
-			(cd "$src"; patch -p1 -N) <$x
+			(cd "$SOURCE"; patch -p1 -N) <$x
 		done
 	fi
 
@@ -75,13 +72,12 @@ cmd_build_install() { set -eu
 	ln -sf "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
 	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
 
-	(cd "$src"; build) || exit "$?"
+	(cd "$SOURCE"; build) || exit "$?"
 
-	rm -rf "$DESTDIR/$PREFIX" "$src"
+	rm -rf "$DESTDIR/$PREFIX" "$SOURCE"
 	! rmdir "$DESTDIR/"* 2>/dev/null
 
-	mv "$DESTDIR" "$opt"
-	cd "$opt"
+	cd "$DESTDIR"
 	find *	-type d -exec mkdir -p "$PREFIX/{}" \; -o \
 		-type f -exec ln -sf "$PWD/{}" "$PREFIX/{}" \;
 }
