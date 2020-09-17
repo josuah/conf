@@ -1,5 +1,5 @@
 #for mail/alias
-={{ 1:dom }}--{{ 1:match }}:mail:{{ uid }}:{{ gid }}:/var/mail/{{ 1:dom }}/{{ 1:goto }}:::
+={{ 1:dom }}--{{ 1:match }}@{{ 1:dom }}:mail:{{ uid }}:{{ gid }}:/var/mail/{{ 1:dom }}/{{ 1:goto }}:::
 #end
 .
 # generated from {{ path }} at {{ now }}
