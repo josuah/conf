@@ -4,7 +4,6 @@
 # to show availability of service.  The name of the serivce is deduced from
 # the path.
 
-
 function flush_values(ctx)
 {
 	printf "\033[%d;1m|\033[m", (32 - (ctx["sum"] < ctx["num"]))
@@ -15,7 +14,8 @@ function flush_values(ctx)
 
 function add_value(time, value, ctx)
 {
-	ctx["progress"] = START
+	if (!("progress" in ctx))
+		ctx["progress"] = START
 
 	if (time > ctx["progress"] && ctx["num"] > 0)
 		flush_values(ctx)
@@ -45,10 +45,10 @@ BEGIN {
 	cmd = "date +%s"
 	cmd | getline NOW
 	close(cmd)
-	NOW = NOW - NOW % STEP + STEP
 
 	STEP = ENVIRON["STEP"] ? ENVIRON["STEP"] : 600
 	COUNT = ENVIRON["COUNT"] ? ENVIRON["COUNT"] : 80
+	NOW = NOW - NOW % STEP + STEP
 	START = NOW - STEP * COUNT
 	START = START - START % STEP + STEP
 
@@ -56,18 +56,18 @@ BEGIN {
 	sub("/[^/]+$", "", NAME)
 	sub(".*/", "", NAME)
 
-	printf "  %-15s %s |", NAME, START
+	printf "  %-15s %s >", NAME, START
 }
 
 { var_split($0, var) }
 
 START <= var["time"] {
-	sub("[^ ]+ [^ ]+ ", "", $0)
 	add_value(var["time"], var["exit"], ctx)
 }
 
 { split("", var) }
 
 END {
-	printf "| %s\n", NOW
+	add_value(NOW, -1, ctx)
+	printf "< %s\n", NOW
 }

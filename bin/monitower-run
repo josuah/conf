@@ -9,28 +9,22 @@
 # to be run from a /etc/crontab.
 
 check() { set -u +e
-	local exit line
+	local exit line now="$(date +%s)"
 	for x; do local "var_$x"; done
 
-	: ${var_timeout:=5}
-
 	mkdir -p "$spool/$var_host/$var_name"
-	"check-$var_check" "$@" >&1 & pid=$!
-	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
-	wait "$pid"
+	out=$("check-$var_check" "$@" 2>&1)
 	exit=$?
 
 	line="time=$now exit=$exit"
 	echo "$line" >>$spool/$var_host/$var_name/current
-	[ "$exit" = 0 ] || monitower-event "$line $*" &
+	[ "$exit" = 0 ] || echo "$out" | monitower-event $line "$@"
 }
 
-now=$(date +%s)
 spool=/var/spool/monitower
 IFS='
 '
-
 sed -r 's,\\\\,\\s,g; s,\\",\\q,g' "$@" \
-| while IFS=' ' read name check line; do
-	check $(echo $line | xargs -n 1)
+| while IFS=' ' read line; do
+	sleep $((RANDOM % 30)) && check $(echo $line | xargs -n 1) &
 done
