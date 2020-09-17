@@ -15,6 +15,8 @@ deploy_pre() { set -eu
 
 deploy_post() { set -eu
 	(cd /etc/qmail/users && qmail-newu)
+	pkill -HUP qmail-start
+	pkill -HUP inetd
 }
 
 export uid="$(id -u mail)"

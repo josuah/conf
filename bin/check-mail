@@ -1,10 +1,12 @@
 #!/bin/sh -eu
 for x; do export "var_$x"; done
 
+: ${var_port:=25} ${var_timeout:=5}
+
 while read line; do
 	printf '%s\r\n' "$line"
 	sleep 0.1
-done << EOF | nc -v "$var_ip" 25
+done << EOF | nc -w "$var_timeout" -v "$var_ip" "$var_port"
 EHLO monitoring
 MAIL from:<monitoring>
 RCPT to:<$var_mail>
