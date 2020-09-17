@@ -1,0 +1,4 @@
+# generated from {{ path }} at {{ now }}
+#for mail/domains
+{{ 1:match }}
+#end
