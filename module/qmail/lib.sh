@@ -13,5 +13,9 @@ deploy_pre() { set -eu
 	hostname >/etc/qmail/control/me
 }
 
+deploy_post() { set -eu
+	(cd /etc/qmail/users && qmail-newu)
+}
+
 export uid="$(id -u mail)"
 export gid="$(id -g mail)"
