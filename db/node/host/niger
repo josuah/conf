@@ -3,3 +3,4 @@ add=role/server
 add=role/openbsd
 add=role/vpn
 add=role/dns-axfr
+add=role/monitor
