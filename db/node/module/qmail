@@ -9,5 +9,5 @@ add=user/qmailr group=qmail home=/var/qmail
 add=user/qmails group=qmail home=/var/qmail
 add=user/mail group=mail home=/var/mail
 add=package/notqmail
-add=monitor/tcp port=25
+add=monitor/tcp name=tcp-smtp port=25
 add=module/inetd

@@ -1,2 +1,2 @@
 add=service/sshd
-add=monitor/ssh
+add=monitor/ssh name=ssh

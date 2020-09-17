@@ -1,1 +1,0 @@
-!preline -f /opt/dovecot/current/libexec/dovecot/dovecot-lda -d $EXT@$USER

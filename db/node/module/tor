@@ -1,3 +1,3 @@
 add=package/tor
 add=service/tor
-add=monitor/tcp port=9150
+add=monitor/tcp name=tcp-tor port=9150

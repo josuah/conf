@@ -1,3 +1,3 @@
 add=package/icecast
 add=service/icecast
-add=monitor/http port=8080
+add=monitor/http name=http-icecast port=8080
