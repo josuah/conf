@@ -1,0 +1,73 @@
+#!/usr/bin/awk -f
+
+# Turn a stream of "time=1600297219 " into a bar graph ||||||| with green/red
+# to show availability of service.  The name of the serivce is deduced from
+# the path.
+
+
+function flush_values(ctx)
+{
+	printf "\033[%d;1m|\033[m", (32 - (ctx["sum"] < ctx["num"]))
+	delete ctx["sum"]
+	delete ctx["num"]
+	ctx["progress"] += STEP
+}
+
+function add_value(time, value, ctx)
+{
+	ctx["progress"] = START
+
+	if (time > ctx["progress"] && ctx["num"] > 0)
+		flush_values(ctx)
+
+	# catch up with time by filling the gaps with spaces
+	while (ctx["progress"] < time) {
+		printf " "
+		ctx["progress"] += STEP
+	}
+
+	# accumulate the sum and num of entries now that we are at the tip
+	ctx["sum"] += (value == "ok")
+	ctx["num"] += 1
+}
+
+function var_split(input, var,
+	key, fields, i)
+{
+	split(input, fields, " ")
+	for (i in fields) {
+		key = substr(fields[i], 1, index(fields[i], "=") - 1)
+		var[key] = substr(fields[i], index(fields[i], "=") + 1)
+	}
+}
+
+BEGIN {
+	cmd = "date +%s"
+	cmd | getline NOW
+	close(cmd)
+	NOW = NOW - NOW % STEP + STEP
+
+	STEP = ENVIRON["STEP"] ? ENVIRON["STEP"] : 600
+	COUNT = ENVIRON["COUNT"] ? ENVIRON["COUNT"] : 80
+	START = NOW - STEP * COUNT
+	START = START - START % STEP + STEP
+
+	NAME = ARGV[1]
+	sub("/[^/]+$", "", NAME)
+	sub(".*/", "", NAME)
+
+	printf "  %-15s %s |", NAME, START
+}
+
+{ var_split($0, var) }
+
+START <= var["time"] {
+	sub("[^ ]+ [^ ]+ ", "", $0)
+	add_value(var["time"], var["exit"], ctx)
+}
+
+{ split("", var) }
+
+END {
+	printf "| %s\n", NOW
+}

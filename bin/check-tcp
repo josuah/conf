@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+for x; do export "var_$x"; done
+
+exec nc -vz "$var_ip" "$var_port"

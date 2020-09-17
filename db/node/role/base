@@ -1,5 +1,4 @@
 add=module/dotfiles
 add=module/shell
-add=module/monitor
 add=module/ssh
 add=module/cron

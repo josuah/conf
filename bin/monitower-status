@@ -1,0 +1,20 @@
+#!/bin/sh -eu
+
+spool=/var/spool/monitower
+
+if [ "$#" = 0 ]; then
+	for host in "$spool/"*; do
+		set -- "$@" "${host##*/}"
+	done
+fi
+
+for hsot in "$@"; do
+	for path in "$spool/$host/"*"/current"; do
+		[ -f "$path" ] || continue
+
+		echo
+		echo "$host"
+		monitower-show "$path"
+	done
+	echo
+done

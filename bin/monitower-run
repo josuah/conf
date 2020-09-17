@@ -1,0 +1,36 @@
+#!/bin/sh -eu
+
+# This part of monitower reads a single log file as input, and for every line,
+# split it as key=values format, and trigger the "$check" for "$host" and store it
+# as "$host/$name" in the spool directory.
+#
+# This way, as few as possible is performed every time, and no complex configuration
+# parsing and exploitation is made at every run, and this script is inexpensive enough
+# to be run from a /etc/crontab.
+
+check() { set -u +e
+	local exit line
+	for x; do local "var_$x"; done
+
+	: ${var_timeout:=5}
+
+	mkdir -p "$spool/$var_host/$var_name"
+	"check-$var_check" "$@" >&1 & pid=$!
+	sleep "$var_timeout" && kill "$pid" 2>/dev/null &
+	wait "$pid"
+	exit=$?
+
+	line="time=$now exit=$exit"
+	echo "$line" >>$spool/$var_host/$var_name/current
+	[ "$exit" = 0 ] || monitower-event "$line $*" &
+}
+
+now=$(date +%s)
+spool=/var/spool/monitower
+IFS='
+'
+
+sed -r 's,\\\\,\\s,g; s,\\",\\q,g' "$@" \
+| while IFS=' ' read name check line; do
+	check $(echo $line | xargs -n 1)
+done
