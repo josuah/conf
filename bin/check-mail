@@ -1,22 +1,27 @@
 #!/bin/sh -eu
 for x; do export "var_$x"; done
 
-: ${var_port:=25} ${var_timeout:=5}
+: ${var_port:=25} ${var_timeout:=1}
 
-while read line; do
-	printf '%s\r\n' "$line"
-	sleep 0.1
-done << EOF | nc -w "$var_timeout" -v "$var_ip" "$var_port"
-EHLO monitoring
-MAIL from:<monitoring>
-RCPT to:<$var_mail>
-DATA
+out() {
+	echo "C: $*" >&2
+	printf '%s\r\n' "$*"
+	sleep 0.4
+}
 
-From: monitorin
-To: $var_mail
-Subject: check=mail time=$(date +%s)
-
-Empty body.
-.
-EOF
-
+{
+out "EHLO monitoring"
+out "MAIL from:<monitoring>"
+out "RCPT to:<$var_mail>"
+out "DATA"
+out ""
+out "From: monitorin"
+out "To: $var_mail"
+out "Subject: check=mail time=$(date +%s)"
+out ""
+out "Message body."
+out "."
+} | nc -w "$var_timeout" "$var_ip" "$var_port" | while read code line; do
+	echo "S: $code $line" >&2
+	case $code in (5*) exit 1 ;; esac
+done
