@@ -1,4 +1,4 @@
 # generated from {{ path }} at {{ now }}
-#for mail/domains
+#for mail/rules-domain
 {{ 1:match }}
 #end
