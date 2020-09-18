@@ -39,7 +39,7 @@ function array_swap(array, a, b,
 function array_keys(array, keys,
 	n, x)
 {
-	array_delete(keys)
+	split("", keys)
 	for (x in array)
 		keys[++n] = x
 	array_sort(keys, 1, n)
@@ -68,14 +68,6 @@ function array_sort(array, beg, end)
 	array_sort(array, a, end)			# sort bottom half
 }
 
-function array_delete_with_prefix(array, prefix,
-	x)
-{
-	for (x in array)
-		if (substr(x, 1, length(prefix)) == prefix)
-			delete array[x]
-}
-
 function array_prefix_keys(array_in, array_out, prefix,
 	x)
 {
@@ -83,11 +75,6 @@ function array_prefix_keys(array_in, array_out, prefix,
 		array_out[prefix x] = array_in[x]
 		delete array_out[x]
 	}
-}
-
-function array_delete(array)
-{
-	split("", array)
 }
 
 function array_length(array,
@@ -176,7 +163,7 @@ function db_getline(path, row,
 		return db_getline(path, row)
 
 	n = row[""]
-	array_delete(row)
+	split("", row)
 	db_split(line, argv)
 	db_keyval(argv, row)
 	row[""] = n + 1
@@ -213,7 +200,7 @@ function db_expand(str, vars,
 function db_query(path, keys, query, result,
 	row, found, i, n)
 {
-	array_delete(result)
+	split("", result)
 	while (db_getmatch(path, query, row)) {
 		for (i = 1; i in keys; i++) {
 			if (keys[i] in row)
@@ -226,7 +213,7 @@ function db_query(path, keys, query, result,
 	return 0
 }
 
-function db_fmt(val)
+function db_format_val(val)
 {
 	gsub("\t", " ", val)
 	return index(val, " ") ? "\"" val "\"" : val
@@ -246,7 +233,7 @@ function db_pprint(row, width,
 			printf "\n    "
 			col = 4
 		}
-		val = db_fmt(row[keys[i]])
+		val = db_format_val(row[keys[i]])
 		printf " " color(36) "%s=" color(0) "%s", keys[i], val
 		col += len
 	}
@@ -254,21 +241,18 @@ function db_pprint(row, width,
 	printf "\n"
 }
 
-function db_print(row, path,
-	i, keys, sp)
+function db_format_row(row,
+	i, keys, sp, out)
 {
 	if (array_keys(row, keys) == 0)
 		return
 	for (i = 1; i in keys; i++) {
 		if (keys[i] == "")
 			continue
-		if (sp)
-			printf " " >>path
-		val = db_fmt(row[keys[i]])
-		printf "%s=%s", keys[i], val >>path
-		sp = 1
+		out = out sp keys[i] "=" db_format_val(row[keys[i]])
+		sp = " "
 	}
-	printf "\n" >>path
+	return out
 }
 
 
@@ -364,7 +348,7 @@ function tpl_flush(texts, queries, lv, vars,
 			tpl_flush(texts, queries, tpl_inc_level(x), vars)
 		}
 	}
-	array_delete_with_prefix(vars, n ":")
+	split("", vars, n ":")
 }
 
 
@@ -392,8 +376,8 @@ function cmd_template(path, argv,
 
 			if (lv == "") {
 				tpl_flush(texts, queries, "1")
-				array_delete(queries)
-				array_delete(texts)
+				split("", queries)
+				split("", texts)
 			}
 
 		} else if (lv == "") {
@@ -425,6 +409,7 @@ function cmd_list(path, argv,
 	cmd = "stty size 2>/dev/null"
 	cmd | getline width
 	close(cmd)
+
 	sub(".* ", "", width)
 	width = (width == "" ? 80 : width + 0)
 
@@ -443,7 +428,7 @@ function cmd_add(path, argv,
 		usage()
 
 	db_keyval(argv, row)
-	db_print(row, path)
+	print db_format_row(row) >>path
 }
 
 function cmd_del(path, argv,
@@ -457,12 +442,12 @@ function cmd_del(path, argv,
 		num[array[x]]++
 
 	"mktemp" | getline tmp
-	close(mktemp)
+	close("mktemp")
 
 	while (db_getline(path, row)) {
 		if (row[""] in num)
 			continue
-		db_print(row, tmp)
+		print db_format_row(row) >>path
 	}
 	return system("mv -f '" tmp "' '" path "'") == 0
 }
@@ -482,14 +467,61 @@ function cmd_set(path, argv,
 
 	while (db_getline(path, row)) {
 		if (row[""] in num) {
-			array_delete(keys)
+			split("", keys)
 			db_keyval(argv, row, keys)
 			for (x in keys)
 				delete row[keys[x]]
 		}
-		db_print(row, tmp)
+		print db_format_row(row) >>tmp
 	}
 	return system("mv -f '" tmp "' '" path "'") == 0
+}
+
+function cmd_num(path, argv,
+	query, row, first)
+{
+	db_keyval(argv, query)
+	for (first = 1; db_getmatch(path, query, row); first = 0)
+		printf "%s%s", (first ? "" : ","), row[""]
+	printf "\n"
+}
+
+function cmd_move(path, argv,
+	x, array, num, row, tmp, block, to)
+{
+	if (!(2 in argv) || (3 in argv))
+		usage()
+
+	split(array_shift(argv), array, ",")
+	for (x in array)
+		num[array[x]]++
+
+	to = array_shift(argv)
+
+	while (db_getline(path, row)) {
+		if (row[""] in num)
+			block = block db_format_row(row)
+		delete num[row[""]]
+	}
+	if (to < 1 || to > row[""])
+		die("destination outside possible values: " to)
+	for (x in num)
+		die("source outside possible values: " x)
+
+	"mktemp" | getline tmp
+	close("mktemp")
+
+	delete row[""]
+	while (db_getline(path, row)) {
+		print "(" num[""] " == " to ") => " (num[""] == to)
+		if (num[""] == to)
+			print block >>tmp
+		print "(" row[""] " in " num " )) => " (!(row[""] in num))
+		if (!(row[""] in num))
+			print db_format_row(row) >>tmp
+	}
+
+	system("mv '" tmp "' '" path "'")
 }
 
 
@@ -503,6 +535,8 @@ function usage()
 	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
 	print " adm-db <db> add <key>=<value>..."		>"/dev/stderr"
 	print " adm-db <db> del <n>"				>"/dev/stderr"
+	print " adm-db <db> num <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> move <n> <n>"			>"/dev/stderr"
 	print " adm-db <template> template"			>"/dev/stderr"
 	exit(1)
 }
@@ -536,6 +570,12 @@ BEGIN {
 
 	} else if (cmd == "del") {
 		cmd_del(path, ARGV)
+
+	} else if (cmd == "num") {
+		cmd_num(path, ARGV)
+
+	} else if (cmd == "move") {
+		cmd_move(path, ARGV)
 
 	} else if (cmd == "template") {
 		cmd_template(path, ARGV)
