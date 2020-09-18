@@ -11,3 +11,4 @@ add=user/mail group=mail home=/var/mail
 add=package/notqmail
 add=monitor/tcp name=tcp-smtp port=25
 add=module/inetd
+add=exec/qmail-start argv=./Maildir/ pexp=qmail-send
