@@ -1,9 +1,9 @@
 
 deploy_pre() { set -eu
 
-	find * -name "deploy*sh" -o \
+	find * -name "lib.sh" -o \
 		-type d -exec mkdir -p "$HOME/.{}" \; -o \
-		-type f -exec ln -sf "$PWD/{}" "$HOME/.{}" \;
+		-type f -exec cp "$PWD/{}" "$HOME/.{}" \;
 
 	mkdir -p "$HOME/.ssh/sock"
 	touch "$HOME/.ssh/config_local"

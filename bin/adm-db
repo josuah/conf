@@ -126,7 +126,7 @@ function db_split(str, argv)
 	sub("^[ \t]*", "", str)
 	sub("[ \t]*$", "", str)
 
-	# split into argv
+	# split ito argv
 	split(str, argv, "\t")
 
 	# restore escaped inline characters
@@ -155,12 +155,12 @@ function db_keyval(argv, row, keys,
 function db_getline(path, row,
 	argv, line, n)
 {
-	if ((getline line <path) <= 0) {
-		close(path)
-		return 0
-	}
-	if (line ~ /^[ \t]*#/)
-		return db_getline(path, row)
+	do {
+		if ((getline line <path) <= 0) {
+			close(path)
+			return 0
+		}
+	} while (line ~ /^[ \t]*#/)
 
 	n = row[""]
 	split("", row)
@@ -447,7 +447,7 @@ function cmd_del(path, argv,
 	while (db_getline(path, row)) {
 		if (row[""] in num)
 			continue
-		print db_format_row(row) >>path
+		print db_format_row(row) >>tmp
 	}
 	return system("mv -f '" tmp "' '" path "'") == 0
 }
@@ -487,36 +487,30 @@ function cmd_num(path, argv,
 }
 
 function cmd_move(path, argv,
-	x, array, num, row, tmp, block, to)
+	x, array, num, to, row, tmp, block)
 {
 	if (!(2 in argv) || (3 in argv))
 		usage()
 
 	split(array_shift(argv), array, ",")
 	for (x in array)
-		num[array[x]]++
+		num[array[x]] = x
 
 	to = array_shift(argv)
 
-	while (db_getline(path, row)) {
+	while (db_getline(path, row))
 		if (row[""] in num)
 			block = block db_format_row(row)
-		delete num[row[""]]
-	}
 	if (to < 1 || to > row[""])
 		die("destination outside possible values: " to)
-	for (x in num)
-		die("source outside possible values: " x)
 
 	"mktemp" | getline tmp
 	close("mktemp")
 
 	delete row[""]
 	while (db_getline(path, row)) {
-		print "(" num[""] " == " to ") => " (num[""] == to)
-		if (num[""] == to)
+		if (row[""] == to)
 			print block >>tmp
-		print "(" row[""] " in " num " )) => " (!(row[""] in num))
 		if (!(row[""] in num))
 			print db_format_row(row) >>tmp
 	}
