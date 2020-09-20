@@ -1,9 +1,9 @@
 dom=@ host=olor soa=z0.is
-host=olor soa=z0.is dom=code
-host=olor soa=z0.is dom=notqmail
-host=olor soa=z0.is dom=duckless
-host=olor soa=z0.is dom=*.duckless
-host=olor soa=josuah.net dom=@
-host=olor soa=josuah.net dom=www
-host=olor soa=atelier-fu.fr dom=@
-host=olor soa=atelier-fu.fr dom=www
+dom=code host=niger soa=z0.is
+dom=notqmail host=olor soa=z0.is
+dom=duckless host=olor soa=z0.is
+dom=*.duckless host=olor soa=z0.is
+dom=@ host=olor soa=josuah.net
+dom=www host=olor soa=josuah.net
+dom=@ host=olor soa=atelier-fu.fr
+dom=www host=olor soa=atelier-fu.fr
