@@ -1,12 +1,4 @@
 
-# draws a dependency onto s6-networking onto the core
-
-_exec_systemd_socket() ( set -eu
-	local v="$1" ip="$2" port="$3" argv="$4"
-	export LISTEN_FDS=1
-
-)
-
 cmd_exec_start() { set -eu
 	local cmd="$1"
 	local argv="$cmd${var_argv:+ $var_argv}"
@@ -14,14 +6,18 @@ cmd_exec_start() { set -eu
 
 	pgrep -f "$pexp" >/dev/null && return
 
-	if [ "${var_systemd_socket:-}" ]; then
+	if [ "${var_listen:-}" ]; then
 		export LISTEN_FDS=1
-		s6-tcpserver4-socketbinder 0.0.0.0 "$var_port" sh -c "exec $argv 3>&0" \
+
+		s6-tcpserver4-socketbinder 0.0.0.0 "$var_port" \
+		  sh -c "exec $argv 3>&0" 2>&1 \
 		| logger -t "$cmd" &
-		s6-tcpserver6-socketbinder :: "$var_port" sh -c "exec $argv 3>&0" \
+
+		s6-tcpserver6-socketbinder :: "$var_port" \
+		  sh -c "exec $argv 3>&0" 2>&1 \
 		| logger -t "$cmd" &
 	else
-		sh -c "exec $argv" | logger -t "$cmd"
+		sh -c "exec $argv" 2>&1 | logger -t "$cmd"
 	fi
 
 	cmd_exec_status "$cmd"
