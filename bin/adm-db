@@ -77,14 +77,6 @@ function array_prefix_keys(array_in, array_out, prefix,
 	}
 }
 
-function array_length(array,
-	x, n)
-{
-	for (x in array)
-		n++
-	return n
-}
-
 function array_shift(array,
 	first, i)
 {
@@ -94,6 +86,14 @@ function array_shift(array,
 		array[i] = array[i + 1]
 	delete array[i]
 	return first
+}
+
+function array_delete(array, prefix,
+	x)
+{
+	for (x in array)
+		if (substr(array[x], 1, length(prefix)) == prefix)
+			delete array[x]
 }
 
 ## tools ##
@@ -348,7 +348,7 @@ function tpl_flush(texts, queries, lv, vars,
 			tpl_flush(texts, queries, tpl_inc_level(x), vars)
 		}
 	}
-	split("", vars, n ":")
+	array_delete(vars, n ":")
 }
 
 
