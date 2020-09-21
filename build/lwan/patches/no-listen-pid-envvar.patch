@@ -1,0 +1,29 @@
+diff --git a/src/lib/sd-daemon.c b/src/lib/sd-daemon.c
+index b6d1c3f..265b2c1 100644
+--- a/src/lib/sd-daemon.c
++++ b/src/lib/sd-daemon.c
+@@ -40,24 +40,6 @@ int sd_listen_fds(int unset_environment) {
+         int n, l, r, fd;
+         const char *e;
+ 
+-        e = getenv("LISTEN_PID");
+-        if (!e) {
+-                r = 0;
+-                goto finish;
+-        }
+-
+-        l = parse_int(e, -1);
+-        if (l <= 0) {
+-                r = -EINVAL;
+-                goto finish;
+-        }
+-
+-        /* Is this for us? */
+-        if (getpid() != (pid_t)l) {
+-                r = 0;
+-                goto finish;
+-        }
+-
+         e = getenv("LISTEN_FDS");
+         if (!e) {
+                 r = 0;
