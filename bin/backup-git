@@ -1,0 +1,12 @@
+#!/bin/sh -eu
+
+host=$1
+
+for x in $(ssh "git@$host" "echo *"); do
+	echo "-- backup git/$x"
+	if [ ! -d "/srv/git/$x" ]; then
+		git clone --mirror "git@$host:$x" "/srv/git/$x"
+	else
+		git -C "/srv/git/$x" fetch --all
+	fi
+done
