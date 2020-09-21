@@ -31,7 +31,8 @@ case $- in
 
 	set -o emacs 2>"/dev/null"
 
-	if ! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK" >/dev/null; then
+	if [ -z "$SSH_CLIENT" ] &&
+	! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK"; then
 		rm -f "$SSH_AUTH_SOCK"
 		ssh-agent -a "$SSH_AUTH_SOCK"
 	fi
