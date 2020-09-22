@@ -1,1 +1,1 @@
-*/10	*	*	*	*	root	monitower-run /etc/monitower/queue
+*	*	*	*	*	root	monitower-run /etc/monitower/queue

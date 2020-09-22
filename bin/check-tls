@@ -1,8 +1,0 @@
-#!/bin/sh -eu
-for x; do export "var_$x"; done
-
-exec openssl s_client 
-  -servername "$var_dom" \
-  -connect "$var_dom:$var_port" \
-  -verify_return_error -verify_depth 3 \
-  </dev/null
