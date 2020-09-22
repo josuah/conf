@@ -1,10 +1,8 @@
 
 _monitower_dns() {
-	adm-db "$etc/db/dns/alias" get dom soa | while read dom soa; do
-		dom=${dom#@}
-		dom=${dom:+$dom.}$soa
-		echo "$* type=a dom=$dom"
-	done
+	adm-db "$etc/db/dns/zones" get soa \
+	| sed 's,^,dom=,' \
+	| xargs -n 1 echo "$* type=a"
 }
 
 deploy_pre() { set -eu
