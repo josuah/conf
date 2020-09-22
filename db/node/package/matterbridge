@@ -1,2 +1,2 @@
 add=module/go
-add=golang/github.com/42wim/matterbridge cmd=matterbridge
+add=golang/matterbridge cmd=matterbridge url=github.com/42wim/matterbridge
