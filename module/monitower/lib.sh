@@ -10,7 +10,7 @@ deploy_pre() { set -eu
 
 	mkdir -p "$dest/etc/monitower"
 
-	adm-db "$etc/db/host/ip" get pub=true host ip | while read host ip; do
+	adm-db "$etc/db/host/ip" get pub=true v=4 host ip | while read host ip; do
 		adm list "host/$host" | while IFS=' /' read type name vars; do
 
 			line="host=$host ip=$ip check=$name $vars"
