@@ -1,6 +1,6 @@
 
 _monitower_dns() {
-	adm-db "$etc/db/dns/zones" get soa \
+	adm-db "$db/dns_zones" get soa \
 	| sed 's,^,dom=,' \
 	| xargs -n 1 echo "$* type=a"
 }
@@ -10,7 +10,7 @@ deploy_pre() { set -eu
 
 	mkdir -p "$dest/etc/monitower/check.d"
 
-	adm-db "$etc/db/host/ip" get pub=true v=4 host ip \
+	adm-db "$db"/host_ip get pub=true v=4 host ip \
 	| while read host ip; do
 
 		adm list "host/$host" \

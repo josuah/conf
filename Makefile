@@ -8,5 +8,4 @@ install:
 
 update: install
 	mkdir -p local
-	ls db | (cd local && xargs mkdir -p)
 	./bin/adm install

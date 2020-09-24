@@ -1,4 +1,4 @@
 # generated from {{ path }} at {{ now }}
-#for mail/rules-domain
+#for mail_domain
 {{ 1:match }}:{{ 1:goto }}-
 #end

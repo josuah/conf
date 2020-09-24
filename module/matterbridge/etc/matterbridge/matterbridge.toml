@@ -8,13 +8,13 @@
 
 [whatsapp]
 [whatsapp.me]
-  Number = "{{ whatsapp/var:tel }}"
+  Number = "{{ whatsapp_var:tel }}"
   SessionFile = "/var/cache/matterbridge/whatsapp.gob"
 
 [discord]
 [discord.me]
-  Token = "{{ discord/var:token }}"
-  Server = "{{ discord/var:guild }}"
+  Token = "{{ discord_var:token }}"
+  Server = "{{ discord_var:guild }}"
 
 # whatsapp chans
 #for whatsapp/chan
@@ -25,7 +25,7 @@
 [[gateway.inout]]
   account = "irc.local"
   channel = "#whatsapp-{{ 1:name }}"
-  options = { key="{{ irc/chan:pass name=#whatsapp-[1:name] }}" }
+  options = { key="{{ irc_chan:pass name=#whatsapp-[1:name] }}" }
 [[gateway.inout]]
   account = "whatsapp.me"
   channel = "{{ 1:name }}"
@@ -40,7 +40,7 @@
 [[gateway.inout]]
   account = "irc.local"
   channel = "#discord-{{ 1:name }}"
-  options = { key="{{ irc/chan:pass name=#discord-[1:name] }}" }
+  options = { key="{{ irc_chan:pass name=#discord-[1:name] }}" }
 [[gateway.inout]]
   account = "discord.me"
   channel = "{{ 1:name }}"

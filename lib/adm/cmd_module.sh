@@ -13,7 +13,7 @@ cmd_module_install() { set -eu
 	for x in $(cd "$conf" && find etc var -type f 2>/dev/null); do
 		[ -f "$conf/$x" ] || continue
 		mkdir -p "$(dirname "$dest/$x")"
-		(cd "$etc/db" && adm-db "$conf/$x" template >$dest/$x)
+		(cd "$db" && adm-db "$conf/$x" template >$dest/$x)
 	done
 	cp -r "$dest/etc" "$dest/var" /
 
