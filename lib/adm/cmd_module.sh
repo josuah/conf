@@ -10,13 +10,11 @@ cmd_module_install() { set -eu
 
 	(type deploy_pre >/dev/null && cd "$conf" && deploy_pre)
 
-	while read x; do
+	for x in $(cd "$conf" && find etc var -type f 2>/dev/null); do
 		[ -f "$conf/$x" ] || continue
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$etc/db" && adm-db "$conf/$x" template >$dest/$x)
-	done <<EOF
-$(cd "$conf" && find etc var -type f 2>/dev/null)
-EOF
+	done
 	cp -r "$dest/etc" "$dest/var" /
 
 	(type deploy_post >/dev/null && cd "$conf" && deploy_post)

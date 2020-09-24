@@ -8,10 +8,13 @@ _monitower_dns() {
 deploy_pre() { set -eu
 	local line
 
-	mkdir -p "$dest/etc/monitower"
+	mkdir -p "$dest/etc/monitower/check.d"
 
-	adm-db "$etc/db/host/ip" get pub=true v=4 host ip | while read host ip; do
-		adm list "host/$host" | while IFS=' /' read type name vars; do
+	adm-db "$etc/db/host/ip" get pub=true v=4 host ip \
+	| while read host ip; do
+
+		adm list "host/$host" \
+		| while IFS=' /' read type name vars; do
 
 			line="host=$host ip=$ip check=$name $vars"
 
@@ -21,5 +24,5 @@ deploy_pre() { set -eu
 			(*) continue ;;
 			esac
 		done
-	done >$dest/etc/monitower/queue
+	done >$dest/etc/monitower/check.d/adm.conf
 }
