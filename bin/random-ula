@@ -1,5 +1,0 @@
-#!/bin/sh -e
-# generate a random fd00:xxxx:xxxx: network prefix from /dev/urandom
-
-dd if=/dev/urandom bs=4 count=1 2>/dev/null |
-	od -x -A n | sed -r 's/[^0-9a-z]//g; s/..../:&/g; s/^/fd00/'

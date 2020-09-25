@@ -2,4 +2,4 @@
 ={{ 1:dom }}--{{ 1:match }}:mail:{{ uid }}:{{ gid }}:/var/mail/{{ 1:dom }}/{{ 1:goto }}:::
 #end
 .
-# generated from {{ path }} at {{ now }}
+# by {{ path }} at {{ now }}

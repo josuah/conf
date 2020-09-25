@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- generated from {{ path }} at {{ now }} -->
+<!-- by {{ path }} at {{ now }} -->
 
 <icecast>
 	<location>@</location>

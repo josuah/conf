@@ -351,11 +351,20 @@ function tpl_flush(texts, queries, lv, vars,
 	array_delete(vars, n ":")
 }
 
+function tpl_addline(texts, lv, line)
+{
+	if (lv == "") {
+		print tpl_replace(line)
+	} else {
+		texts[lv] = texts[lv] line "\n"
+	}
+}
+
 
 ## commands ##
 
 function cmd_template(path, argv,
-	line, lv, queries, texts)
+	line, include, lv, queries, texts)
 {
 	if (1 in argv)
 		usage()
@@ -364,7 +373,12 @@ function cmd_template(path, argv,
 
 	while ((getline line <path) > 0) {
 
-		if (sub(/^#+for /, "", line)) {
+		if (sub(/^#+include /, "", line)) {
+			include = line
+			while ((getline line <include) > 0)
+				tpl_addline(texts, lv, line)
+
+		} else if (sub(/^#+for /, "", line)) {
 			lv = tpl_inc_level(lv)
 			queries[lv] = line
 
@@ -380,11 +394,8 @@ function cmd_template(path, argv,
 				split("", texts)
 			}
 
-		} else if (lv == "") {
-			print tpl_replace(line)
-
 		} else {
-			texts[lv] = texts[lv] line "\n"
+			tpl_addline(texts, lv, line)
 		}
 	}
 }
