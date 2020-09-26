@@ -8,7 +8,7 @@ add=user/qmailq group=qmail home=/var/qmail
 add=user/qmailr group=qmail home=/var/qmail
 add=user/qmails group=qmail home=/var/qmail
 add=user/mail group=mail home=/var/mail
-add=pack/notqmail
-monitor=tcp name=tcp-smtp port=25
+add=pkg/notqmail
+add=monitor/tcp name=tcp-smtp port=25
 add=mod/inetd
-add=exec argv=./Maildir/ pexp=qmail/send
+add=exec/dovecot argv=./Maildir/ pexp=qmail-send

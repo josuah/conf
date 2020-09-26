@@ -1,2 +1,0 @@
-add=mod/nsd-axfr
-monitor=dns name=dns

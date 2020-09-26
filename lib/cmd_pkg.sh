@@ -1,5 +1,5 @@
 
-_build_git() { set -eu
+_pkg_git() { set -eu
 	local bare="$cache/git/$name"
 
 	if [ ! -d "$bare" ]; then
@@ -15,7 +15,7 @@ _build_git() { set -eu
 	fi
 }
 
-_build_tar() { set -eu
+_pkg_tar() { set -eu
 	local tar="$cache/tar/$(basename "$url")"
 
 	if [ ! -f "$tar" ]; then
@@ -43,25 +43,25 @@ _build_tar() { set -eu
 	fi
 }
 
-cmd_build_install() { set -eu
+cmd_pkg_install() { set -eu
 	local name="$1"
 
-	. "$etc/build/$name/lib.sh"
+	. "$etc/pkg/$name/lib.sh"
 
 	export PREFIX="$usr"
 	export DESTDIR="$PREFIX/opt/$name-${v:-$commit}"
 	export SOURCE="$cache/src/$name-${v:-$commit}"
 
 	[ -d "$DESTDIR" ] && return 0
-	[ "${sha256:-}" ] && _build_tar
-	[ "${commit:-}" ] && _build_git
+	[ "${sha256:-}" ] && _pkg_tar
+	[ "${commit:-}" ] && _pkg_git
 
-	if [ -d "$etc/build/$name/files" ]; then
-		cp -r "$etc/build/$name/files/"* "$SOURCE"
+	if [ -d "$etc/pkg/$name/files" ]; then
+		cp -r "$etc/pkg/$name/files/"* "$SOURCE"
 	fi
 
-	if [ -d "$etc/build/$name/patches" ]; then
-		for x in "$etc/build/$name/patches/"*; do
+	if [ -d "$etc/pkg/$name/patches" ]; then
+		for x in "$etc/pkg/$name/patches/"*; do
 			(cd "$SOURCE"; patch -p1 -N) <$x
 		done
 	fi
@@ -72,7 +72,7 @@ cmd_build_install() { set -eu
 	ln -sf "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
 	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
 
-	(cd "$SOURCE"; build) || exit "$?"
+	(cd "$SOURCE"; pkg) || exit "$?"
 
 	rm -rf "$DESTDIR/$PREFIX" "$SOURCE"
 	! rmdir "$DESTDIR/"* 2>/dev/null

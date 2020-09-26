@@ -1,5 +1,5 @@
 
-cmd_module_install() { set -eu
+cmd_mod_install() { set -eu
 	local name="$1"
 	local conf="$etc/module/$name"
 	local dest="$tmp/module/$name"

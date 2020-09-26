@@ -1,2 +1,0 @@
-add=mod/nsd-auth
-monitor=dns name=dns

@@ -1,2 +1,2 @@
 add=service/inetd
-add=pack/inetd
+add=pkg/inetd

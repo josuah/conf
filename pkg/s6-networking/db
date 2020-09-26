@@ -1,0 +1,2 @@
+add=pkg/s6-dns
+add=pkg/libbearssl

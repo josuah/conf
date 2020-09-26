@@ -1,0 +1,3 @@
+add=pkg/libmbedtls
+add=pkg/libprotobuf-c
+add=pkg/libconfig

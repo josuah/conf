@@ -13,6 +13,9 @@ cmd() { set -eu
 		export "var_$x"
 	done
 	unset IFS
+
+	[ -f "$etc/$type/$name/lib.sh" ] && . "$etc/$type/$name/lib.sh"
+
 	"cmd_${type}_${cmd}" "$name"
 }
 
@@ -35,18 +38,20 @@ list() { set -eu
 	shift 2
 
 	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
-	if [ -f "$etc/$node" ]; then
+	if [ -f "$etc/$node/db" ]; then
 		while read -r node vars; do
-			list $((level + 1)) "${node#add=}" $* $vars
-		done <$etc/$node
+			case "$node" in
+			(add=*) list $((level + 1)) "${node#add=}" $* $vars ;;
+			esac
+		done <$etc/$node/db
 	fi
 }
 
 export etc="${ADM_CONFIG:-/etc/adm}"
 export db="$etc/db"
+export lib="$etc/lib"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
-export lib="${0%/*/*}/lib/adm"
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 for x in adm /usr/*/bin /usr/*/sbin; do
@@ -71,10 +76,10 @@ case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in
 (sync | install | update | uninstall | start | stop | restart | reload | status)
-	. "$lib/cmd_build.sh"
+	. "$lib/cmd_pkg.sh"
+	. "$lib/cmd_mod.sh"
 	. "$lib/cmd_golang.sh"
 	. "$lib/cmd_host.sh"
-	. "$lib/cmd_module.sh"
 	. "$lib/cmd_repo.sh"
 	. "$lib/cmd_exec.sh"
 	. "$lib/os_$os.sh"

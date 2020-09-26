@@ -1,2 +1,0 @@
-add=mod/go
-add=golang cmd=matterbridge url=github.com/42wim/matterbridge
