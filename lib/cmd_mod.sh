@@ -1,5 +1,5 @@
 
-cmd_mod_install() { set -eu
+cmd_mod_install() { set -eux
 	local name="$1"
 	local conf="$etc/mod/$name"
 	local dest="$tmp/mod/$name"
@@ -13,7 +13,7 @@ cmd_mod_install() { set -eu
 	for x in $(cd "$conf" && find etc var -type f 2>/dev/null); do
 		[ -f "$conf/$x" ] || continue
 		mkdir -p "$(dirname "$dest/$x")"
-		(cd "$db" && adm-db "$conf/$x" template >$dest/$x)
+		(cd "$etc" && adm-db "$conf/$x" template >$dest/$x)
 	done
 	scp -r "$dest/etc" "$dest/var" /
 

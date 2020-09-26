@@ -3,7 +3,7 @@ ip=45.32.148.148 pub=true v=4
 ip=2001:19f0:6801:186d:5400:2ff:feef:74fc pub=true v=6
 add=mod/base
 add=mod/mail
-add=mod/openbsd
+add=mod/os-OpenBSD
 add=mod/git
 add=mod/httpd
 add=mod/wireguard

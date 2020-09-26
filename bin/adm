@@ -1,7 +1,10 @@
 #!/bin/sh -eu
 
 send() { set -eu
-	ssh "root@$host" "$*"
+	ssh "root@$host" "
+		export PATH=/bin:/sbin:/usr/bin:/usr/sbin:\$(echo /usr/*/sbin /usr/*/bin | tr ' ' :)
+		$*
+	" </dev/null
 }
 
 cmd() { set -eu
@@ -39,18 +42,13 @@ cmd="${1:-help}"
 host="${2:-$(hostname -s)}"
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$(echo /usr/*/sbin /usr/*/bin | tr ' ' :)"
 export etc="${ADM_CONFIG:-/etc/adm}"
 export lib="$etc/lib"
 export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$(adm-db "$etc/host/$host/db" get os)"
-
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for x in adm /usr/*/bin /usr/*/sbin; do
-	export PATH="$PATH:$x"
-done
-
 export tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 

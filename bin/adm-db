@@ -1,6 +1,5 @@
 #!/usr/bin/awk -f
 
-
 ## utilities ##
 
 function die(msg)
@@ -95,19 +94,6 @@ function array_delete(array, prefix,
 		if (substr(array[x], 1, length(prefix)) == prefix)
 			delete array[x]
 }
-
-## tools ##
-
-function ip6_hex(ip6,
-	hex, i, arr)
-{
-	sub("::", substr("::::::::", split(ip6, arr, ":") - 1), ip6)
-	split(ip6, arr, ":")
-	for (i = 1; i <= 8; i++)
-		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
-	return hex
-}
-
 
 ## database ##
 
@@ -269,7 +255,6 @@ function db_format_row(row,
 	return out
 }
 
-
 ## templates ##
 
 function tpl_replace(text, vars,
@@ -373,7 +358,6 @@ function tpl_addline(texts, lv, line)
 		texts[lv] = texts[lv] line "\n"
 	}
 }
-
 
 ## commands ##
 
@@ -550,7 +534,6 @@ function cmd_move(path, argv,
 
 	system("mv '" tmp "' '" path "'")
 }
-
 
 ## main ##
 

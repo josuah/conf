@@ -1,4 +1,4 @@
 os=NetBSD
 add=mod/base
-add=mod/netbsd
+add=mod/os-NetBSD
 add=mod/monit
