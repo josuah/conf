@@ -32,14 +32,13 @@ _pkg_tar() { set -eu
 			exit 1
 		}
 
-		mkdir -p "$SOURCE.tmp.$$" "$SOURCE"
-		rm -rf "$SOURCE"
-
 		case $tar in
 		(*gz) gzip -cd "$tar" ;;
 		(*xz) xz -cd "$tar" ;;
 		(*lz) lz -cd "$tar" ;;
 		esac | send "
+			mkdir -p '$SOURCE.tmp.$$' '$SOURCE'
+			rm -rf '$SOURCE'
 			tar -x -f - -C '$SOURCE.tmp.$$'
 			mv '$SOURCE.tmp.$$/'* '$SOURCE'
 		"
@@ -68,7 +67,7 @@ cmd_pkg_install() { set -eu
 	if [ -d "$etc/pkg/$name/patches" ]; then
 		cat "$etc/pkg/$name/patches/"* | send "
 			cd '$SOURCE'
-			patch -p1 -N"
+			patch -p1 -N
 		"
 	fi
 

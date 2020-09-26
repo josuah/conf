@@ -1,5 +1,9 @@
 #!/bin/sh -eu
 
+send() { set -eu
+	ssh "root@$host" "$*"
+}
+
 cmd() { set -eu
 	local type="$1" cmd="$2" name="$3" vars="$4"
 
@@ -45,10 +49,14 @@ list() { set -eu
 	fi
 }
 
+cmd="${1:-help}"
+host="${2:-$(hostname -s)}"
+case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
+
 export etc="${ADM_CONFIG:-/etc/adm}"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
-export os="$(adm-db "$etc/host/$host/db" os)"
+export os="$(adm-db "$etc/host/$host/db" get os)"
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 for x in adm /usr/*/bin /usr/*/sbin; do
@@ -58,28 +66,21 @@ done
 export tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
-cmd="${1:-help}"
-node="${2:-host/$(hostname -s)}"
-case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
-
 case $cmd in
-(sync | install | update | uninstall | start | stop | restart | reload | status)
+(list)
+	list 0 "host/$host" "" "$@"
+	;;
+(install | update | uninstall | start | stop | restart | reload | status)
 	. "$etc/lib/cmd_pkg.sh"
 	. "$etc/lib/cmd_mod.sh"
 	. "$etc/lib/cmd_golang.sh"
-	. "$etc/lib/cmd_host.sh"
 	. "$etc/lib/cmd_repo.sh"
 	. "$etc/lib/cmd_exec.sh"
 	. "$etc/lib/os_$os.sh"
-	list 0 "$node" "" "$@" | sed 's,\\\\,\\s,g; s,\\",\\q,g' | apply "$cmd"
+	list 0 "host/$host" "" "$@" | sed 's,\\\\,\\s,g; s,\\",\\q,g' | apply "$cmd"
 	;;
-
-(list)
-	list 0 "$node" "" "$@"
-	;;
-
 (*)
-	echo "usage: ${0##*/} cmd [node/name] [key=value...]"
+	echo "usage: ${0##*/} cmd [host] [key=value...]"
 	echo "list, install, update, uninstall, start, stop, restart, reload, status"
 	;;
 esac

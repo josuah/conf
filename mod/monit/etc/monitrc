@@ -1,0 +1,12 @@
+set log syslog
+set idfile /var/monit/id
+set statefile /var/monit/state
+set daemon 30
+
+set httpd port 2812 and
+  use address localhost
+  allow admin:{{ db/monit-var:pass }}
+
+set alert {{ db/monit-var:mail }}
+
+include /etc/monit.d/*

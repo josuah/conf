@@ -1,0 +1,2 @@
+add=service/monit
+add=pkg/monit

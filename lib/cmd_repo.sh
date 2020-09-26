@@ -1,6 +1,6 @@
 
 cmd_repo_install() { set -eu
-	send "[ -d "$var_path" ] || git clone --depth 1 "$var_url" "$var_path"
+	send "[ -d "$var_path" ] || git clone --depth 1 '$var_url' '$var_path'"
 }
 
 cmd_repo_update() { set -eu

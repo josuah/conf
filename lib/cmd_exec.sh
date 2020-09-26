@@ -29,7 +29,7 @@ cmd_exec_reload() { set -eu
 	local argv="$cmd${var_argv:+ $var_argv}"
 	local pexp="${var_pexp:-$argv}"
 
-	send 'pkill -f -HUP '$pexp'"
+	send "pkill -f -HUP '$pexp'"
 }
 
 cmd_exec_restart() { set -eu
