@@ -1,4 +1,0 @@
-# by {{ path }} at {{ now }}
-#for mail_domain
-{{ 1:match }}
-#end

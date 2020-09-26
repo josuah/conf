@@ -1,0 +1,4 @@
+# by {{ path }} at {{ now }}
+#for db/mail-domain
+{{ 1:match }}
+#end

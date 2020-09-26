@@ -1,0 +1,8 @@
+add=role/base
+add=role/server
+add=role/openbsd
+add=role/vpn
+add=role/dns-axfr
+add=role/monitor
+ip=136.244.112.11 pub=true v=4
+ip=2001:19f0:6801:14ef:5400:2ff:feba:162e pub=true v=6

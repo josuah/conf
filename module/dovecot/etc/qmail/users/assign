@@ -1,0 +1,5 @@
+#for db/mail-user
+={{ 1:dom }}--{{ 1:match }}:mail:{{ uid }}:{{ gid }}:/var/mail/{{ 1:dom }}/{{ 1:goto }}:::
+#end
+.
+# by {{ path }} at {{ now }}
