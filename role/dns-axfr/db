@@ -1,2 +1,2 @@
-add=module/nsd-axfr
-add=monitor/dns name=dns
+add=mod/nsd-axfr
+monitor=dns name=dns

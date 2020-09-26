@@ -1,2 +1,0 @@
-add=package/git
-add=repo/git url=https://github.com/openbsd/ports path=/usr/ports

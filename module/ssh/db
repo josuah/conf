@@ -1,2 +1,0 @@
-add=service/sshd
-add=monitor/ssh name=ssh

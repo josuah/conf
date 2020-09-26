@@ -1,0 +1,3 @@
+add=pack/tor
+add=service/tor
+monitor=tcp name=tcp-tor port=9150

@@ -1,0 +1,3 @@
+add=pack/git
+add=service/gitdaemon
+monitor=tcp name=tcp-git port=9318

@@ -1,2 +1,2 @@
 add=service/gitdaemon
-add=package/git
+add=pack/git

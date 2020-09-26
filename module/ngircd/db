@@ -1,3 +1,0 @@
-add=package/ngircd
-add=service/ngircd
-add=monitor/tcp name=tcp-ircs port=6697

@@ -1,2 +1,2 @@
-add=module/qmail
-add=module/dovecot
+add=mod/qmail
+add=mod/dovecot

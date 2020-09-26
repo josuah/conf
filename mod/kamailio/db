@@ -1,0 +1,4 @@
+add=pack/kamailio
+add=service/kamailio
+monitor=tcp name=tcp-sip port=5060
+monitor=tls name=tls-sip port=5061

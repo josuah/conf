@@ -1,2 +1,2 @@
-add=module/ngircd
-add=module/matterbridge
+add=mod/ngircd
+add=mod/matterbridge

@@ -1,3 +1,0 @@
-add=package/lwan
-add=exec/lwan argv="-c /etc/lwan/lwan.conf" listen=true port=80
-add=package/s6-networking

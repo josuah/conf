@@ -1,3 +1,0 @@
-add=package/libmbedtls
-add=package/libprotobuf-c
-add=package/libconfig

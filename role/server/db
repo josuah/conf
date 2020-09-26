@@ -1,1 +1,1 @@
-add=monitor/ping name=ping
+monitor=ping name=ping

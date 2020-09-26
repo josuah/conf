@@ -1,2 +1,2 @@
-add=module/nsd-auth
-add=monitor/dns name=dns
+add=mod/nsd-auth
+monitor=dns name=dns

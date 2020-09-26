@@ -42,9 +42,8 @@ list() { set -eu
 	fi
 }
 
-cd "${ADM_CONFIG:-/etc/adm}"
-
-export db="$PWD/db"
+export etc="${ADM_CONFIG:-/etc/adm}"
+export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"

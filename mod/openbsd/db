@@ -1,0 +1,2 @@
+add=pack/git
+add=git url=https://github.com/openbsd/ports path=/usr/ports
