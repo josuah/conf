@@ -1,8 +1,8 @@
 
 cmd_mod_install() { set -eu
 	local name="$1"
-	local conf="$etc/module/$name"
-	local dest="$tmp/module/$name"
+	local conf="$etc/mod/$name"
+	local dest="$tmp/mod/$name"
 
 	. "$etc/mod/$name/lib.sh"
 

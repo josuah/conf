@@ -35,25 +35,13 @@ apply() { set -eu
 	return "$exit"
 }
 
-list() { set -eu
-	local level="$1" node="$2"
-	shift 2
-
-	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
-	if [ -f "$etc/$node/db" ]; then
-		while read -r node vars; do
-			case "$node" in
-			(add=*) list $((level + 1)) "${node#add=}" $* $vars ;;
-			esac
-		done <$etc/$node/db
-	fi
-}
-
 cmd="${1:-help}"
 host="${2:-$(hostname -s)}"
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 export etc="${ADM_CONFIG:-/etc/adm}"
+export lib="$etc/lib"
+export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$(adm-db "$etc/host/$host/db" get os)"
@@ -68,7 +56,7 @@ trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 case $cmd in
 (list)
-	list 0 "host/$host" "" "$@"
+	(cd "$etc"; adm-db "host/$host/db" tree)
 	;;
 (install | update | uninstall | start | stop | restart | reload | status)
 	. "$etc/lib/cmd_pkg.sh"
@@ -77,7 +65,7 @@ case $cmd in
 	. "$etc/lib/cmd_repo.sh"
 	. "$etc/lib/cmd_exec.sh"
 	. "$etc/lib/os_$os.sh"
-	list 0 "host/$host" "" "$@" | sed 's,\\\\,\\s,g; s,\\",\\q,g' | apply "$cmd"
+	(cd "$etc"; adm-db "host/$host/db" tree) | apply "$cmd"
 	;;
 (*)
 	echo "usage: ${0##*/} cmd [host] [key=value...]"

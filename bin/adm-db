@@ -219,7 +219,7 @@ function db_format_val(val)
 	return index(val, " ") ? "\"" val "\"" : val
 }
 
-function db_pprint(row, width,
+function db_print_pretty(row, width,
 	i, n, put, len, col, keys, val)
 {
 	printf("%3d ", row[""])
@@ -239,6 +239,20 @@ function db_pprint(row, width,
 	}
 
 	printf "\n"
+}
+
+function db_print_tree(path, lv,
+	node)
+{
+	while (db_getline(path, row)) {
+		if ("add" in row) {
+			printf "%" (lv*2) "s%s ", "", row["add"]
+			node = row["add"]
+			delete row["add"]
+			print db_format_row(row)
+			db_print_tree(node "/db", lv + 1)
+		}
+	}
 }
 
 function db_format_row(row,
@@ -427,9 +441,17 @@ function cmd_list(path, argv,
 	printf "\n"
 	db_keyval(argv, query)
 	while (db_getmatch(path, query, row)) {
-		db_pprint(row, width)
+		db_print_pretty(row, width)
 		printf "\n"
 	}
+}
+
+function cmd_tree(path, argv)
+{
+	if (1 in argv)
+		usage()
+
+	db_print_tree(path, 0)
 }
 
 function cmd_add(path, argv,
@@ -536,6 +558,7 @@ function usage()
 {
 	print "usage:"						>"/dev/stderr"
 	print " adm-db <db> list [<key>=<value>...]"		>"/dev/stderr"
+	print " adm-db <db> tree"				>"/dev/stderr"
 	print " adm-db <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
 	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
 	print " adm-db <db> add <key>=<value>..."		>"/dev/stderr"
@@ -563,6 +586,9 @@ BEGIN {
 
 	if (cmd == "list") {
 		cmd_list(path, ARGV)
+
+	} else if (cmd == "tree") {
+		cmd_tree(path, ARGV)
 
 	} else if (cmd == "get") {
 		cmd_get(path, ARGV)
