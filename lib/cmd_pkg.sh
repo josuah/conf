@@ -48,7 +48,7 @@ _pkg_tar() { set -eu
 cmd_pkg_install() { set -eu
 	local name="$1"
 
-	[ -f "$etc/pkg/$name/lib.sh" ] || return
+	[ -f "$etc/pkg/$name/lib.sh" ] || return 0
 
 	. "$etc/pkg/$name/lib.sh"
 
@@ -88,5 +88,5 @@ cmd_pkg_install() { set -eu
 		find *	-type d -exec mkdir -p '$PREFIX/{}' \; -o \
 			-type f -exec ln -sf '$PWD/{}' '$PREFIX/{}' \;
 
-	" <$etc/pkg/$name/build.sh
+	" <$etc/pkg/$name/install.sh
 }

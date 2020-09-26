@@ -1,10 +1,11 @@
 
-deploy_pre() { set -eu
+deploy_post() { set -eu
+	local key=
 
-	cd "$etc"
-
-	mkdir -p db/local/wireguard
-	if [ -z "$(bin/adm-db "$db"/wireguard_var get pass)" ]; then
-		bin/adm-db "$db"/wireguard_var add privkey="$(wg genkey)"
-	fi
+	send "
+		cd /etc/wireguard
+		umask 400
+		[ -f key ] || echo PrivateKey = \$(wg genkey) >key
+		cat peers interface key >conf
+	"
 }

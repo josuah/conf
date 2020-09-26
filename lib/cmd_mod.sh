@@ -1,5 +1,5 @@
 
-cmd_mod_install() { set -eux
+cmd_mod_install() { set -eu
 	local name="$1"
 	local conf="$etc/mod/$name"
 	local dest="$tmp/mod/$name"
@@ -15,7 +15,7 @@ cmd_mod_install() { set -eux
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$etc" && adm-db "$conf/$x" template >$dest/$x)
 	done
-	scp -r "$dest/etc" "$dest/var" /
+	scp -qr "$dest/etc" "$dest/var" "$host:/"
 
 	(type deploy_post >/dev/null && cd "$conf" && deploy_post)
 

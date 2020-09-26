@@ -1,19 +1,13 @@
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for path in /usr/*/bin /usr/*/sbin; do
-	[ -d "$path" ] && export PATH="$PATH:$path"
-done
-
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/sbin /usr/*/bin)"
 export MAIL="/var/mail/$USER/Maildir"
 export ENV="$HOME/.profile"
-
-export LC_COLLATE="C"
-export LC_ALL="en_US.UTF-8"
-
 export LESS="XSR"
 export EDITOR="vim"
 export PAGER="less"
 export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
+export LC_COLLATE="C"
+export LC_ALL="en_US.UTF-8"
 
 case $(uname) in
 (NetBSD)
@@ -25,7 +19,6 @@ esac
 
 case $- in
 (*i*)
-	export TERM="xterm-256color"
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
 	export SSH_AUTH_SOCK="$HOME/.ssh/sock/agent"
 
