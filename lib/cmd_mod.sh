@@ -4,9 +4,9 @@ cmd_mod_install() { set -eu
 	local conf="$etc/module/$name"
 	local dest="$tmp/module/$name"
 
-	mkdir -p "$dest/etc" "$dest/var"
+	. "$etc/mod/$name/lib.sh"
 
-	. "$conf/lib.sh"
+	mkdir -p "$dest/etc" "$dest/var"
 
 	(type deploy_pre >/dev/null && cd "$conf" && deploy_pre)
 

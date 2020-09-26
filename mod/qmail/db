@@ -1,0 +1,13 @@
+add=group/nofiles
+add=group/qmail
+add=user/alias group=nofiles home=/var/qmail/alias
+add=user/qmaild group=nofiles home=/var/qmail
+add=user/qmaill group=nofiles home=/var/qmail
+add=user/qmailp group=nofiles home=/var/qmail
+add=user/qmailq group=qmail home=/var/qmail
+add=user/qmailr group=qmail home=/var/qmail
+add=user/qmails group=qmail home=/var/qmail
+add=user/mail group=mail home=/var/mail
+add=pkg/notqmail
+add=mod/inetd
+add=exec/dovecot argv=./Maildir/ pexp=qmail-send

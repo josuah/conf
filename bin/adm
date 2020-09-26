@@ -14,8 +14,6 @@ cmd() { set -eu
 	done
 	unset IFS
 
-	[ -f "$etc/$type/$name/lib.sh" ] && . "$etc/$type/$name/lib.sh"
-
 	"cmd_${type}_${cmd}" "$name"
 }
 
@@ -48,24 +46,14 @@ list() { set -eu
 }
 
 export etc="${ADM_CONFIG:-/etc/adm}"
-export db="$etc/db"
-export lib="$etc/lib"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
+export os="$(adm-db "$etc/host/$host/db" os)"
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 for x in adm /usr/*/bin /usr/*/sbin; do
 	export PATH="$PATH:$x"
 done
-
-export os=$(uname)
-type >/dev/null apt		&& export os=DebianLinux
-type >/dev/null apk		&& export os=AlpineLinux
-type >/dev/null pacman		&& export os=ArchLinux
-type >/dev/null yum		&& export os=RedHatLinux
-type >/dev/null zypper		&& export os=SuseLinux
-type >/dev/null emerge		&& export os=GentooLinux
-type >/dev/null xbps-install	&& export os=VoidLinux
 
 export tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
@@ -76,13 +64,13 @@ case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in
 (sync | install | update | uninstall | start | stop | restart | reload | status)
-	. "$lib/cmd_pkg.sh"
-	. "$lib/cmd_mod.sh"
-	. "$lib/cmd_golang.sh"
-	. "$lib/cmd_host.sh"
-	. "$lib/cmd_repo.sh"
-	. "$lib/cmd_exec.sh"
-	. "$lib/os_$os.sh"
+	. "$etc/lib/cmd_pkg.sh"
+	. "$etc/lib/cmd_mod.sh"
+	. "$etc/lib/cmd_golang.sh"
+	. "$etc/lib/cmd_host.sh"
+	. "$etc/lib/cmd_repo.sh"
+	. "$etc/lib/cmd_exec.sh"
+	. "$etc/lib/os_$os.sh"
 	list 0 "$node" "" "$@" | sed 's,\\\\,\\s,g; s,\\",\\q,g' | apply "$cmd"
 	;;
 

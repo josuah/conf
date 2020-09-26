@@ -1,3 +1,0 @@
-add=pkg/dovecot
-add=service/dovecot
-add=monitor/tls port=993

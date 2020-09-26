@@ -1,5 +1,0 @@
-add=pkg/git
-add=service/gitdaemon
-add=monitor/tcp name=tcp-git port=9318
-add=service/gitdaemon
-add=pkg/git

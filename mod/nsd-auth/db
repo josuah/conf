@@ -1,3 +1,2 @@
 add=service/nsd
 add=pkg/nsd
-add=monitor/dns name=dns

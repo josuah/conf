@@ -1,4 +1,1 @@
-add=mod/dotfiles
-add=mod/shell
-add=mod/ssh
-add=mod/cron
+add=service/cron
