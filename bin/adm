@@ -35,15 +35,16 @@ list() { set -eu
 	shift 2
 
 	printf "%-$((level * 2))s%s%s\n" "" "$node" "${*:+ $*}"
-	if [ -f "$db/node_$node" ]; then
+	if [ -f "$etc/$node" ]; then
 		while read -r node vars; do
 			list $((level + 1)) "${node#add=}" $* $vars
-		done <$db/node_$node
+		done <$etc/$node
 	fi
 }
 
-export etc="${ADM_CONFIG:-/etc/adm}"
-export db="$etc/db"
+cd "${ADM_CONFIG:-/etc/adm}"
+
+export db="$PWD/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export lib="${0%/*/*}/lib/adm"

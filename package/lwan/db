@@ -1,3 +1,2 @@
 add=ospack/liblzma cmd=lzma
 add=ospack/cmake
-add=build/lwan

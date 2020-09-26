@@ -1,3 +1,2 @@
 add=package/s6-dns
 add=package/libbearssl
-add=build/s6-networking
