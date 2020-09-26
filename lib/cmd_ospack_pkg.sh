@@ -1,7 +1,7 @@
 
 cmd_ospack_install() { set -eu
 	local pkg="${var_this_os:-$1}"
+	local cmd="${var_cmd:-$pkg}"
 
-	type "${var_cmd:-$pkg}" >/dev/null && return 0
-	pkg install "$pkg"
+	send "type '$cmd' >/dev/null || pkg install '$pkg'"
 }

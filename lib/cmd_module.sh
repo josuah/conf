@@ -15,7 +15,7 @@ cmd_mod_install() { set -eu
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$db" && adm-db "$conf/$x" template >$dest/$x)
 	done
-	cp -r "$dest/etc" "$dest/var" /
+	scp -r "$dest/etc" "$dest/var" /
 
 	(type deploy_post >/dev/null && cd "$conf" && deploy_post)
 

@@ -1,5 +1,4 @@
 
 cmd_group_install() { set -eu
-	awk -F : -v g="$1" '$1==g {n++} END {exit(!n)}' /etc/group && return 0
-	groupadd "$1"
+	send "getent group '$1' >/dev/null || groupadd '$1'"
 }

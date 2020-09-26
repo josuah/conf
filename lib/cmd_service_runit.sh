@@ -1,28 +1,28 @@
 
 cmd_service_install() { set -eu
-	ln -sf "/etc/runit/sv/$1" "/run/runit/service"
+	send "ln -sf '/etc/runit/sv/$1' /run/runit/service"
 }
 
 cmd_service_uninstall() { set -eu
-	rm -f "/run/runit/service/$1"
+	send "rm -f '/run/runit/service/$1'"
 }
 
 cmd_service_start() { set -eu
-	sv start "$1"
+	send "sv start '$1'"
 }
 
 cmd_service_stop() { set -eu
-	sv stop "$1"
+	send "sv stop '$1'"
 }
 
 cmd_service_restart() { set -eu
-	sv restart "$1"
+	send "sv restart '$1'"
 }
 
 cmd_service_reload() { set -eu
-	sv reload "$1"
+	send "sv reload '$1'"
 }
 
 cmd_service_status() { set -eu
-	sv status "$1"
+	send "sv status '$1'"
 }

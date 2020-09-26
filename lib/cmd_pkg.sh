@@ -6,12 +6,14 @@ _pkg_git() { set -eu
 		git clone --mirror "$url" "$bare"
 	fi
 
-	if [ ! -d "$DESTDIR" ]; then
+	if ! send "test -d '$DESTDIR'"; then
 		git -C "$bare" rev-parse "$commit" >/dev/null ||
 			git -C "$bare" fetch
 		rm -rf "$SOURCE"
 		mkdir -p "$SOURCE"
-		git -C "$bare" archive "$commit" | tar -C "$SOURCE" -xf -
+		git -C "$bare" archive "$commit" | send "
+			tar -C "$SOURCE" -xf -
+		"
 	fi
 }
 
@@ -23,7 +25,7 @@ _pkg_tar() { set -eu
 		curl -Ls -o "$tar" "$url"
 	fi
 
-	if [ ! -d "$DESTDIR" ]; then
+	if ! send "test -d '$DESTDIR'"; then
 		openssl sha256 "$tar" \
 		| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
 			echo >&2 invalid checksum
@@ -37,14 +39,17 @@ _pkg_tar() { set -eu
 		(*gz) gzip -cd "$tar" ;;
 		(*xz) xz -cd "$tar" ;;
 		(*lz) lz -cd "$tar" ;;
-		esac | tar -x -f - -C "$SOURCE.tmp.$$"
-
-		mv "$SOURCE.tmp.$$/"* "$SOURCE"
+		esac | send "
+			tar -x -f - -C '$SOURCE.tmp.$$'
+			mv '$SOURCE.tmp.$$/'* '$SOURCE'
+		"
 	fi
 }
 
 cmd_pkg_install() { set -eu
 	local name="$1"
+
+	[ -f "$etc/pkg/$name/lib.sh" ] || return
 
 	. "$etc/pkg/$name/lib.sh"
 
@@ -57,27 +62,32 @@ cmd_pkg_install() { set -eu
 	[ "${commit:-}" ] && _pkg_git
 
 	if [ -d "$etc/pkg/$name/files" ]; then
-		cp -r "$etc/pkg/$name/files/"* "$SOURCE"
+		scp -r "$etc/pkg/$name/files/"* "$host:$SOURCE"
 	fi
 
 	if [ -d "$etc/pkg/$name/patches" ]; then
-		for x in "$etc/pkg/$name/patches/"*; do
-			(cd "$SOURCE"; patch -p1 -N) <$x
-		done
+		cat "$etc/pkg/$name/patches/"* | send "
+			cd '$SOURCE'
+			patch -p1 -N"
+		"
 	fi
 
-	mkdir -p "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
-	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
+	send "
+		mkdir -p '$DESTDIR/bin' '$DESTDIR/sbin' '$DESTDIR/lib' \
+		  '$DESTDIR/libexec' '$DESTDIR/include' '$DESTDIR$PREFIX'
 
-	ln -sf "$DESTDIR/bin" "$DESTDIR/sbin" "$DESTDIR/lib" \
-	  "$DESTDIR/libexec" "$DESTDIR/include" "$DESTDIR$PREFIX"
+		ln -sf '$DESTDIR/bin' '$DESTDIR/sbin' '$DESTDIR/lib' \
+		  '$DESTDIR/libexec' '$DESTDIR/include' '$DESTDIR$PREFIX'
 
-	(cd "$SOURCE"; pkg) || exit "$?"
+		cd '$SOURCE'
+		sh -eux
 
-	rm -rf "$DESTDIR/$PREFIX" "$SOURCE"
-	! rmdir "$DESTDIR/"* 2>/dev/null
+		rm -rf '$DESTDIR/$PREFIX' '$SOURCE'
+		! rmdir '$DESTDIR/'* 2>/dev/null
 
-	cd "$DESTDIR"
-	find *	-type d -exec mkdir -p "$PREFIX/{}" \; -o \
-		-type f -exec ln -sf "$PWD/{}" "$PREFIX/{}" \;
+		cd '$DESTDIR'
+		find *	-type d -exec mkdir -p '$PREFIX/{}' \; -o \
+			-type f -exec ln -sf '$PWD/{}' '$PREFIX/{}' \;
+
+	" <$etc/pkg/$name/build.sh
 }
