@@ -75,8 +75,7 @@ cmd_pkg_install() { set -eu
 		"
 	fi
 
-	send "
-		export PREFIX='$PREFIX'
+	send "	export PREFIX='$PREFIX'
 		export DESTDIR='$DESTDIR'
 
 		mkdir -p '$DESTDIR/bin' '$DESTDIR/sbin' '$DESTDIR/lib' \

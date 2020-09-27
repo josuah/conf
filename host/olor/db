@@ -8,4 +8,5 @@ add=mod/wireguard
 add=mod/nsd-auth
 add=mod/monit
 add=mod/dovecot
+add=mod/relayd
 add=mod/base

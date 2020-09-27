@@ -4,8 +4,7 @@ cmd_repo_install() { set -eu
 }
 
 cmd_repo_update() { set -eu
-	send "
-		git -C '$var_path' remote set-url origin '$var_url'
+	send "	git -C '$var_path' remote set-url origin '$var_url'
 		git -C '$var_path' fetch --all
 	"
 }

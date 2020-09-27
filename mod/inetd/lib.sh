@@ -1,4 +1,3 @@
-
 deploy_pre() { set -eu
-	cat /etc/inetd.d/* >/etc/inetd.conf
+	send "cat /etc/inetd.d/* >/etc/inetd.conf"
 }

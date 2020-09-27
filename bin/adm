@@ -40,10 +40,8 @@ apply() { set -eu
 	return "$exit"
 }
 
-cmd="${1:-help}"
-host="${2:-$(hostname -s)}"
-case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
-
+export cmd="${1:-help}"
+export host="${2:-$(hostname -s)}"
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/sbin /usr/*/bin)"
 export etc="${ADM_CONFIG:-/etc/adm}"
 export lib="$etc/lib"
@@ -52,7 +50,10 @@ export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$(adm-db "$etc/host/$host/db" get os)"
 export tmp="$(mktemp -d)"
+
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+
+case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in
 (list)

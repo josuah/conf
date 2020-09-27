@@ -1,3 +1,5 @@
+export uid="$(id -u mail)"
+export gid="$(id -g mail)"
 
 deploy_pre() { set -eu
 	mkdir -p /var/qmail/alias /var/qmail/control /var/qmail/users \
@@ -12,12 +14,8 @@ deploy_pre() { set -eu
 	hostname >/etc/qmail/control/me
 }
 
-export uid="$(id -u mail)"
-export gid="$(id -g mail)"
-
 deploy_post() { set -eu
-	send "
-		cd /etc/qmail/users
+	send "	cd /etc/qmail/users
 		qmail-newu
 		pkill -HUP qmail-start
 		pkill -HUP inetd

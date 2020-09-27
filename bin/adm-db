@@ -564,10 +564,6 @@ BEGIN {
 	cmd | getline VAR["now"]
 	close(cmd)
 
-	cmd = "hostname -s"
-	cmd | getline VAR["host"]
-	close(cmd)
-
 	if (!(2 in ARGV))
 		usage()
 

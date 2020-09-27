@@ -1,7 +1,9 @@
-deploy_pre() {
-	for x in $(send "ls /etc/ssl/acme"); do
-		mkdir -p "$dest/etc/ssl/acme/$x"
-		(cd "$etc" && dom="$x" adm-db "$conf/acme.conf" template) \
-			>$dest/etc/ssl/acme/$x/acme.conf
-	done
+deploy_pre() { set -eu
+	local acme=/etc/acme/letsencrypt-privkey.pem
+
+        send "ls /etc/ssl/acme" | sed 's,^,dom=,' >$etc/host/$host/db.cert
+
+	send "	mkdir -p /etc/acme
+		test -f '$acme' || openssl genrsa -out '$acme'
+	"
 }
