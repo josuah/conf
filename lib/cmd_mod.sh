@@ -1,8 +1,11 @@
 
 cmd_mod_install() { set -eu
 	local name="$1"
-	local conf="$etc/mod/$name"
-	local dest="$tmp/mod/$name"
+	export conf="$etc/mod/$name"
+	export dest="$etc/mod/$name/tmp"
+	local trap="rm -rf '$etc/mod/'*'/tmp'"
+
+	trap "$trap" INT TERM EXIT HUP
 
 	. "$etc/mod/$name/lib.sh"
 
@@ -19,5 +22,5 @@ cmd_mod_install() { set -eu
 
 	(type deploy_post >/dev/null && cd "$conf" && deploy_post)
 
-	true
+	sh -c "$trap"
 }

@@ -5,6 +5,10 @@ deploy_post() { set -eu
                 mkdir -p "$HOME/.ssh/sock"
                 touch "$HOME/.ssh/config_local"
 
+		mkdir -p /var/unbound/db
+		chown _unbound: /var/unbound/db
+		unbound-anchor -vvv -a /var/unbound/db/root.key
+
 		cat /etc/crontab.d/* >/etc/crontab
 		pkill -HUP cron
 

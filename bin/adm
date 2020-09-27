@@ -49,9 +49,6 @@ export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$(adm-db "$etc/host/$host/db" get os)"
-export tmp="$(mktemp -d)"
-
-trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
