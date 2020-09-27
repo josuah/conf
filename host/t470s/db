@@ -1,3 +1,4 @@
 os=NetBSD
 add=mod/os-NetBSD
+add=mod/terminal
 add=mod/base
