@@ -8,3 +8,7 @@ deploy_pre() { set -eu
 			>$dest/var/nsd/zones/master/$soa
 	done
 }
+
+deploy_post() { set -eu
+	send "pkill -HUP nsd"
+}
