@@ -3,7 +3,8 @@ deploy_pre() { set -eu
 
         send "ls /etc/ssl/acme" | sed 's,^,dom=,' >$etc/host/$host/db.cert
 
-	send "	mkdir -p /etc/acme
+	send "
+		mkdir -p /etc/acme
 		test -f '$acme' || openssl genrsa -out '$acme'
 	"
 }
