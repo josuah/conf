@@ -9,5 +9,4 @@ add=user/qmailr group=qmail home=/var/qmail
 add=user/qmails group=qmail home=/var/qmail
 add=user/mail group=mail home=/var/mail
 add=pkg/notqmail cmd=qmail-start
-add=mod/inetd
 add=exec/qmail-start argv=./Maildir/ pexp=qmail-send

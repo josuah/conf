@@ -1,1 +1,1 @@
-10	*	*	*	*	root	ls /etc/ssl/acme | xargs -tr -n 1 acme-client
+10	*	*	*	*	root	ls /etc/ssl/acme | xargs -t -n 1 acme-client

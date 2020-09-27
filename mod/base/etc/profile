@@ -1,12 +1,7 @@
 umask 022
 
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-for x in /usr/*/bin /usr/*/sbin; do
-	[ -d "$x" ] || continue
-	export PATH="$PATH:$x"
-done
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/bin /usr/*/sbin)"
 
 for x in /etc/profile.d/*.sh; do
-	[ -f "$x" ] || continue
 	. "$x"
 done

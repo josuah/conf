@@ -1,13 +1,10 @@
-deploy_pre() { set -eu
-	scp -qr home/.??* "$host:/root"
-	send "
-		mkdir -p "$HOME/.ssh/sock"
-		touch "$HOME/.ssh/config_local"
-	"
-}
-
 deploy_post() { set -eu
+	scp -qr home/.??* "$host:/root"
+
 	send "
+                mkdir -p "$HOME/.ssh/sock"
+                touch "$HOME/.ssh/config_local"
+
 		cat /etc/crontab.d/* >/etc/crontab
 		pkill -HUP cron
 
@@ -18,5 +15,7 @@ deploy_post() { set -eu
 		pkill -HUP syslogd
 
 		cat /etc/newsyslog.d/* >/etc/newsyslog.conf
+
+		cat /etc/inetd.d/* >/etc/inetd.conf
 	"
 }
