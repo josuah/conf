@@ -2,3 +2,4 @@ add=service/cron
 add=service/syslogd
 add=service/inetd
 add=pkg/inetd
+add=service/unbound
