@@ -20,24 +20,26 @@ $ORIGIN {{ zone }}.
 @	86400	IN	MX	{{ 1:pref }} {{ 1:host }}.{{ zone }}.
 #end
 
-; A - host IPv4 addresses
-#for db/host-ip pub=true v=4
-{{ 1:host }}	86400	IN	A	{{ 1:ip }}
-#end
-
-; AAAA - host IPv6 addresses
-#for db/host-ip pub=true v=6
-{{ 1:host }}	86400	IN	AAAA	{{ 1:ip }}
+; A/AAAA - host IP addresses
+#for host
+##for host/[1:path]/db pub=true v=4
+{{ 1:path }}	86400	IN	A	{{ 2:ip }}
+*.{{ 1:path }}	86400	IN	A	{{ 2:ip }}
+##end
+##for host/[1:path]/db pub=true v=6
+{{ 1:path }}	86400	IN	AAAA	{{ 2:ip }}
+*.{{ 1:path }}	86400	IN	AAAA	{{ 2:ip }}
+##end
 #end
 
 ; PTR - reverse DNS for hosts
 
 ; A/AAAA - alias addresses
 #for db/dns-alias soa=[zone]
-##for db/host-ip host=[1:host] pub=true v=4
+##for host/[1:host]/db pub=true v=4
 {{ 1:dom }}  86400  IN  A  {{ 2:ip }}
 ##end
-##for db/host-ip host=[1:host] pub=true v=6
+##for host/[1:host]/db pub=true v=6
 {{ 1:dom }}  86400  IN  AAAA  {{ 2:ip }}
 ##end
 #end

@@ -317,8 +317,10 @@ function tpl_getmatch(str, row, prefix,
 	path = array_shift(argv)
 
 	if (system("test -d '" path "'") == 0) {
-		if (("ls '" path "'" | getline row["path"]) <= 0)
+		if (("ls '" path "'" | getline row["path"]) <= 0) {
+			close("ls '" path "'")
 			return 0
+		}
 	} else {
 		db_keyval(argv, query)
 		if (db_getmatch(path, query, row) == 0)
@@ -343,13 +345,13 @@ function tpl_query(str, result,
 function tpl_flush(texts, queries, lv, vars,
 	n, x, _, row)
 {
-	if (!(lv in queries))
+	if (!(lv in texts))
 		return
 
 	n = split(lv, _, ".")
 	while (tpl_getmatch(db_expand(queries[lv], vars), row)) {
 		array_prefix_keys(row, vars, n ":")
-		for (x = lv; x in queries; x = tpl_inc_tail(x)) {
+		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x], vars)
 			tpl_flush(texts, queries, tpl_inc_level(x), vars)
 		}
@@ -386,23 +388,26 @@ function cmd_template(path, argv,
 		} else if (sub(/^#+for /, "", line)) {
 			lv = tpl_inc_level(lv)
 			queries[lv] = line
+			texts[lv] = ""
 
 		} else if (line ~ /^#+end/) {
 			if (lv == "")
 				die("more #end than #for")
 			lv = tpl_dec_level(lv)
 			lv = tpl_inc_tail(lv)
+			texts[lv] = ""
 
 			if (lv == "") {
 				tpl_flush(texts, queries, "1")
-				split("", queries)
 				split("", texts)
+				split("", queries)
 			}
 
 		} else {
 			tpl_addline(texts, lv, line)
 		}
 	}
+	close(path)
 }
 
 function cmd_get(path, argv,
