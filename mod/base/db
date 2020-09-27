@@ -1,1 +1,2 @@
 add=service/cron
+add=service/syslogd
