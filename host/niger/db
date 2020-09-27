@@ -5,4 +5,5 @@ add=mod/os-OpenBSD
 add=mod/wireguard
 add=mod/nsd-axfr
 add=mod/monit
+add=mod/httpd
 add=mod/base
