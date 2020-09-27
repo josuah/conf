@@ -8,6 +8,6 @@ add=user/qmailq group=qmail home=/var/qmail
 add=user/qmailr group=qmail home=/var/qmail
 add=user/qmails group=qmail home=/var/qmail
 add=user/mail group=mail home=/var/mail
-add=pkg/notqmail
+add=pkg/notqmail cmd=qmail-start
 add=mod/inetd
 add=exec/dovecot argv=./Maildir/ pexp=qmail-send

@@ -1,2 +1,2 @@
-add=service/monit
 add=pkg/monit
+add=service/monit

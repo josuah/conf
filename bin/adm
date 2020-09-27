@@ -4,8 +4,9 @@ send() { set -eu
 	ssh "root@$host" "
 		export PATH='/bin:/sbin:/usr/bin:/usr/sbin'
 		export PATH=\"\$PATH\$(printf :%s /usr/*/sbin /usr/*/bin)\"
+		set -eu
 		$1
-	" </dev/null >&2
+	"
 }
 
 cmd() { set -eu
@@ -22,7 +23,7 @@ cmd() { set -eu
 	done
 	unset IFS
 
-	"cmd_${type}_${cmd}" "$name"
+	"cmd_${type}_${cmd}" "$name" </dev/null
 }
 
 apply() { set -eu

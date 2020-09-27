@@ -6,12 +6,13 @@ _pkg_git() { set -eu
 		git clone --mirror "$url" "$bare"
 	fi
 
-	if ! send "test -d '$DESTDIR'"; then
+	if ! send "test -d '$SOURCE'"; then
 		git -C "$bare" rev-parse "$commit" >/dev/null ||
 			git -C "$bare" fetch
 		rm -rf "$SOURCE"
-		mkdir -p "$SOURCE"
-		git -C "$bare" archive "$commit" | send "
+
+		git -C "$bare" archive "$commit" | send "set -x
+			mkdir -p "$SOURCE"
 			tar -C "$SOURCE" -xf -
 		"
 	fi
@@ -25,7 +26,7 @@ _pkg_tar() { set -eu
 		curl -Ls -o "$tar" "$url"
 	fi
 
-	if ! send "test -d '$DESTDIR'"; then
+	if ! send "test -d '$SOURCE'"; then
 		openssl sha256 "$tar" \
 		| sed 's/.* //' | tee /dev/stderr | grep -Fqx "$sha256" || {
 			echo >&2 invalid checksum
@@ -36,7 +37,7 @@ _pkg_tar() { set -eu
 		(*gz) gzip -cd "$tar" ;;
 		(*xz) xz -cd "$tar" ;;
 		(*lz) lz -cd "$tar" ;;
-		esac | send "
+		esac | send "set -x
 			mkdir -p '$SOURCE.tmp.$$' '$SOURCE'
 			rm -rf '$SOURCE'
 			tar -x -f - -C '$SOURCE.tmp.$$'
@@ -47,8 +48,11 @@ _pkg_tar() { set -eu
 
 cmd_pkg_install() { set -eu
 	local name="$1"
+	local cmd="${var_cmd:-$name}"
 
-	[ -f "$etc/pkg/$name/lib.sh" ] || return 0
+	send "type '$cmd' >/dev/null" && return 0
+
+	test -f "$etc/pkg/$name/lib.sh" || return 0
 
 	. "$etc/pkg/$name/lib.sh"
 
@@ -72,6 +76,9 @@ cmd_pkg_install() { set -eu
 	fi
 
 	send "
+		export PREFIX='$PREFIX'
+		export DESTDIR='$DESTDIR'
+
 		mkdir -p '$DESTDIR/bin' '$DESTDIR/sbin' '$DESTDIR/lib' \
 		  '$DESTDIR/libexec' '$DESTDIR/include' '$DESTDIR$PREFIX'
 
@@ -86,7 +93,7 @@ cmd_pkg_install() { set -eu
 
 		cd '$DESTDIR'
 		find *	-type d -exec mkdir -p '$PREFIX/{}' \; -o \
-			-type f -exec ln -sf '$PWD/{}' '$PREFIX/{}' \;
+			-type f -exec ln -sf '$DESTDIR/{}' '$PREFIX/{}' \;
 
 	" <$etc/pkg/$name/install.sh
 }

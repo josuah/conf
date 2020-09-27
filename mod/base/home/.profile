@@ -9,14 +9,6 @@ export LESSHISTFILE="/tmp/lesshist"
 export LC_COLLATE="C"
 export LC_ALL="en_US.UTF-8"
 
-case $(uname) in
-(NetBSD)
-	export PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages"
-	export PKG_PATH="$PKG_PATH/$(uname -s)/$(uname -m)"
-	export PKG_PATH="$PKG_PATH/$(uname -r | cut -d . -f 1-2)/All/"
-	;;
-esac
-
 case $- in
 (*i*)
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
@@ -25,7 +17,7 @@ case $- in
 	set -o emacs 2>"/dev/null"
 
 	if [ -z "$SSH_CLIENT" ] &&
-	! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK"; then
+	! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK" >/dev/null; then
 		rm -f "$SSH_AUTH_SOCK"
 		ssh-agent -a "$SSH_AUTH_SOCK"
 	fi

@@ -1,0 +1,1 @@
+10	*	*	*	*	root	ls /etc/ssl/acme | xargs -tr -I {} acme-client -f /etc/ssl/acme/{}/acme.conf {}

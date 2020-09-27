@@ -186,8 +186,9 @@ function db_expand(str, vars,
 function db_query(path, keys, query, result,
 	row, found, i, n)
 {
-	split("", result)
 	while (db_getmatch(path, query, row)) {
+		n = 0
+		split("", result)
 		for (i = 1; i in keys; i++) {
 			if (keys[i] in row)
 				found = 1
@@ -314,9 +315,15 @@ function tpl_getmatch(str, row, prefix,
 {
 	db_split(str, argv)
 	path = array_shift(argv)
-	db_keyval(argv, query)
-	if (db_getmatch(path, query, row) == 0)
-		return 0
+
+	if (system("test -d '" path "'") == 0) {
+		if (("ls '" path "'" | getline row["path"]) <= 0)
+			return 0
+	} else {
+		db_keyval(argv, query)
+		if (db_getmatch(path, query, row) == 0)
+			return 0
+	}
 	return 1
 }
  

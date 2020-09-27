@@ -6,6 +6,6 @@ deploy_post() { set -eu
 		cd /etc/wireguard
 		umask 400
 		[ -f key ] || echo PrivateKey = \$(wg genkey) >key
-		cat peers interface key >conf
+		cat interface key peers >conf
 	"
 }
