@@ -13,6 +13,11 @@ cmd_mod_install() { set -eu
 
 	(type deploy_pre >/dev/null && cd "$conf" && deploy_pre)
 
+	if [ -d "$conf/bin" ]; then
+		mkdir -p "$dest/usr/local"
+		cp -rf "$conf/bin" "$dest/usr/local"
+	fi
+
 	for x in $(cd "$conf" && find etc var -type f 2>/dev/null); do
 		[ -f "$conf/$x" ] || continue
 		mkdir -p "$(dirname "$dest/$x")"
