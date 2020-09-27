@@ -10,3 +10,5 @@ add=user/qmails group=qmail home=/var/qmail
 add=user/mail group=mail home=/var/mail
 add=pkg/notqmail cmd=qmail-start
 add=exec/qmail-start argv=./Maildir/ pexp=qmail-send
+add=pkg/dovecot
+add=service/dovecot
