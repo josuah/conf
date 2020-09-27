@@ -3,3 +3,5 @@ add=service/syslogd
 add=service/inetd
 add=pkg/inetd
 add=service/unbound
+add=service/unbound
+add=pkg/unbound
