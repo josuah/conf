@@ -3,7 +3,7 @@ ip=136.244.112.11 pub=true v=4
 ip=2001:19f0:6801:14ef:5400:2ff:feba:162e pub=true v=6
 add=mod/os-OpenBSD
 add=mod/vpn
-add=mod/dns-axfr
+add=mod/dns
 add=mod/backup
 add=mod/monit
 add=mod/http
