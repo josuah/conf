@@ -123,7 +123,7 @@ function db_split(str, argv)
 	}
 }
 
-function db_keyval(argv, row, keys,
+function db_key_value(argv, row, keys,
 	i, n, key, eq, val)
 {
 	for (i = 1; i in argv; i++) {
@@ -138,21 +138,45 @@ function db_keyval(argv, row, keys,
 	}
 }
 
-function db_getline(path, row,
+# to permit the same file to be open multipletimes
+
+function db_read_file(path,
+	line, n)
+{
+	if (path in FILECACHE)
+		return FILECACHE[path]
+	while ((getline line <path) > 0) {
+		if (line ~ /^[ \t]*#/)
+			continue
+		FILECACHE[path ":" ++n] = line
+	}
+	close(path)
+	return FILECACHE[path] = n
+}
+
+function db_read_line(path, n)
+{
+	if (n > db_read_file(path))
+		return 0
+	return n
+}
+
+function db_line(path, n)
+{
+	assert(path ":" n in FILECACHE)
+	return FILECACHE[path ":" n]
+}
+
+function db_get_row(path, row,
 	argv, line, n)
 {
-	do {
-		if ((getline line <path) <= 0) {
-			close(path)
-			return 0
-		}
-	} while (line ~ /^[ \t]*#/)
-
-	n = row["#"]
+	n = db_read_line(path, row["#"] + 1)
+	if (n == 0)
+		return 0
 	split("", row)
-	db_split(line, argv)
-	db_keyval(argv, row)
-	row["#"] = n + 1
+	db_split(db_line(path, n), argv)
+	db_key_value(argv, row)
+	row["#"] = n
 	return 1
 }
 
@@ -165,9 +189,9 @@ function db_match(query, row,
 	return 1
 }
 
-function db_getmatch(path, query, row)
+function db_get_match(path, query, row)
 {
-	while (db_getline(path, row))
+	while (db_get_row(path, row))
 		if (db_match(query, row))
 			return 1
 	return 0
@@ -186,7 +210,7 @@ function db_expand(str, vars,
 function db_query(path, keys, query, result,
 	row, found, i, n)
 {
-	while (db_getmatch(path, query, row)) {
+	while (db_get_match(path, query, row)) {
 		n = 0
 		split("", result)
 		for (i = 1; i in keys; i++) {
@@ -231,7 +255,7 @@ function db_print_pretty(row, width,
 function db_print_tree(path, lv,
 	node)
 {
-	while (db_getline(path, row)) {
+	while (db_get_row(path, row)) {
 		if ("add" in row) {
 			printf "%" (lv*2) "s%s ", "", row["add"]
 			node = row["add"]
@@ -308,7 +332,7 @@ function tpl_dec_level(lv,
 	return array_join(array, ".")
 }
 
-function tpl_getmatch(str, row, prefix,
+function tpl_get_match(str, row, prefix,
 	path, argv, query)
 {
 	db_split(str, argv)
@@ -320,8 +344,8 @@ function tpl_getmatch(str, row, prefix,
 			return 0
 		}
 	} else {
-		db_keyval(argv, query)
-		if (db_getmatch(path, query, row) == 0)
+		db_key_value(argv, query)
+		if (db_get_match(path, query, row) == 0)
 			return 0
 	}
 	return 1
@@ -334,7 +358,7 @@ function tpl_query(str, result,
 		die("unrecognized parameter: " str)
 	db_split(str, argv)
 	path = array_shift(argv)
-	db_keyval(argv, query, keys)
+	db_key_value(argv, query, keys)
 	e = db_query(path, keys, query, result)
 	close(path)
 	return e
@@ -347,7 +371,7 @@ function tpl_flush(texts, queries, lv, vars,
 		return
 
 	n = split(lv, _, ".")
-	while (tpl_getmatch(db_expand(queries[lv], vars), row)) {
+	while (tpl_get_match(db_expand(queries[lv], vars), row)) {
 		array_prefix_keys(row, vars, n ":")
 		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x], vars)
@@ -357,7 +381,7 @@ function tpl_flush(texts, queries, lv, vars,
 	array_delete(vars, n ":")
 }
 
-function tpl_addline(texts, lv, line)
+function tpl_add_line(texts, lv, line)
 {
 	if (lv == "") {
 		print tpl_replace(line)
@@ -381,19 +405,19 @@ function cmd_template(path, argv,
 		if (sub(/^#+include /, "", line)) {
 			include = db_expand(line)
 			while ((getline line <include) > 0)
-				tpl_addline(texts, lv, line)
+				tpl_add_line(texts, lv, line)
 
 		} else if (sub(/^#+for /, "", line)) {
 			lv = tpl_inc_level(lv)
 			queries[lv] = line
-			texts[lv] = ""
+			texts[lv] = ""  # lv in texts
 
 		} else if (line ~ /^#+end/) {
 			if (lv == "")
 				die("more #end than #for")
 			lv = tpl_dec_level(lv)
 			lv = tpl_inc_tail(lv)
-			texts[lv] = ""
+			texts[lv] = ""  # lv in texts
 
 			if (lv == "") {
 				tpl_flush(texts, queries, "1")
@@ -402,7 +426,7 @@ function cmd_template(path, argv,
 			}
 
 		} else {
-			tpl_addline(texts, lv, line)
+			tpl_add_line(texts, lv, line)
 		}
 	}
 	close(path)
@@ -414,7 +438,7 @@ function cmd_get(path, argv,
 	if (!(1 in argv))
 		usage()
 
-	db_keyval(argv, query, keys)
+	db_key_value(argv, query, keys)
 	while (db_query(path, keys, query, result)) {
 		for (i = 1; i in result; i++)
 			printf "%s%s", (i == 1 ? "" : "\t"), result[i]
@@ -433,8 +457,8 @@ function cmd_list(path, argv,
 	width = (width == "" ? 80 : width + 0)
 
 	printf "\n"
-	db_keyval(argv, query)
-	while (db_getmatch(path, query, row)) {
+	db_key_value(argv, query)
+	while (db_get_match(path, query, row)) {
 		db_print_pretty(row, width)
 		printf "\n"
 	}
@@ -454,7 +478,7 @@ function cmd_add(path, argv,
 	if (!(1 in argv))
 		usage()
 
-	db_keyval(argv, row)
+	db_key_value(argv, row)
 	print db_format_row(row) >>path
 }
 
@@ -471,7 +495,7 @@ function cmd_del(path, argv,
 	"mktemp" | getline tmp
 	close("mktemp")
 
-	while (db_getline(path, row)) {
+	while (db_get_row(path, row)) {
 		if (row["#"] in num)
 			continue
 		print db_format_row(row) >>tmp
@@ -492,10 +516,10 @@ function cmd_set(path, argv,
 	"mktemp" | getline tmp
 	close(mktemp)
 
-	while (db_getline(path, row)) {
+	while (db_get_row(path, row)) {
 		if (row["#"] in num) {
 			split("", keys)
-			db_keyval(argv, row, keys)
+			db_key_value(argv, row, keys)
 			for (x in keys)
 				delete row[keys[x]]
 		}
@@ -503,12 +527,12 @@ function cmd_set(path, argv,
 	}
 	return system("mv -f '" tmp "' '" path "'") == 0
 }
-
+_
 function cmd_num(path, argv,
 	query, row, first)
 {
-	db_keyval(argv, query)
-	for (first = 1; db_getmatch(path, query, row); first = 0)
+	db_key_value(argv, query)
+	for (first = 1; db_get_match(path, query, row); first = 0)
 		printf "%s%s", (first ? "" : ","), row["#"]
 	printf "\n"
 }
@@ -525,7 +549,7 @@ function cmd_move(path, argv,
 
 	to = array_shift(argv)
 
-	while (db_getline(path, row))
+	while (db_get_row(path, row))
 		if (row["#"] in num)
 			block = block db_format_row(row)
 	if (to < 1 || to > row["#"])
@@ -535,7 +559,7 @@ function cmd_move(path, argv,
 	close("mktemp")
 
 	delete row["#"]
-	while (db_getline(path, row)) {
+	while (db_get_row(path, row)) {
 		if (row["#"] == to)
 			print block >>tmp
 		if (!(row["#"] in num))
