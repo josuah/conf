@@ -140,7 +140,7 @@ function db_key_value(argv, row, keys,
 
 # to permit the same file to be open multipletimes
 
-function db_read_file(path,
+function db_cache_file(path,
 	line, n)
 {
 	if (path in FILECACHE)
@@ -154,29 +154,24 @@ function db_read_file(path,
 	return FILECACHE[path] = n
 }
 
-function db_read_line(path, n)
+function db_get_line(file)
 {
-	if (n > db_read_file(path))
+	if (file["#"] >= db_cache_file(file["path"]))
 		return 0
-	return n
+	file["#"]++
+	assert(file["path"] ":" file["#"] in FILECACHE)
+	file["line"] = FILECACHE[file["path"] ":" file["#"]]
+	return 1
 }
 
-function db_line(path, n)
-{
-	assert(path ":" n in FILECACHE)
-	return FILECACHE[path ":" n]
-}
-
-function db_get_row(path, row,
+function db_get_row(file, row,
 	argv, line, n)
 {
-	n = db_read_line(path, row["#"] + 1)
-	if (n == 0)
+	if (db_get_line(file) == 0)
 		return 0
+	db_split(file["line"], argv)
 	split("", row)
-	db_split(db_line(path, n), argv)
 	db_key_value(argv, row)
-	row["#"] = n
 	return 1
 }
 
@@ -189,9 +184,9 @@ function db_match(query, row,
 	return 1
 }
 
-function db_get_match(path, query, row)
+function db_get_match(file, query, row)
 {
-	while (db_get_row(path, row))
+	while (db_get_row(file, row))
 		if (db_match(query, row))
 			return 1
 	return 0
@@ -207,10 +202,10 @@ function db_expand(str, vars,
 	return str
 }
 
-function db_query(path, keys, query, result,
+function db_query(file, keys, query, result,
 	row, found, i, n)
 {
-	while (db_get_match(path, query, row)) {
+	while (db_get_match(file, query, row)) {
 		n = 0
 		split("", result)
 		for (i = 1; i in keys; i++) {
@@ -230,15 +225,14 @@ function db_format_val(val)
 	return index(val, " ") ? "\"" val "\"" : val
 }
 
-function db_print_pretty(row, width,
+function db_print_pretty(ln, row, width,
 	i, n, put, len, col, keys, val)
 {
-	printf("%3d ", row["#"])
+	printf("%3d ", ln)
 	col = 4
 
 	n = array_keys(row, keys)
-
-	for (i = 2; i <= n; i++) {
+	for (i = 1; i <= n; i++) {
 		len = 1 + length(keys[i]) + 1 + length(row[keys[i]])
 		if (col + len > width && col > 4) {
 			printf "\n    "
@@ -255,7 +249,7 @@ function db_print_pretty(row, width,
 function db_print_tree(path, lv,
 	node)
 {
-	while (db_get_row(path, row)) {
+	while (db_get_row(file, row)) {
 		if ("add" in row) {
 			printf "%" (lv*2) "s%s ", "", row["add"]
 			node = row["add"]
@@ -333,34 +327,34 @@ function tpl_dec_level(lv,
 }
 
 function tpl_get_match(str, row, prefix,
-	path, argv, query)
+	file, argv, query)
 {
 	db_split(str, argv)
-	path = array_shift(argv)
+	file["path"] = array_shift(argv)
 
-	if (system("test -d '" path "'") == 0) {
-		if (("ls '" path "'" | getline row["path"]) <= 0) {
-			close("ls '" path "'")
+	if (system("test -d '" file["path"] "'") == 0) {
+		if (("ls '" file["path"] "'" | getline row["path"]) <= 0) {
+			close("ls '" file["path"] "'")
 			return 0
 		}
 	} else {
 		db_key_value(argv, query)
-		if (db_get_match(path, query, row) == 0)
+		if (db_get_match(file, query, row) == 0)
 			return 0
 	}
 	return 1
 }
  
 function tpl_query(str, result,
-	path, keys, query, argv, e)
+	file, keys, query, argv, e)
 {
 	if (sub(":", " ", str) == 0)
 		die("unrecognized parameter: " str)
 	db_split(str, argv)
-	path = array_shift(argv)
+	file["path"] = array_shift(argv)
 	db_key_value(argv, query, keys)
-	e = db_query(path, keys, query, result)
-	close(path)
+	e = db_query(file, keys, query, result)
+	close(file["path"])
 	return e
 }
 
@@ -392,15 +386,15 @@ function tpl_add_line(texts, lv, line)
 
 ## commands ##
 
-function cmd_template(path, argv,
+function cmd_template(file, argv,
 	line, include, lv, queries, texts)
 {
 	if (1 in argv)
 		usage()
 
-	ENVIRON["path"] = path
+	ENVIRON["path"] = file["path"]
 
-	while ((getline line <path) > 0) {
+	while ((getline line <file["path"]) > 0) {
 
 		if (sub(/^#+include /, "", line)) {
 			include = db_expand(line)
@@ -429,24 +423,24 @@ function cmd_template(path, argv,
 			tpl_add_line(texts, lv, line)
 		}
 	}
-	close(path)
+	close(file["path"])
 }
 
-function cmd_get(path, argv,
+function cmd_get(file, argv,
 	keys, query, result, i, n)
 {
 	if (!(1 in argv))
 		usage()
 
 	db_key_value(argv, query, keys)
-	while (db_query(path, keys, query, result)) {
+	while (db_query(file, keys, query, result)) {
 		for (i = 1; i in result; i++)
 			printf "%s%s", (i == 1 ? "" : "\t"), result[i]
 		printf "\n"
 	}
 }
 
-function cmd_list(path, argv,
+function cmd_list(file, argv,
 	cmd, query, row, width)
 {
 	cmd = "stty size 2>/dev/null"
@@ -458,31 +452,31 @@ function cmd_list(path, argv,
 
 	printf "\n"
 	db_key_value(argv, query)
-	while (db_get_match(path, query, row)) {
-		db_print_pretty(row, width)
+	while (db_get_match(file, query, row)) {
+		db_print_pretty(file["#"], row, width)
 		printf "\n"
 	}
 }
 
-function cmd_tree(path, argv)
+function cmd_tree(file, argv)
 {
 	if (1 in argv)
 		usage()
 
-	db_print_tree(path, 0)
+	db_print_tree(file["path"], 0)
 }
 
-function cmd_add(path, argv,
+function cmd_add(file, argv,
 	row)
 {
 	if (!(1 in argv))
 		usage()
 
 	db_key_value(argv, row)
-	print db_format_row(row) >>path
+	print db_format_row(row) >>file["path"]
 }
 
-function cmd_del(path, argv,
+function cmd_del(file, argv,
 	x, num, array)
 {
 	if (!(1 in argv) || (2 in argv))
@@ -495,12 +489,12 @@ function cmd_del(path, argv,
 	"mktemp" | getline tmp
 	close("mktemp")
 
-	while (db_get_row(path, row)) {
-		if (row["#"] in num)
+	while (db_get_row(file, row)) {
+		if (file["#"] in num)
 			continue
 		print db_format_row(row) >>tmp
 	}
-	return system("mv -f '" tmp "' '" path "'") == 0
+	return system("mv -f '" tmp "' '" file["path"] "'") == 0
 }
 
 function cmd_set(path, argv,
@@ -516,8 +510,8 @@ function cmd_set(path, argv,
 	"mktemp" | getline tmp
 	close(mktemp)
 
-	while (db_get_row(path, row)) {
-		if (row["#"] in num) {
+	while (db_get_row(file, row)) {
+		if (file["#"] in num) {
 			split("", keys)
 			db_key_value(argv, row, keys)
 			for (x in keys)
@@ -527,13 +521,13 @@ function cmd_set(path, argv,
 	}
 	return system("mv -f '" tmp "' '" path "'") == 0
 }
-_
+
 function cmd_num(path, argv,
 	query, row, first)
 {
 	db_key_value(argv, query)
-	for (first = 1; db_get_match(path, query, row); first = 0)
-		printf "%s%s", (first ? "" : ","), row["#"]
+	for (first = 1; db_get_match(file, query, row); first = 0)
+		printf "%s%s", (first ? "" : ","), file["#"]
 	printf "\n"
 }
 
@@ -549,20 +543,20 @@ function cmd_move(path, argv,
 
 	to = array_shift(argv)
 
-	while (db_get_row(path, row))
-		if (row["#"] in num)
+	while (db_get_row(file, row))
+		if (file["#"] in num)
 			block = block db_format_row(row)
-	if (to < 1 || to > row["#"])
+	if (to < 1 || to > file["#"])
 		die("destination outside possible values: " to)
 
 	"mktemp" | getline tmp
 	close("mktemp")
 
-	delete row["#"]
-	while (db_get_row(path, row)) {
-		if (row["#"] == to)
+	delete file["#"]
+	while (db_get_row(file, row)) {
+		if (file["#"] == to)
 			print block >>tmp
-		if (!(row["#"] in num))
+		if (!(file["#"] in num))
 			print db_format_row(row) >>tmp
 	}
 
@@ -574,14 +568,14 @@ function cmd_move(path, argv,
 function usage()
 {
 	print "usage:"						>"/dev/stderr"
-	print " adm-db <db> list [<key>=<value>...]"		>"/dev/stderr"
-	print " adm-db <db> tree"				>"/dev/stderr"
-	print " adm-db <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
-	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
 	print " adm-db <db> add <key>=<value>..."		>"/dev/stderr"
 	print " adm-db <db> del <n>"				>"/dev/stderr"
-	print " adm-db <db> num <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
+	print " adm-db <db> list [<key>=<value>...]"		>"/dev/stderr"
 	print " adm-db <db> move <n> <n>"			>"/dev/stderr"
+	print " adm-db <db> num <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
+	print " adm-db <db> tree"				>"/dev/stderr"
 	print " adm-db <template> template"			>"/dev/stderr"
 	exit(1)
 }
@@ -594,37 +588,17 @@ BEGIN {
 	if (!(2 in ARGV))
 		usage()
 
-	path = array_shift(ARGV)
+	file["path"] = array_shift(ARGV)
 	cmd = array_shift(ARGV)
 
-	if (cmd == "list") {
-		cmd_list(path, ARGV)
-
-	} else if (cmd == "tree") {
-		cmd_tree(path, ARGV)
-
-	} else if (cmd == "get") {
-		cmd_get(path, ARGV)
-
-	} else if (cmd == "set") {
-		cmd_set(path, ARGV)
-
-	} else if (cmd == "add") {
-		cmd_add(path, ARGV)
-
-	} else if (cmd == "del") {
-		cmd_del(path, ARGV)
-
-	} else if (cmd == "num") {
-		cmd_num(path, ARGV)
-
-	} else if (cmd == "move") {
-		cmd_move(path, ARGV)
-
-	} else if (cmd == "template") {
-		cmd_template(path, ARGV)
-
-	} else {
+	if (cmd == "add") { cmd_add(file, ARGV) } else
+	if (cmd == "del") { cmd_del(file, ARGV) } else
+	if (cmd == "get") { cmd_get(file, ARGV) } else
+	if (cmd == "list") { cmd_list(file, ARGV) } else
+	if (cmd == "move") { cmd_move(file, ARGV) } else
+	if (cmd == "num") { cmd_num(file, ARGV) } else
+	if (cmd == "set") { cmd_set(file, ARGV) } else
+	if (cmd == "template") { cmd_template(file, ARGV) } else
+	if (cmd == "tree") { cmd_tree(file, ARGV) } else
 		usage()
-	}
 }
