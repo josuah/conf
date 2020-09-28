@@ -1,2 +1,2 @@
-host=olor
-host=niger
+host=olor mode=auth
+host=niger mode=axfr

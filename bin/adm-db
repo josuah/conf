@@ -148,11 +148,11 @@ function db_getline(path, row,
 		}
 	} while (line ~ /^[ \t]*#/)
 
-	n = row[""]
+	n = row["#"]
 	split("", row)
 	db_split(line, argv)
 	db_keyval(argv, row)
-	row[""] = n + 1
+	row["#"] = n + 1
 	return 1
 }
 
@@ -209,7 +209,7 @@ function db_format_val(val)
 function db_print_pretty(row, width,
 	i, n, put, len, col, keys, val)
 {
-	printf("%3d ", row[""])
+	printf("%3d ", row["#"])
 	col = 4
 
 	n = array_keys(row, keys)
@@ -248,7 +248,7 @@ function db_format_row(row,
 	if (array_keys(row, keys) == 0)
 		return
 	for (i = 1; i in keys; i++) {
-		if (keys[i] == "")
+		if (keys[i] == "#")
 			continue
 		out = out sp keys[i] "=" db_format_val(row[keys[i]])
 		sp = " "
@@ -472,7 +472,7 @@ function cmd_del(path, argv,
 	close("mktemp")
 
 	while (db_getline(path, row)) {
-		if (row[""] in num)
+		if (row["#"] in num)
 			continue
 		print db_format_row(row) >>tmp
 	}
@@ -493,7 +493,7 @@ function cmd_set(path, argv,
 	close(mktemp)
 
 	while (db_getline(path, row)) {
-		if (row[""] in num) {
+		if (row["#"] in num) {
 			split("", keys)
 			db_keyval(argv, row, keys)
 			for (x in keys)
@@ -509,7 +509,7 @@ function cmd_num(path, argv,
 {
 	db_keyval(argv, query)
 	for (first = 1; db_getmatch(path, query, row); first = 0)
-		printf "%s%s", (first ? "" : ","), row[""]
+		printf "%s%s", (first ? "" : ","), row["#"]
 	printf "\n"
 }
 
@@ -526,19 +526,19 @@ function cmd_move(path, argv,
 	to = array_shift(argv)
 
 	while (db_getline(path, row))
-		if (row[""] in num)
+		if (row["#"] in num)
 			block = block db_format_row(row)
-	if (to < 1 || to > row[""])
+	if (to < 1 || to > row["#"])
 		die("destination outside possible values: " to)
 
 	"mktemp" | getline tmp
 	close("mktemp")
 
-	delete row[""]
+	delete row["#"]
 	while (db_getline(path, row)) {
-		if (row[""] == to)
+		if (row["#"] == to)
 			print block >>tmp
-		if (!(row[""] in num))
+		if (!(row["#"] in num))
 			print db_format_row(row) >>tmp
 	}
 

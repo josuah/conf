@@ -2,7 +2,7 @@
 
 $ORIGIN {{ zone }}.
 
-@	3600 IN SOA {{ db/dns-ns:host }}.{{ zone }}. hostmaster.{{ zone }}. (
+@	3600 IN SOA ns1.{{ zone }}. hostmaster.{{ zone }}. (
 	{{ now }}	; serial
 	3600		; refresh
 	3600		; retry
@@ -12,15 +12,33 @@ $ORIGIN {{ zone }}.
 
 ; NS - name servers
 #for db/dns-ns
-	3600	IN	NS	{{ 1:host }}.{{ zone }}.
+	3600	IN	NS	ns{{ 1:# }}.{{ zone }}.
 #end
 
 ; MX - mail exchangers
-#for db/dns-mx soa=[zone]
-@	3600	IN	MX	{{ 1:pref }} {{ 1:host }}.{{ zone }}.
+#for db/ns-soa soa=[zone] mx=true
+##for db/dns-mx
+@	3600	IN	MX	{{ 2:# }} mx{{ 2:# }}.{{ zone }}.
+##end
 #end
 
 ; A/AAAA - host IP addresses
+#for db/dns-ns
+##for host/[1:host]/db pub=true v=4
+ns{{ 1:# }}	3600	IN	A	{{ 2:ip }}
+##end
+##for host/[1:host]/db pub=true v=6
+ns{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
+##end
+#end
+#for db/dns-mx
+##for host/[1:host]/db pub=true v=4
+mx{{ 1:# }}	3600	IN	A	{{ 2:ip }}
+##end
+##for host/[1:host]/db pub=true v=6
+mx{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
+##end
+#end
 #for host
 ##for host/[1:path]/db pub=true v=4
 {{ 1:path }}	3600	IN	A	{{ 2:ip }}
