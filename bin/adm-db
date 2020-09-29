@@ -67,13 +67,11 @@ function array_sort(array, beg, end)
 	array_sort(array, a, end)			# sort bottom half
 }
 
-function array_prefix_keys(array_in, array_out, prefix,
+function array_prefix(array_in, array_out, prefix,
 	x)
 {
-	for (x in array_in) {
+	for (x in array_in)
 		array_out[prefix x] = array_in[x]
-		delete array_out[x]
-	}
 }
 
 function array_shift(array,
@@ -95,13 +93,25 @@ function array_delete(array, prefix,
 			delete array[x]
 }
 
+function exec(cmd,
+	line)
+{
+	"exec " cmd | getline line
+	close("exec " cmd)
+	return line
+}
+
+function mv(a, b)
+{
+	return system("exec mv -f '" a "' '" b "'") == 0
+}
+
 ## database ##
 
 function db_cache_glob(path,
 	glob, array, n, line, head, tail)
 {
-	"echo " file["path"] | getline glob
-	close("echo " file["path"])
+	glob = exec("echo " path)
 
 	if (index(glob, "*"))
 		return 0
@@ -110,12 +120,12 @@ function db_cache_glob(path,
 	assert(head > 0)
 	tail = length(path) - head - 1
 
-	FILECACHE["path"] = split(glob, array, " ")
-	while (n in array) {
-		item = substr(array[n], head, length(array[n] - head - tail))
-		FILECACHE[file["path"] ":" n] = "path=" db_format_val(item)
+	FILECACHE[path] = split(glob, array, " ")
+	for (n in array) {
+		item = substr(array[n], head, length(array[n]) - head - tail)
+		FILECACHE[path ":" n] = "*=" db_format_val(item)
 	}
-	return FILECACHE["path"]
+	return FILECACHE[path]
 }
 
 function db_cache_file(path,
@@ -196,6 +206,7 @@ function db_get_row(file, row,
 	db_split(file["line"], argv)
 	split("", row)
 	db_key_value(argv, row)
+	row["#"] = file["#"]
 	return 1
 }
 
@@ -236,8 +247,8 @@ function db_query(file, keys, query, result,
 function db_format_val(val)
 {
 	gsub("\t", " ", val)
-	gsub("\\", "\\s", val)
-	gsub("\"", "\\q", val)
+	gsub(/\\/, "\\s", val)
+	gsub(/"/, "\\q", val)
 	return index(val, " ") ? "\"" val "\"" : val
 }
 
@@ -262,7 +273,7 @@ function db_print_pretty(ln, row, width,
 	col = 4
 
 	n = array_keys(row, keys)
-	for (i = 1; i <= n; i++) {
+	for (i = 2; i <= n; i++) {
 		len = 1 + length(keys[i]) + 1 + length(row[keys[i]])
 		if (col + len > width && col > 4) {
 			printf "\n    "
@@ -277,8 +288,9 @@ function db_print_pretty(ln, row, width,
 }
 
 function db_print_tree(path, lv,
-	node)
+	file, node)
 {
+	file["path"] = path
 	while (db_get_row(file, row)) {
 		if ("add" in row) {
 			printf "%" (lv*2) "s%s ", "", row["add"]
@@ -290,12 +302,21 @@ function db_print_tree(path, lv,
 	}
 }
 
-function db_expand(str,
-	x)
+function db_expand(tail,
+	head, i, key)
 {
-	for (x in ENVIRON)
-		gsub("\\[" x "\\]", ENVIRON[x], str)
-	return str
+	while ((i = index(tail, "[")) > 0) {
+		head = head substr(tail, 1, i - 1)
+		tail = substr(tail, i + 1)
+		if ((i = index(tail, "]")) == 0)
+			die("missing closing bracket")
+		key = substr(tail, 1, i - 1)
+		tail = substr(tail, i + 1)
+		if (!(key in ENVIRON))
+			die("no result for " key)
+		head = head ENVIRON[key]
+	}
+	return head tail
 }
 
 ## templates ##
@@ -371,20 +392,18 @@ function tpl_query(str, result,
 	db_split(str, argv)
 	file["path"] = array_shift(argv)
 	db_key_value(argv, query, keys)
-	e = db_query(file, keys, query, result)
-	close(file["path"])
-	return e
+	return db_query(file, keys, query, result)
 }
 
 function tpl_flush(texts, queries, lv,
-	n, x, _, row)
+	pos, n, x, _, row)
 {
 	if (!(lv in texts))
 		return
 
 	n = split(lv, _, ".")
 	while (tpl_get_match(db_expand(queries[lv]), pos, n, row)) {
-		array_prefix_keys(row, ENVIRON, n ":")
+		array_prefix(row, ENVIRON, n ":")
 		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x])
 			tpl_flush(texts, queries, tpl_inc_level(x))
@@ -461,9 +480,7 @@ function cmd_get(file, argv,
 function cmd_list(file, argv,
 	cmd, query, row, width)
 {
-	cmd = "stty size 2>/dev/null"
-	cmd | getline width
-	close(cmd)
+	width = exec("stty size 2>/dev/null")
 
 	sub(".* ", "", width)
 	width = (width == "" ? 80 : width + 0)
@@ -504,18 +521,17 @@ function cmd_del(file, argv,
 	for (x in array)
 		num[array[x]]++
 
-	"mktemp" | getline tmp
-	close("mktemp")
+	tmp = exec("mktemp")
 
 	while (db_get_row(file, row)) {
 		if (file["#"] in num)
 			continue
 		print db_format_row(row) >>tmp
 	}
-	return system("mv -f '" tmp "' '" file["path"] "'") == 0
+	return mv(tmp, file["path"])
 }
 
-function cmd_set(path, argv,
+function cmd_set(file, argv,
 	x, array, num, row, tmp)
 {
 	if (!(2 in argv))
@@ -525,8 +541,7 @@ function cmd_set(path, argv,
 	for (x in array)
 		num[array[x]]++
 
-	"mktemp" | getline tmp
-	close(mktemp)
+	tmp = exec("mktemp")
 
 	while (db_get_row(file, row)) {
 		if (file["#"] in num) {
@@ -537,10 +552,10 @@ function cmd_set(path, argv,
 		}
 		print db_format_row(row) >>tmp
 	}
-	return system("mv -f '" tmp "' '" path "'") == 0
+	return mv(tmp, file["path"])
 }
 
-function cmd_num(path, argv,
+function cmd_num(file, argv,
 	query, row, first)
 {
 	db_key_value(argv, query)
@@ -549,7 +564,7 @@ function cmd_num(path, argv,
 	printf "\n"
 }
 
-function cmd_move(path, argv,
+function cmd_move(file, argv,
 	x, array, num, to, row, tmp, block)
 {
 	if (!(2 in argv) || (3 in argv))
@@ -567,8 +582,7 @@ function cmd_move(path, argv,
 	if (to < 1 || to > file["#"])
 		die("destination outside possible values: " to)
 
-	"mktemp" | getline tmp
-	close("mktemp")
+	tmp = exec("mktemp")
 
 	delete file["#"]
 	while (db_get_row(file, row)) {
@@ -578,7 +592,7 @@ function cmd_move(path, argv,
 			print db_format_row(row) >>tmp
 	}
 
-	system("mv '" tmp "' '" path "'")
+	return mv(tmp, file["path"])
 }
 
 ## main ##
@@ -599,14 +613,12 @@ function usage()
 }
 
 BEGIN {
-	cmd = "date +%s"
-	cmd | getline ENVIRON["now"]
-	close(cmd)
+	ENVIRON["now"] = exec("date +%s")
 
 	if (!(2 in ARGV))
 		usage()
 
-	FILENAME = file["path"] = array_shift(ARGV)
+	file["path"] = array_shift(ARGV)
 	cmd = array_shift(ARGV)
 
 	if (cmd == "add") { cmd_add(file, ARGV) } else

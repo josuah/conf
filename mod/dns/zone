@@ -22,7 +22,7 @@ $ORIGIN {{ zone }}.
 ##end
 #end
 
-; A/AAAA - host IP addresses
+; A/AAAA - addresses of name/mail servers
 #for db/dns-ns
 ##for host/[1:host]/db pub=true v=4
 ns{{ 1:# }}	3600	IN	A	{{ 2:ip }}
@@ -40,14 +40,13 @@ mx{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
 ##end
 #end
 
-#for host
-##for host/[1:path]/db pub=true v=4
-{{ 1:path }}	3600	IN	A	{{ 2:ip }}
-*.{{ 1:path }}	3600	IN	A	{{ 2:ip }}
+; A/AAAA - addresses of hosts
+#for host/*
+##for host/[1:*]/db pub=true v=4
+{{ 1:* }}	3600	IN	A	{{ 2:ip }}
 ##end
-##for host/[1:path]/db pub=true v=6
-{{ 1:path }}	3600	IN	AAAA	{{ 2:ip }}
-*.{{ 1:path }}	3600	IN	AAAA	{{ 2:ip }}
+##for host/[1:*]/db pub=true v=6
+{{ 1:* }}	3600	IN	AAAA	{{ 2:ip }}
 ##end
 #end
 
