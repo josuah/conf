@@ -1,4 +1,4 @@
-set log syslog
+set log syslog facility local0
 set idfile /var/monit/id
 set statefile /var/monit/state
 set daemon 30
