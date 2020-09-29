@@ -1,9 +1,9 @@
 30	1	*	*	*	git	backup-git git.z0.is
-#for host
-##for host/[1:path]/db add=mod/mail
+#for host/*
+##for host/[1:*]/db add=mod/mail
 35	1	*	*	*	root	sleep $((RANDOM % 30)) && snapshot-snap mail [1:host]:/var/mail
 ##end
-##for host/[1:path]/db add=mod/http
+##for host/[1:*]/db add=mod/http
 40	1	*	*	*	root	sleep $((RANDOM % 30)) && snapshot-snap http [1:host]:/var/www
 ##end
 #end
