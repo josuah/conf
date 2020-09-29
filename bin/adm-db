@@ -4,7 +4,7 @@
 
 function die(msg)
 {
-	print "error: " msg >"/dev/stderr"
+	print FILENAME ": " msg >"/dev/stderr"
 	exit(1)
 }
 
@@ -97,6 +97,56 @@ function array_delete(array, prefix,
 
 ## database ##
 
+function db_cache_glob(path,
+	glob, array, n, line, head, tail)
+{
+	"echo " file["path"] | getline glob
+	close("echo " file["path"])
+
+	if (index(glob, "*"))
+		return 0
+
+	head = index(path, "*")
+	assert(head > 0)
+	tail = length(path) - head - 1
+
+	FILECACHE["path"] = split(glob, array, " ")
+	while (n in array) {
+		item = substr(array[n], head, length(array[n] - head - tail))
+		FILECACHE[file["path"] ":" n] = "path=" db_format_val(item)
+	}
+	return FILECACHE["path"]
+}
+
+function db_cache_file(path,
+	line, n)
+{
+	while ((getline line <path) > 0) {
+		if (line ~ /^[ \t]*#/)
+			continue
+		FILECACHE[path ":" ++n] = line
+	}
+	close(path)
+	return FILECACHE[path] = n
+}
+
+function db_cache_path(path)
+{
+	if (path in FILECACHE)
+		return FILECACHE[path]
+	return index(path, "*") ? db_cache_glob(path) : db_cache_file(path)
+}
+
+function db_get_line(file)
+{
+	if (file["#"] >= db_cache_path(file["path"]))
+		return 0
+	file["#"]++
+	assert(file["path"] ":" file["#"] in FILECACHE)
+	file["line"] = FILECACHE[file["path"] ":" file["#"]]
+	return file["#"]
+}
+
 function db_split(str, argv)
 {
 	# escape special characters
@@ -138,32 +188,6 @@ function db_key_value(argv, row, keys,
 	}
 }
 
-# to permit the same file to be open multipletimes
-
-function db_cache_file(path,
-	line, n)
-{
-	if (path in FILECACHE)
-		return FILECACHE[path]
-	while ((getline line <path) > 0) {
-		if (line ~ /^[ \t]*#/)
-			continue
-		FILECACHE[path ":" ++n] = line
-	}
-	close(path)
-	return FILECACHE[path] = n
-}
-
-function db_get_line(file)
-{
-	if (file["#"] >= db_cache_file(file["path"]))
-		return 0
-	file["#"]++
-	assert(file["path"] ":" file["#"] in FILECACHE)
-	file["line"] = FILECACHE[file["path"] ":" file["#"]]
-	return 1
-}
-
 function db_get_row(file, row,
 	argv, line, n)
 {
@@ -192,16 +216,6 @@ function db_get_match(file, query, row)
 	return 0
 }
 
-function db_expand(str, vars,
-	x)
-{
-	for (x in vars)
-		gsub("\\[" x "\\]", vars[x], str)
-	for (x in ENVIRON)
-		gsub("\\[" x "\\]", ENVIRON[x], str)
-	return str
-}
-
 function db_query(file, keys, query, result,
 	row, found, i, n)
 {
@@ -222,7 +236,23 @@ function db_query(file, keys, query, result,
 function db_format_val(val)
 {
 	gsub("\t", " ", val)
+	gsub("\\", "\\s", val)
+	gsub("\"", "\\q", val)
 	return index(val, " ") ? "\"" val "\"" : val
+}
+
+function db_format_row(row,
+	i, keys, sp, out)
+{
+	if (array_keys(row, keys) == 0)
+		return
+	for (i = 1; i in keys; i++) {
+		if (keys[i] == "#")
+			continue
+		out = out sp keys[i] "=" db_format_val(row[keys[i]])
+		sp = " "
+	}
+	return out
 }
 
 function db_print_pretty(ln, row, width,
@@ -260,23 +290,17 @@ function db_print_tree(path, lv,
 	}
 }
 
-function db_format_row(row,
-	i, keys, sp, out)
+function db_expand(str,
+	x)
 {
-	if (array_keys(row, keys) == 0)
-		return
-	for (i = 1; i in keys; i++) {
-		if (keys[i] == "#")
-			continue
-		out = out sp keys[i] "=" db_format_val(row[keys[i]])
-		sp = " "
-	}
-	return out
+	for (x in ENVIRON)
+		gsub("\\[" x "\\]", ENVIRON[x], str)
+	return str
 }
 
 ## templates ##
 
-function tpl_replace(text, vars,
+function tpl_replace(text,
 	head, tail, str, result, value)
 {
 	tail = text
@@ -284,16 +308,14 @@ function tpl_replace(text, vars,
 		str = substr(tail, RSTART + 2, RLENGTH - 4)
 		sub("^ *", "", str)
 		sub(" *$", "", str)
-		str = db_expand(str, vars)
+		str = db_expand(str)
 
 		if (str in ENVIRON) {
 			value = ENVIRON[str]
-		} else if (str in vars) {
-			value = vars[str]
-		} else {
-			if (tpl_query(str, result) == 0)
-				die("no result for " str)
+		} else if (tpl_query(str, result)) {
 			value = result[1]
+		} else {
+			die("no result for " str)
 		}
 
 		head = head substr(tail, 1, RSTART - 1) value
@@ -326,22 +348,18 @@ function tpl_dec_level(lv,
 	return array_join(array, ".")
 }
 
-function tpl_get_match(str, row, prefix,
-	file, argv, query)
+function tpl_get_match(str, pos, n, row,
+	i, file, glob, argv, query)
 {
 	db_split(str, argv)
 	file["path"] = array_shift(argv)
+	file["#"] = pos[n]
 
-	if (system("test -d '" file["path"] "'") == 0) {
-		if (("ls '" file["path"] "'" | getline row["path"]) <= 0) {
-			close("ls '" file["path"] "'")
-			return 0
-		}
-	} else {
-		db_key_value(argv, query)
-		if (db_get_match(file, query, row) == 0)
-			return 0
-	}
+	db_key_value(argv, query)
+	if (db_get_match(file, query, row) == 0)
+		return 0
+
+	pos[n] = file["#"]
 	return 1
 }
  
@@ -358,21 +376,21 @@ function tpl_query(str, result,
 	return e
 }
 
-function tpl_flush(texts, queries, lv, vars,
+function tpl_flush(texts, queries, lv,
 	n, x, _, row)
 {
 	if (!(lv in texts))
 		return
 
 	n = split(lv, _, ".")
-	while (tpl_get_match(db_expand(queries[lv], vars), row)) {
-		array_prefix_keys(row, vars, n ":")
+	while (tpl_get_match(db_expand(queries[lv]), pos, n, row)) {
+		array_prefix_keys(row, ENVIRON, n ":")
 		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
-			printf "%s", tpl_replace(texts[x], vars)
-			tpl_flush(texts, queries, tpl_inc_level(x), vars)
+			printf "%s", tpl_replace(texts[x])
+			tpl_flush(texts, queries, tpl_inc_level(x))
 		}
 	}
-	array_delete(vars, n ":")
+	array_delete(ENVIRON, n ":")
 }
 
 function tpl_add_line(texts, lv, line)
@@ -588,7 +606,7 @@ BEGIN {
 	if (!(2 in ARGV))
 		usage()
 
-	file["path"] = array_shift(ARGV)
+	FILENAME = file["path"] = array_shift(ARGV)
 	cmd = array_shift(ARGV)
 
 	if (cmd == "add") { cmd_add(file, ARGV) } else
