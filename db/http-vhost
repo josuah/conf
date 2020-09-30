@@ -1,6 +1,6 @@
-vhost=josuah host=olor
-vhost=code host=olor
-vhost=git host=olor
-vhost=duckless host=olor
-vhost=notqmail host=olor
-vhost=code host=olor
+host=olor vhost=josuah
+host=olor vhost=code
+host=olor vhost=git
+host=olor vhost=duckless
+host=olor vhost=notqmail
+host=olor vhost=atelier-fu
