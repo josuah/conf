@@ -11,9 +11,8 @@ send() { set -eu
 
 apply() { set -eu
 	export "$@" this="$(awk 'BEGIN { print ENVIRON[ENVIRON["os"]] }')"
-	shift 2
 	if type "cmd_${add}_${apply}" >/dev/null; then
-		echo "=>" "$apply" "$add" "$@"
+		echo "=>" "$@"
 		"cmd_${add}_${apply}" "${name:-}" </dev/null
 	fi
 }
