@@ -15,8 +15,5 @@ deploy_pre() { set -eu
 }
 
 deploy_post() { set -eu
-	send "
-		pkill -HUP opensmtpd
-		pkill -HUP dovecot
-	"
+	send "pkill -HUP dovecot"
 }

@@ -645,7 +645,8 @@ function usage()
 }
 
 BEGIN {
-	ENVIRON["now"] = exec("date +%s")
+	ENVIRON["epoch"] = exec("date +%s")
+	ENVIRON["date"] = exec("date +'%Y/%m/%d %H:%M:%S %Z'")
 
 	if (!(2 in ARGV))
 		usage()

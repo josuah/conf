@@ -11,9 +11,9 @@ send() { set -eu
 
 apply() { set -eu
 	export "$@" this="$(awk 'BEGIN { print ENVIRON[ENVIRON["os"]] }')"
-	if type "cmd_${add}_${apply}" >/dev/null; then
+	if type "cmd_${add}_${do}" >/dev/null; then
 		echo "=>" "$@"
-		"cmd_${add}_${apply}" "${name:-}" </dev/null
+		"cmd_${add}_${do}" "${name:-}" </dev/null
 	fi
 }
 
@@ -44,7 +44,7 @@ case $cmd in
 
 	IFS="$nl"
 	for line in $(cd "$etc"; adm-db "host/$host/db" tree); do
-		if ! (apply apply="$cmd" $(echo "$line" | xargs -n 1)); then
+		if ! (apply do="$cmd" $(echo "$line" | xargs -n 1)); then
 			exit=1
 			echo error
 		fi
