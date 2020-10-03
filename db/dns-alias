@@ -1,6 +1,7 @@
 dom=@ host=olor soa=z0.is
 dom=code host=olor soa=z0.is
 dom=git host=olor soa=z0.is
+dom=imap host=olor soa=z0.is
 dom=notqmail host=olor soa=z0.is
 dom=duckless host=olor soa=z0.is
 dom=*.duckless host=olor soa=z0.is

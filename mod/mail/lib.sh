@@ -16,9 +16,7 @@ deploy_pre() { set -eu
 
 deploy_post() { set -eu
 	send "
-		cd /etc/qmail/users
-		qmail-newu
-		pkill -HUP qmail-start
-		pkill -HUP inetd
+		pkill -HUP opensmtpd
+		pkill -HUP dovecot
 	"
 }

@@ -1,1 +1,1 @@
-add=service/httpd
+add=service name=httpd

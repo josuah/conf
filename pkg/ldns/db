@@ -1,1 +1,1 @@
-add=ospack/ldns cmd=ldns-version
+add=ospack name=ldns cmd=ldns-version

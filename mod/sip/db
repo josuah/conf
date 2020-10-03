@@ -1,2 +1,2 @@
-add=pkg/kamailio
-add=service/kamailio
+add=pkg name=kamailio
+add=service name=kamailio

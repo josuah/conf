@@ -11,7 +11,7 @@ _pkg_git() { set -eu
 			git -C "$bare" fetch
 		rm -rf "$SOURCE"
 
-		git -C "$bare" archive "$commit" | send "set -x
+		git -C "$bare" archive "$commit" | send "
 			mkdir -p "$SOURCE"
 			tar -C "$SOURCE" -xf -
 		"
@@ -48,7 +48,7 @@ _pkg_tar() { set -eu
 
 cmd_pkg_install() { set -eu
 	local name="$1"
-	local cmd="${var_cmd:-$name}"
+	local cmd="${cmd:-$name}"
 
 	send "type '$cmd' >/dev/null" && return 0
 
@@ -75,7 +75,8 @@ cmd_pkg_install() { set -eu
 		"
 	fi
 
-	send "	export PREFIX='$PREFIX'
+	send "
+		export PREFIX='$PREFIX'
 		export DESTDIR='$DESTDIR'
 
 		mkdir -p '$DESTDIR/bin' '$DESTDIR/sbin' '$DESTDIR/lib' \

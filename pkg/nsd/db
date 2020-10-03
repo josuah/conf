@@ -1,1 +1,1 @@
-add=ospack/nsd cmd=nsd
+add=ospack name=nsd cmd=nsd

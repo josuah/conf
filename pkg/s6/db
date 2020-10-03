@@ -1,2 +1,2 @@
-add=pkg/libskarnet
-add=pkg/execline
+add=pkg name=libskarnet
+add=pkg name=execline

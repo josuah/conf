@@ -1,6 +1,6 @@
-add=service/cron
-add=service/syslogd
-add=service/inetd
-add=pkg/inetd
-add=service/unbound
-add=pkg/unbound
+add=service name=cron
+add=service name=syslogd
+add=service name=inetd
+add=pkg name=inetd
+add=service name=unbound
+add=pkg name=unbound

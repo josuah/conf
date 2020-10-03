@@ -9,46 +9,25 @@ send() { set -eu
 	"
 }
 
-cmd() { set -eu
-	local type="$1" cmd="$2" name="$3" vars="$4"
-
-	echo "-- $cmd $type/$name" $vars
-	IFS='
-'
-	for x in $(echo "$vars" | xargs -n 1); do
-		if [ "${x%%=*}" = "os_$os" ]; then
-			export "var_this_os=${x#*=}"
-		fi
-		export "var_$x"
-	done
-	unset IFS
-
-	"cmd_${type}_${cmd}" "$name" </dev/null
-}
-
 apply() { set -eu
-	local cmd="$1" type name vars exit=0
-
-	while IFS=" /" read -r type name vars; do
-		if type "cmd_${type}_${cmd}" >/dev/null; then
-			if ! (cmd "$type" "$cmd" "$name" "$vars"); then
-				echo error
-				exit=1
-			fi
-		fi
-	done
-	return "$exit"
+	export "$@" this="$(awk 'BEGIN { print ENVIRON[ENVIRON["os"]] }')"
+	shift 2
+	if type "cmd_${add}_${apply}" >/dev/null; then
+		echo "=>" "$apply" "$add" "$@"
+		"cmd_${add}_${apply}" "${name:-}" </dev/null
+	fi
 }
 
 export cmd="${1:-help}"
 export host="${2:-$(hostname -s)}"
-export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/sbin /usr/*/bin)"
 export etc="${ADM_CONFIG:-/etc/adm}"
 export lib="$etc/lib"
 export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$(adm-db "$etc/host/$host/db" get os)"
+export nl="
+"
 
 case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
@@ -63,10 +42,18 @@ case $cmd in
 	. "$etc/lib/cmd_repo.sh"
 	. "$etc/lib/cmd_exec.sh"
 	. "$etc/lib/os_$os.sh"
-	(cd "$etc"; adm-db "host/$host/db" tree) | apply "$cmd"
+
+	IFS="$nl"
+	for line in $(cd "$etc"; adm-db "host/$host/db" tree); do
+		if ! (apply apply="$cmd" $(echo "$line" | xargs -n 1)); then
+			exit=1
+			echo error
+		fi
+	done
+	exit "${exit:-0}"
 	;;
 (*)
-	echo "usage: ${0##*/} cmd [host] [key=value...]"
-	echo "list, install, update, uninstall, start, stop, restart, reload, status"
+	echo "usage: ${0##*/} command [host] [key=value...]"
+	echo "command: list, install, update, uninstall, start, stop, restart, reload, status"
 	;;
 esac

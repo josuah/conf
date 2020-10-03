@@ -293,11 +293,9 @@ function db_print_tree(path, lv,
 	file["path"] = path
 	while (db_get_row(file, row)) {
 		if ("add" in row) {
-			printf "%" (lv*2) "s%s ", "", row["add"]
-			node = row["add"]
-			delete row["add"]
+			printf "%"(lv*2)"s", ""
 			print db_format_row(row)
-			db_print_tree(node "/db", lv + 1)
+			db_print_tree(row["add"] "/" row["name"] "/db", lv + 1)
 		}
 	}
 }
@@ -421,10 +419,55 @@ function tpl_add_line(texts, lv, line)
 	}
 }
 
+function tpl_do_include(line, texts, lv,
+	include)
+{
+	include = db_expand(line)
+	while ((getline line <include) > 0)
+		tpl_add_line(texts, lv, line)
+}
+
+function tpl_do_define(line,
+	key, sp, value)
+{
+	sp = index(line, " ")
+	if (sp == 0)
+		die("missing value after " line)
+	key = substr(line, 1, sp - 1)
+	value = substr(line, sp + 1)
+	ENVIRON[key] = tpl_replace(value)
+}
+
+function tpl_do_for(line, texts, queries, lv)
+{
+	lv = tpl_inc_level(lv)
+	queries[lv] = line
+	texts[lv] = ""  # lv in texts
+
+	return lv
+}
+
+function tpl_do_end(texts, queries, lv)
+{
+	if (lv == "")
+		die("more #end than #for")
+	lv = tpl_dec_level(lv)
+	lv = tpl_inc_tail(lv)
+	texts[lv] = ""  # lv in texts
+
+	if (lv == "") {
+		tpl_flush(texts, queries, "1")
+		split("", texts)
+		split("", queries)
+	}
+
+	return lv
+}
+
 ## commands ##
 
 function cmd_template(file, argv,
-	line, include, lv, queries, texts)
+	line, lv, queries, texts)
 {
 	if (1 in argv)
 		usage()
@@ -433,28 +476,17 @@ function cmd_template(file, argv,
 
 	while ((getline line <file["path"]) > 0) {
 
-		if (sub(/^#+include /, "", line)) {
-			include = db_expand(line)
-			while ((getline line <include) > 0)
-				tpl_add_line(texts, lv, line)
+		if (sub(/^#+define /, "", line)) {
+			tpl_do_define(line)
+
+		} else if (sub(/^#+include /, "", line)) {
+			tpl_do_include(line, lv)
 
 		} else if (sub(/^#+for /, "", line)) {
-			lv = tpl_inc_level(lv)
-			queries[lv] = line
-			texts[lv] = ""  # lv in texts
+			lv = tpl_do_for(line, texts, queries, lv)
 
 		} else if (line ~ /^#+end/) {
-			if (lv == "")
-				die("more #end than #for")
-			lv = tpl_dec_level(lv)
-			lv = tpl_inc_tail(lv)
-			texts[lv] = ""  # lv in texts
-
-			if (lv == "") {
-				tpl_flush(texts, queries, "1")
-				split("", texts)
-				split("", queries)
-			}
+			lv = tpl_do_end(texts, queries, lv)
 
 		} else {
 			tpl_add_line(texts, lv, line)

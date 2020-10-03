@@ -1,1 +1,1 @@
-add=service/sshd
+add=service name=sshd

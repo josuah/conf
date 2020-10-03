@@ -1,2 +1,2 @@
-add=pkg/ngircd
-add=service/ngircd
+add=pkg name=ngircd
+add=service name=ngircd

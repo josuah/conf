@@ -20,6 +20,8 @@ deploy_post() { set -eu
 
 		cat /etc/newsyslog.d/* >/etc/newsyslog.conf
 
+		cat /etc/login.d/* >/etc/login.conf
+
 		cat /etc/inetd.d/* >/etc/inetd.conf
 	"
 }

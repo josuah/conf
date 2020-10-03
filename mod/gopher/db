@@ -1,2 +1,2 @@
-add=pkg/geomyidae
-add=service/geomyidae argv="-u geomyidae -g nobody -b /srv/www"
+add=pkg name=geomyidae
+add=service name=geomyidae flags="-u geomyidae -g nobody -b /var/gopher"

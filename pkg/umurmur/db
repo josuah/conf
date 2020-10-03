@@ -1,3 +1,3 @@
-add=pkg/libmbedtls
-add=pkg/libprotobuf-c
-add=pkg/libconfig
+add=pkg name=libmbedtls
+add=pkg name=libprotobuf-c
+add=pkg name=libconfig

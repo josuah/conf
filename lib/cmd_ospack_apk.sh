@@ -1,7 +1,7 @@
 
 cmd_ospack_install() { set -eu
-	local pkg="${var_this_os:-$1}"
-	local cmd="${var_cmd:-$pkg}"
+	local pkg="${this_os:-$1}"
+	local cmd="${cmd:-$pkg}"
 
 	send "type '$cmd' >/dev/null || apk add '$pkg'"
 }

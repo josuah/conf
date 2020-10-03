@@ -1,2 +1,2 @@
-add=pkg/tor
-add=service/tor
+add=pkg name=tor
+add=service name=tor

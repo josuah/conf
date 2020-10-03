@@ -1,10 +1,10 @@
 os=OpenBSD
 ip=136.244.112.11 pub=true v=4
 ip=2001:19f0:6801:14ef:5400:2ff:feba:162e pub=true v=6
-add=mod/os-OpenBSD
-add=mod/vpn
-add=mod/dns
-add=mod/backup
-add=mod/monit
-add=mod/http
-add=mod/base
+add=mod name=os-OpenBSD
+add=mod name=vpn
+add=mod name=dns
+add=mod name=backup
+add=mod name=monit
+add=mod name=http
+add=mod name=base

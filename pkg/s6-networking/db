@@ -1,2 +1,2 @@
-add=pkg/s6-dns
-add=pkg/libbearssl
+add=pkg name=s6-dns
+add=pkg name=libbearssl

@@ -1,2 +1,2 @@
-add=service/nsd
-add=pkg/nsd
+add=service name=nsd
+add=pkg name=nsd
