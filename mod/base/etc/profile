@@ -1,4 +1,4 @@
-umask 022
+umask 002
 
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/bin /usr/*/sbin)"
 
