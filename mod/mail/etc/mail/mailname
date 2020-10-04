@@ -1,0 +1,3 @@
+mx{{ db/dns-mx:# host=[host] }}.{{ db/dns-soa:soa }}
+
+# by {{ path }} at {{ date }}
