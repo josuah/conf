@@ -1,5 +1,5 @@
 deploy_pre() { set -eu
-	adm-db ../../db/dns-alias get dom soa host \
+	adm-db "$db/dns-alias" get dom soa host \
 	| while IFS='	' read dom soa host; do
 		case "$dom" in (*"*"*) ;;
 		(@) echo host="$host" dom="$soa" ;;
