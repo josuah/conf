@@ -6,5 +6,6 @@ add=mod name=vpn
 add=mod name=dns
 add=mod name=backup
 add=mod name=monit
+add=mod name=sip
 add=mod name=http
 add=mod name=base

@@ -22,21 +22,17 @@ $ORIGIN {{ zone }}.
 ##end
 #end
 
-; A/AAAA - addresses of name/mail servers
-#for db/dns-ns
-##for host/[1:host]/db pub=true v=4
-ns{{ 1:# }}	3600	IN	A	{{ 2:ip }}
-##end
-##for host/[1:host]/db pub=true v=6
-ns{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
-##end
-#end
-#for db/dns-mx
-##for host/[1:host]/db pub=true v=4
-mx{{ 1:# }}	3600	IN	A	{{ 2:ip }}
-##end
-##for host/[1:host]/db pub=true v=6
-mx{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
+; A/AAAA - addresses of service servers
+#for db/dns-soa #=1 soa=[zone]
+##for db/dns-type
+###for db/dns-[2:type]
+####for host/[3:host]/db pub=true v=4
+{{ 2:type }}{{ 3:# }}	3600	IN	A	{{ 4:ip }}
+####end
+####for host/[3:host]/db pub=true v=6
+{{ 2:type }}{{ 3:# }}	3600	IN	AAAA	{{ 4:ip }}
+####end
+###end
 ##end
 #end
 
@@ -49,8 +45,6 @@ mx{{ 1:# }}	3600	IN	AAAA	{{ 2:ip }}
 {{ 1:* }}	3600	IN	AAAA	{{ 2:ip }}
 ##end
 #end
-
-; PTR - reverse DNS for hosts
 
 ; A/AAAA - alias addresses
 #for db/dns-alias soa=[zone]
