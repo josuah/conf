@@ -1,3 +1,18 @@
+deploy_pre() { set -eu
+#	if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+#		ssh-keygen -A
+#	fi
+#
+#		mkdir -p	"$dest/root/.ssh/sock"
+#		touch		"$dest/root/.ssh/authorized_keys"
+#		chmod 644 	"$dest/root/.ssh/"*
+#		chmod 700	"$dest/root/.ssh/"*"/"
+#		chmod 755	"$dest/root/.ssh"
+#		chown -R 0:0	"$dest/root/.ssh"
+#		cat keys/*	>$dir/.ssh/authorized_keys
+#	done
+}
+
 deploy_post() { set -eu
 	scp -qr home/.??* "$host:/root"
 

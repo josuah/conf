@@ -1,7 +1,18 @@
-me: josuah
-mail: josuah
-account: josuah
-root: josuah
-postmaster: root
-hostmaster: root
-webmaster: root
+# josuah
+me:		josuah
+mail:		josuah
+account:	josuah
+
+# mail admin as root will not have any mail
+root:		josuah
+
+# RFC 2142: network operations mailbox names
+abuse:		root
+noc:		root
+security:	root
+postmaster:	root
+hostmaster:	root
+webmaster:	root
+usenet:		root
+news:		root
+ftp:		root
