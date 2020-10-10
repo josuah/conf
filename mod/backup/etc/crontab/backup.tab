@@ -1,0 +1,7 @@
+20	1	*	*	*	root	backup-git root@git.{{ db/dns-soa:soa }}
+#for host/*
+30	1	*	*	*	root	snapshot take root@{{ 1:* }}:/home home
+##for host/[1:*]/db add=mod name=http
+40	1	*	*	*	root	snapshot-take root@{{ 1:* }}:/var/www http
+##end
+#end

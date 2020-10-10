@@ -24,19 +24,19 @@ deploy_post() { set -eu
 		chown _unbound: /var/unbound/db
 		unbound-anchor -vvv -a /var/unbound/db/root.key
 
-		cat /etc/crontab.d/* >/etc/crontab
+		cat /etc/crontab/* >/etc/crontab
 		pkill -HUP cron
 
-		cat /etc/syslog.d/* >/etc/syslog.conf
+		cat /etc/syslog/* >/etc/syslog.conf
 		sed -n 's,^[^#/]*/,/,p' /etc/syslog.conf | xargs touch
 		sed -n 's,^[^#/]*/,/,p' /etc/syslog.conf | xargs chmod 6400
 		sed -n 's,^[^#/]*/,/,p' /etc/syslog.conf | xargs chown root:
 		pkill -HUP syslogd
 
-		cat /etc/newsyslog.d/* >/etc/newsyslog.conf
+		cat /etc/newsyslog/* >/etc/newsyslog.conf
 
-		cat /etc/login.d/* >/etc/login.conf
+		cat /etc/login/* >/etc/login.conf
 
-		cat /etc/inetd.d/* >/etc/inetd.conf
+		cat /etc/inetd/* >/etc/inetd.conf
 	"
 }

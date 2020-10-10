@@ -15,8 +15,8 @@ deploy_post() { set -eu
 		mkdir -p -m 700 /etc/acme /etc/ssl/private
 		test -f '$acme' || openssl genrsa -out '$acme'
 
-		printf 'include \"%s\"\n' /etc/httpd.d/* >>/etc/httpd.conf
+		printf 'include \"%s\"\n' /etc/httpd/* >>/etc/httpd.conf
 
-		printf 'include \"%s\"\n' /etc/relayd.d/* >/etc/relayd.conf
+		printf 'include \"%s\"\n' /etc/relayd/* >/etc/relayd.conf
 	"
 }
