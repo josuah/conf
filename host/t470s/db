@@ -2,4 +2,4 @@ os=NetBSD
 add=mod name=os-NetBSD
 add=mod name=term
 add=mod name=backup
-add=mod name=base
+add=mod name=base pf=true

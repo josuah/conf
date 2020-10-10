@@ -24,7 +24,7 @@ deploy_post() { set -eu
 		chown _unbound: /var/unbound/db
 		unbound-anchor -vvv -a /var/unbound/db/root.key
 
-		cat /etc/crontab/* >/etc/crontab
+		cat /etc/crond/* >/etc/crontab
 		pkill -HUP cron
 
 		cat /etc/syslog/* >/etc/syslog.conf
