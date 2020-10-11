@@ -1,6 +1,6 @@
 # The Kamailio configuration file for the control tools.
 # by {{ path }} at {{ date }}
-#define domain sip.{{ db/dns-soa:soa }}
+#define domain sip{{ db/dns-sip:# host=[host] }}.{{ db/dns-soa:soa }}
 
 SIP_DOMAIN={{ domain }}
 DBENGINE=DBTEXT
