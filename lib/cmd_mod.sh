@@ -1,9 +1,9 @@
 cmd_mod_install() { set -eu
 	local name="$1"
-	export conf="$etc/mod/$name"
-	export dest="$etc/mod/$name/tmp"
 	local exit=0
 	local trap="rm -rf '$etc/mod/'*'/tmp'"
+	export conf="$etc/mod/$name"
+	export dest="$etc/mod/$name/tmp"
 
 	trap "$trap" INT TERM EXIT HUP
 	mkdir -p "$dest/etc" "$dest/var" "$dest/home" "$dest/root"

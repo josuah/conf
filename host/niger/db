@@ -5,6 +5,7 @@ add=mod name=os-OpenBSD
 add=mod name=vpn pf=true
 add=mod name=dns pf=true
 add=mod name=backup
+add=mod name=home user=root
 add=mod name=monit
 add=mod name=sip pf=true
 add=mod name=http pf=true

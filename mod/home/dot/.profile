@@ -3,10 +3,8 @@ export MAIL="$HOME/Maildir/"
 export ENV="$HOME/.profile"
 export LC_ALL="en_US.UTF-8"
 
-set -o emacs 2>"/dev/null"
-
-case " ${ok:-first} $- " in
-(" first "*i*" ")
+case " ${ok:-false} $- " in
+(" false "*i*" ")
 	export PS1="\$USER@$(hostname -s):\$PWD%\${?#0} "
 	export SSH_AUTH_SOCK="$HOME/.ssh/sock/agent"
 	export LESSHISTFILE="/tmp/lesshist"
@@ -24,4 +22,5 @@ case " ${ok:-first} $- " in
 	fi
 	;;
 esac
+set -o emacs 2>"/dev/null"
 ok=true

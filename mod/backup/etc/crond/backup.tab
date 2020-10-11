@@ -1,4 +1,6 @@
 #for host/*
+
+# {{ 1:* }}
 ##for host/[1:*]/db add=mod name=git
 10	*	*	*	*	root	snapshot-take root@{{ 1:* }}:/srv/git git
 ##end
