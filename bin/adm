@@ -24,7 +24,7 @@ export lib="$etc/lib"
 export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
 export cache="${ADM_CACHE:-/var/cache/adm}"
-export os="$(adm-db "$etc/host/$host/db" get os)"
+export os="$(dbase "$etc/host/$host/db" get os)"
 export nl="
 "
 
@@ -32,7 +32,7 @@ case $# in (0) ;; (1) shift 1 ;; (*) shift 2 ;; esac
 
 case $cmd in
 (list)
-	(cd "$etc"; adm-db "host/$host/db" tree)
+	(cd "$etc"; dbase "host/$host/db" tree)
 	;;
 (install | update | uninstall | start | stop | restart | reload | status)
 	. "$etc/lib/cmd_pkg.sh"
@@ -43,7 +43,7 @@ case $cmd in
 	. "$etc/lib/os_$os.sh"
 
 	IFS="$nl"
-	for line in $(cd "$etc"; adm-db "host/$host/db" tree); do
+	for line in $(cd "$etc"; dbase "host/$host/db" tree); do
 		if ! (apply do="$cmd" $(echo "$line" | xargs -n 1)); then
 			exit=1
 			echo error

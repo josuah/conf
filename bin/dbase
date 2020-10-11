@@ -632,15 +632,15 @@ function cmd_move(file, argv,
 function usage()
 {
 	print "usage:"						>"/dev/stderr"
-	print " adm-db <db> add <key>=<value>..."		>"/dev/stderr"
-	print " adm-db <db> del <n>"				>"/dev/stderr"
-	print " adm-db <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
-	print " adm-db <db> list [<key>=<value>...]"		>"/dev/stderr"
-	print " adm-db <db> move <n> <n>"			>"/dev/stderr"
-	print " adm-db <db> num <key>=<value>..."		>"/dev/stderr"
-	print " adm-db <db> set <n> <key>=<value>..."		>"/dev/stderr"
-	print " adm-db <db> tree"				>"/dev/stderr"
-	print " adm-db <template> template"			>"/dev/stderr"
+	print " dbase <db> add <key>=<value>..."		>"/dev/stderr"
+	print " dbase <db> del <n>"				>"/dev/stderr"
+	print " dbase <db> get <key> [<key>=<value>...]"	>"/dev/stderr"
+	print " dbase <db> list [<key>=<value>...]"		>"/dev/stderr"
+	print " dbase <db> move <n> <n>"			>"/dev/stderr"
+	print " dbase <db> num <key>=<value>..."		>"/dev/stderr"
+	print " dbase <db> set <n> <key>=<value>..."		>"/dev/stderr"
+	print " dbase <db> tree"				>"/dev/stderr"
+	print " dbase <template> template"			>"/dev/stderr"
 	exit(1)
 }
 

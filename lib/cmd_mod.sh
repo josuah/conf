@@ -16,7 +16,7 @@ cmd_mod_install() { set -eu
 
 	for x in $(cd "$conf" && find etc var -type f 2>/dev/null); do
 		mkdir -p "$(dirname "$dest/$x")"
-		(cd "$etc" && adm-db "$conf/$x" template >$dest/$x)
+		(cd "$etc" && dbase "$conf/$x" template >$dest/$x)
 	done
 
 	scp -qr "$dest/etc" "$dest/var" "$dest/root" "$dest/home" \

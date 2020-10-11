@@ -1,6 +1,6 @@
 deploy_post() {
-	domain=sip$(adm-db "$db/dns-sip" get "#" host="$host")
-	domain=$domain.$(adm-db "$db/dns-soa" get soa | sed q)
+	domain=sip$(dbase "$db/dns-sip" get "#" host="$host")
+	domain=$domain.$(dbase "$db/dns-soa" get soa | sed q)
 
 	send "
 		ln -f '/etc/ssl/private/$domain.key' /etc/kamailio/hardlink.key
