@@ -4,5 +4,5 @@
 
 SIP_DOMAIN={{ domain }}
 DBENGINE=DBTEXT
-DB_PATH="/etc/kamailio/dbtext"
+DBTEXT_PATH="/etc/kamailio/dbtext"
 MD5="sha256"
