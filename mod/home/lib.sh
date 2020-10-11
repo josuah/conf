@@ -1,4 +1,4 @@
-deploy_pre() { set -eux
+deploy_pre() { set -eu
 	[ "${user:-root}" = root ] && home="root" || home="home/$user"
 
 	mkdir -p "$dest/$home"
