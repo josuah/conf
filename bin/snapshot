@@ -1,0 +1,100 @@
+#!/bin/sh -eu
+# non-posix dependencies: gzip rsync openssl
+
+: ${SNAPSHOT_DIR:=/var/lib/snapshot}
+
+case " $* " in
+(" take "*?" "*?" ")
+	remote=$2 repo=$3
+
+	IFS=@: read user host path <<EOF
+$remote
+EOF
+	mkdir -p "$SNAPSHOT_DIR"
+	cd "$SNAPSHOT_DIR"
+
+	mkdir -p "tmp/$$"
+	trap 'rm -rf "tmp/$$"' INT EXIT TERM HUP
+
+	# get a list of all hashes on the remote
+	ssh "$host" "cd '$path' && exec find . -type f -exec openssl sha256 -r {} +" \
+	| sed -r 's, \*\./,  ,' | LC_ALL=C sort -t " " -k 3, -o "tmp/$$/index"
+
+	# for each hash, check if we have it locally
+	sed -r 's,(..)(..),\1 \2 &,' "tmp/$$/index" \
+	| while read ha sh hash file; do
+		if [ ! -f "file/$ha/$sh/$hash.gz" ]; then
+			echo "$hash  $file"
+			ssh "$host" "gzip -cf '$path/$file'" >tmp/$$/$hash.gz </dev/null
+			mkdir -p "file/$ha/$sh"
+			mv -f "tmp/$$/$hash.gz" "file/$ha/$sh/$hash.gz"
+		fi
+	done
+
+	# add the revision to the index
+	read ha hash index <<EOF
+	$(openssl sha256 -r "tmp/$$/index" | sed -r 's/ \*/  /; s/../& &/')
+EOF
+	mkdir -p "index/$ha" "host/$host"
+	mv "$index" "index/$ha/$hash"
+
+	# append the date and the new index to the host's repo
+	date +"%Y-%m-%d-%H-%M-%S $hash" | tee -a "host/$host/$repo"
+	;;
+(" cat "*?" ")
+	hash=$2
+	path=$(echo "$hash" | sed -r 's,(..)(..).*,\1/\2/&,')
+	exec gzip -cd "$SNAPSHOT_DIR/file/$path.gz"
+	;;
+(" list "*)
+	hash=$(echo "${2:-}" | sed 's,..,&/&,')
+	if [ "$#" = 1 ]; then
+		ls "$SNAPSHOT_DIR/host/"*
+	elif [ -d "$SNAPSHOT_DIR/host/$2" ]; then
+		tail "$SNAPSHOT_DIR/host/$2/"*
+	elif [ -f "$SNAPSHOT_DIR/index/$hash" ]; then
+		cat "$SNAPSHOT_DIR/index/$hash"
+	else
+		tail "$SNAPSHOT_DIR/host/"*"/$2"
+	fi
+	;;
+(" check ")
+	echo "bad hashes:" >&2
+	find "$SNAPSHOT_DIR/file" -type f -name "*.gz" | while read file; do
+		hash=${file##*/} hash=${hash%.gz}
+		gzip -cd "$file" \
+		  | mbedtls_generic_sum SHA256 /dev/stdin \
+		  | grep -Fqx "$hash  /dev/stdin" ||
+			echo "$hash"
+	done
+	;;
+(" pull "*?" ")
+	host=$2
+	mkdir -p "$SNAPSHOT_DIR"
+	exec rsync -Pa --size-only "$host:$SNAPSHOT_DIR/" "$SNAPSHOT_DIR/"
+	;;
+(" push "*?" ")
+	host=$2
+	exec rsync -Pa --size-only "$SNAPSHOT_DIR/" "$host:$SNAPSHOT_DIR/"
+	;;
+(" apply "*?" ")
+	hash=$2
+	ha=$(echo "$hash" | sed -r 's/(..).*/\1/')
+	sed -r 's/(..)(..)/\1 \2 \1\2/' "$SNAPSHOT_DIR/index/$ha/$hash" \
+	 | while read ha sh hash ex file; do
+		mkdir -p "$path/${file%/*}"
+		gzip -cd <"$SNAPSHOT_DIR/file/$ha/$sh/$hash.gz" >"$path/$file"
+		[ "$ex" = "x" ] && chmod +x "$path/$file"
+	done
+	;;
+(*)
+	echo>&2 "usage:	${0##*/} take <user@host:/path> <repo>"
+	echo>&2 "	${0##*/} cat <hash>"
+	echo>&2 "	${0##*/} list <hash>|<host>|<repo>"
+	echo>&2 "	${0##*/} check"
+	echo>&2 "	${0##*/} apply <hash>"
+	echo>&2 "	${0##*/} push [<user>@]<host>"
+	echo>&2 "	${0##*/} pull [<user>@]<host>"
+	exit 1
+	;;
+esac
