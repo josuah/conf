@@ -3,3 +3,5 @@ add=mod name=os-NetBSD
 add=mod name=term
 add=mod name=backup
 add=mod name=base pf=true
+add=mod name=home user=root
+add=mod name=home user=josuah

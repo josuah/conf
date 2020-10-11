@@ -1,8 +1,3 @@
-deploy_pre() { set -eu
-	mkdir -p "$dest/root/.ssh/sock"
-	cat keys/* >$dest/root/.ssh/authorized_keys
-}
-
 deploy_post() { set -eu
 	send "
 		touch "$HOME/.ssh/config_local"
@@ -27,5 +22,8 @@ deploy_post() { set -eu
 		cat /etc/login/* >/etc/login.conf
 
 		cat /etc/inetd/* >/etc/inetd.conf
+
+		touch /etc/hosts.local
+		cat /etc/hosts.local >>/etc/hosts
 	"
 }

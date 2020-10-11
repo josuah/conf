@@ -1,0 +1,14 @@
+# by {{ path }} at {{ date }}
+
+# global
+127.0.0.1  {{ host }} localhost
+::1  {{ host }} localhost
+
+# hosts
+#for host/*
+##for host/[1:*]/db ip pub=true
+{{ 2:ip }}  {{ 1:* }}
+##end
+#end
+
+# local entries

@@ -6,7 +6,7 @@ cmd_mod_install() { set -eu
 	local trap="rm -rf '$etc/mod/'*'/tmp'"
 
 	trap "$trap" INT TERM EXIT HUP
-	mkdir -p "$dest/etc" "$dest/var"
+	mkdir -p "$dest/etc" "$dest/var" "$dest/home" "$dest/root"
 
 	. "$etc/mod/$name/lib.sh"
 
@@ -18,7 +18,9 @@ cmd_mod_install() { set -eu
 		mkdir -p "$(dirname "$dest/$x")"
 		(cd "$etc" && adm-db "$conf/$x" template >$dest/$x)
 	done
-	scp -qr "$dest/etc" "$dest/var" "$host:/"
+
+	scp -qr "$dest/etc" "$dest/var" "$dest/root" "$dest/home" \
+	  "${user:-root}@$host:/"
 
 	if type deploy_post >/dev/null; then
 		(cd "$conf" && deploy_post) || exit 1
