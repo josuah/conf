@@ -1,3 +1,5 @@
-umask 002
-
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/bin /usr/*/sbin)"
+
+for x in /etc/profile.d/*; do
+	[ -f "$x" ] && . "$x"; done
+done

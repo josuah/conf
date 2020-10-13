@@ -1,4 +1,4 @@
 os=OpenBSD
 ip=2001:bc8:2c97::3 pub=true v=6
 ip=212.129.21.111 pub=true v=4
-add=mod name=home user=josuah
+add=mod backup=true name=home user=josuah

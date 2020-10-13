@@ -6,7 +6,10 @@
 
 # hosts
 #for host/*
-##for host/[1:*]/db ip pub=true
+##for host/[1:*]/db v=4
+{{ 2:ip }}  {{ 1:* }}
+##end
+##for host/[1:*]/db v=6
 {{ 2:ip }}  {{ 1:* }}
 ##end
 #end
