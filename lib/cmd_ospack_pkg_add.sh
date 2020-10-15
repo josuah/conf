@@ -1,7 +1,6 @@
 
 cmd_ospack_install() { set -eu
-	local pkg="${this_os:-$1}"
-	local cmd="${cmd:-$pkg}"
+	local cmd="${cmd:-$name}"
 
-	send "type '$cmd' >/dev/null || pkg_add '$pkg'"
+	send "type '$cmd' >/dev/null || pkg_add '$name'"
 }

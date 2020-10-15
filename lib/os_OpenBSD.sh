@@ -4,13 +4,13 @@
 . "$lib/cmd_group_groupadd.sh"
 
 cmd_service_install() {
-       send "rcctl enable '$1'"
+       send "rcctl enable '$name'"
 }
 
 cmd_service_uninstall() {
-       send "rcctl disable '$1'"
+       send "rcctl disable '$name'"
 }
 
 cmd_service_status() {
-       send "rcctl check '$1'"
+       send "rcctl check '$name'"
 }

@@ -1,5 +1,4 @@
 cmd_mod_install() { set -eu
-	local name="$1"
 	local exit=0
 	local trap="rm -rf '$etc/mod/'*'/tmp'"
 	export conf="$etc/mod/$name"

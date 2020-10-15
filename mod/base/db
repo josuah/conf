@@ -4,4 +4,4 @@ add=service name=inetd
 add=pkg name=inetd
 add=service name=unbound
 add=pkg name=unbound
-add=service name=sshd
+DebianLinux=ssh add=service name=sshd

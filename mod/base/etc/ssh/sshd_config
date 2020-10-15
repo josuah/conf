@@ -14,6 +14,9 @@ HostKey			/etc/ssh/ssh_host_rsa_key
 
 Subsystem sftp		/usr/libexec/sftp-server
 
+Match Group users
+ X11Forwarding		yes
+
 Match Group sftp
  X11Forwarding		no
  AllowTcpForwarding	no

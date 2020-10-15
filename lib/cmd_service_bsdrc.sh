@@ -1,28 +1,28 @@
 
 cmd_service_install() { set -eu
-	send "echo '$1=YES' >'/etc/rc.conf.d/$1'"
+	send "echo '$name=YES' >'/etc/rc.conf.d/$name'"
 }
 
 cmd_service_uninstall() { set -eu
-	send "rm '/etc/rc.conf.d/$1'"
+	send "rm '/etc/rc.conf.d/$name'"
 }
 
 cmd_service_start() { set -eu
-	send "'/etc/rc.d/$1' start"
+	send "'/etc/rc.d/$name' start"
 }
 
 cmd_service_stop() { set -eu
-	send "'/etc/rc.d/$1' stop"
+	send "'/etc/rc.d/$name' stop"
 }
 
 cmd_service_restart() { set -eu
-	send "'/etc/rc.d/$1' restart"
+	send "'/etc/rc.d/$name' restart"
 }
 
 cmd_service_reload() { set -eu
-	send "'/etc/rc.d/$1' reload"
+	send "'/etc/rc.d/$name' reload"
 }
 
 cmd_service_status() { set -eu
-	send "'/etc/rc.d/$1' status"
+	send "'/etc/rc.d/$name' status"
 }

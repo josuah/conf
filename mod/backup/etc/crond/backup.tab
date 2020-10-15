@@ -8,7 +8,7 @@
 ##for host/[1:*]/db add=mod name=http
 20	*	*	*	*	root	snapshot take root@{{ 1:* }}:/var/www http
 ##end
-##for host/[1:*]/db add=mod name=home
+##for host/[1:*]/db add=mod name=home backup=true
 30	*	*	*	*	root	snapshot take {{ 2:user }}@{{ 1:* }}:/home/{{ 2:user }} home-{{ 2:user }}
 ##end
 #end

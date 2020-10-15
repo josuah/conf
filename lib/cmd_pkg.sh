@@ -47,7 +47,6 @@ _pkg_tar() { set -eu
 }
 
 cmd_pkg_install() { set -eu
-	local name="$1"
 	local cmd="${cmd:-$name}"
 
 	send "type '$cmd' >/dev/null" && return 0
