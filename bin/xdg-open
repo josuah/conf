@@ -1,0 +1,130 @@
+#!/bin/sh -e
+# override xdg-open so that it uses my environment
+
+cmd() {
+	if type "$1" >/dev/null; then
+		exec "$@"
+	fi
+}
+
+export DISPLAY="${DISPLAY:-:0}"
+
+url=$(printf %s "$1" | tr A-Z a-z | sed 's,#.*,,; s,/*$,,')
+hash=$(printf %s "$url" | openssl sha256 | sed 's/(stdin)= //')
+proto=$(printf %s "$url" | sed -rn 's,([^/]+):.*,\1,p')
+
+
+## categorise
+
+case "$url" in
+(*://invidio.us/*\
+|*://*youtube.com/*\
+|*://youtu.be/*\
+|*://*dailymotion.com/*\
+|*://vimeo.com/*)
+	proto=ytdl type=video
+	;;
+(*://*bandcamp.com/track/*)
+	proto=ytdl type=audio
+	;;
+(*://github.com/*/*)
+	proto=git
+	;;
+(*.jpg|*.jpeg|*.png|*.gif)
+	type=image
+	;;
+(*.pdf|*.ps)
+	type=paper
+	;;
+(*.mkv|*.webm|*.avi|*.mp4)
+	type=video
+	;;
+(*.mka|*.ogg|*.opus|*.mp3|*.flac|*.wav)
+	type=audio
+	;;
+(*.txt|*.md|*.sh|*.c)
+	type=text
+	;;
+(*.torrent)
+	type=torrent
+	;;
+esac
+
+
+## download
+
+file=${XDG_CACHE_HOME:-$HOME/.cache}/hash/$hash-${url##*/}
+
+[ -f "$file" -o -z "$type" ] ||
+case "$proto" in
+("ssh")
+	scp "$url" "$file"
+	;;
+("sftp")
+	scp "$url" "$file"
+	;;
+("ytdl")
+	youtube-dl -o "$file" "$url"
+	;;
+("http"|"https"|"gopher")
+	curl -L -o "$file" "$url"
+	;;
+esac
+
+
+## open
+
+case " $proto $type $url " in
+(" "*" audio "*" "\
+|" "*" video "*" ")
+	set -x
+	cmd ffplay "$file"
+	cmd mplayer "$file"
+	cmd mpv "$file"
+	cmd vlc "$file"
+	echo "no command found" >&2
+	exit 1
+	;;
+(" "*" text "*" ")
+	exec x-terminal-emulator less "$file"
+	;;
+(" "*" image "*" ")
+	exec sxiv "$file"
+	;;
+(" "*" paper "*" ")
+	exec mupdf "$file"
+	;;
+(" ftp "*" "*" ")
+	exec x-terminal-emulator ftp "$url"
+	;;
+(" git "*" "*" ")
+	path=$(basename "$url" .git)
+	mkdir -p "$(dirname "$HOME/src/$path")"
+	[ -d "$HOME/src/$path" ] || git clone "$url" "$HOME/src/$path"
+	;;
+(" gopher "*" "*" ")
+	exec x-terminal-emulator sacc "$url"
+	;;
+(" http "*" "*" "\
+|" https "*" "*" ")
+	exec x-www-browser "$url"
+	;;
+(" magnet "*" "*" ")
+	exec transmission-remote -a "$url"
+	;;
+(" mumble "*" "*" ")
+	exec mumble "$url"
+	;;
+(" sftp "*" "*" ")
+	exec x-terminal-emulator sftp "$url"
+	;;
+(" ssh "*" "*" ")
+	exec x-terminal-emulator ssh "$url"
+	;;
+(" torrent "*" "*" ")
+	exec transmission-remote -a "$url"
+	;;
+(*)
+	echo "no handler for $url" >&2
+	exit 1
+esac

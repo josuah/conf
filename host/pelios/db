@@ -5,3 +5,4 @@ add=mod name=os-OpenBSD
 add=mod name=base pf=true
 add=mod name=home user=root
 add=mod backup=true name=home user=josuah
+add=mod name=backup

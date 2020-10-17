@@ -1,0 +1,89 @@
+#!/bin/sh -eu
+
+: ${PASSWORD_STORE_DIR:=$HOME/.password-store}
+: ${PASSWORD_STORE_GENERATED_LENGTH:=32}
+
+umask "${PASSWORD_STORE_UMASK:-077}"
+
+check_not_exist() {
+	if [ -f "$PASSWORD_STORE_DIR/$1" ]; then
+		echo "$PASSWORD_STORE_DIR/$1 already exist" 
+		exit 1
+	fi
+}
+
+prompt_env() {
+	while tty >/dev/null && printf '%s: ' "$1" >&2; ! read "$1"; do :; done
+	export "$1"
+}
+
+case " $* " in
+(" init ")
+	mkdir -p "$PASSWORD_STORE_DIR"
+	;;
+(" ls "*)
+	(cd "$PASSWORD_STORE_DIR/${2:-}"; find *) | sed 's,[^/]*/,:  ,g'
+	;;
+(" rm "*?" "*)
+	rm -i"$flags" "$PASSWORD_STORE_DIR/$2"
+	;;
+(" mv "*?" "*?" "*)
+	mv -i"$flags" "$PASSWORD_STORE_DIR/$2" "$PASSWORD_STORE_DIR/$3"
+	;;
+(" cp "*?" "*?" "*)
+	cp -i"$flags" "$PASSWORD_STORE_DIR/$2" "$PASSWORD_STORE_DIR/$3"
+	;;
+(" git "*?" "*)
+	shift 1
+	git -C "$PASSWORD_STORE_DIR" "$@"
+	;;
+(" find "*?" ")
+	(cd "$PASSWORD_STORE_DIR"; find . -name "*$2*")
+	;;
+(" show "*?" ")
+	cat "$PASSWORD_STORE_DIR/$2"
+	;;
+(" insert "*?" ")
+	check_not_exist "$2"
+	mkdir -p "$PASSWORD_STORE_DIR/${2%/*}"
+	prompt_env PASS
+	awk 'BEGIN { print ENVIRON["PASS"] }' >$PASSWORD_STORE_DIR/$2
+	;;
+(" edit "*?" ")
+	${EDITOR:-vi} "$PASSWORD_STORE_DIR/$2"
+	;;
+(" random "*)
+	n=${2:-$PASSWORD_STORE_GENERATED_LENGTH}
+	openssl base64 -in /dev/urandom 2>/dev/null \
+	 | sed -r "y,+/,-_,; s,^,$(date +%y%m%d-),; s,(.{$n}).*,\1,; q" \
+	;;
+(" generate "*?" ")
+	check_not_exist "$2"
+	mkdir -p "$(dirname "$PASSWORD_STORE_DIR/$2")"
+	exec "$0" random "${3:-}" >$PASSWORD_STORE_DIR/$2
+	;;
+(" version ")
+	echo "pass-posix-sh"
+	exit 1
+	;;
+("  ")
+	sel=$(cd "$PASSWORD_STORE_DIR"; find * -type f | dmenu)
+	echo "$sel" | sed 's,.*/,,' | tr -d '\n' | xsel -ib
+	"$0" show "$sel" | tr -d '\n' | xsel -ip
+	;;
+(" "*" ")
+	[ -f "$1" ] && exec "$0" show "$1"
+	[ -d "$1" ] && exec "$0" ls "$1"
+	echo>&2 "usage:	pass init"
+	echo>&2 "	pass ls [<path>]"
+	echo>&2 "	pass find <pattern>"
+	echo>&2 "	pass show <path>"
+	echo>&2 "	pass insert <path>"
+	echo>&2 "	pass random"
+	echo>&2 "	pass generate <path>"
+	echo>&2 "	pass edit <path>"
+	echo>&2 "	pass version"
+	echo>&2 "	pass help"
+	exit 1
+	;;
+esac
