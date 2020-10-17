@@ -1,4 +1,4 @@
-PREFIX = /usr/local
+PREFIX = /usr/adm
 
 install:
 	mkdir -p ${PREFIX}${DESTDIR}/bin

@@ -40,7 +40,7 @@ case $cmd in
 	. "$etc/lib/cmd_pkg.sh"
 	. "$etc/lib/cmd_mod.sh"
 	. "$etc/lib/cmd_golang.sh"
-	. "$etc/lib/cmd_repo.sh"
+	. "$etc/lib/cmd_git.sh"
 	. "$etc/lib/cmd_exec.sh"
 	. "$etc/lib/os_$os.sh"
 
