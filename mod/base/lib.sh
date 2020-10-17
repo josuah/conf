@@ -17,13 +17,13 @@ deploy_post() { set -eu
 		sed -n 's,^[^#/]*/,/,p' /etc/syslog.conf | xargs chown root:
 		pkill -HUP syslogd
 
+		touch /etc/hosts.local
+		cat /etc/hosts.local >>/etc/hosts
+
 		cat /etc/newsyslog/* >/etc/newsyslog.conf
 
 		cat /etc/login/* >/etc/login.conf
 
 		cat /etc/inetd/* >/etc/inetd.conf
-
-		touch /etc/hosts.local
-		cat /etc/hosts.local >>/etc/hosts
 	"
 }
