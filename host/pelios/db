@@ -7,3 +7,4 @@ add=mod name=home user=root
 add=mod backup=true name=home user=josuah
 add=mod name=torrent
 add=mod name=backup
+add=mod name=vpn

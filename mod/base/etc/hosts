@@ -1,17 +1,16 @@
 # by {{ path }} at {{ date }}
 
-# global
-127.0.0.1  {{ host }} localhost
-::1  {{ host }} localhost
-
-# hosts
+127.0.0.1 {{ host }} localhost
+::1 {{ host }} localhost
 #for host/*
+
+# {{ 1:* }}
 ##for host/[1:*]/db v=4
-{{ 2:ip }}  {{ 1:* }}
+{{ 2:ip }} {{ 1:* }}
 ##end
 ##for host/[1:*]/db v=6
-{{ 2:ip }}  {{ 1:* }}
+{{ 2:ip }} {{ 1:* }}
 ##end
 #end
 
-# local entries
+# hosts.local

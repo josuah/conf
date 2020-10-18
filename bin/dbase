@@ -67,13 +67,6 @@ function array_sort(array, beg, end)
 	array_sort(array, a, end)			# sort bottom half
 }
 
-function array_prefix(array_in, array_out, prefix,
-	x)
-{
-	for (x in array_in)
-		array_out[prefix x] = array_in[x]
-}
-
 function array_shift(array,
 	first, i)
 {
@@ -83,14 +76,6 @@ function array_shift(array,
 		array[i] = array[i + 1]
 	delete array[i]
 	return first
-}
-
-function array_delete(array, prefix,
-	x)
-{
-	for (x in array)
-		if (substr(array[x], 1, length(prefix)) == prefix)
-			delete array[x]
 }
 
 function exec(cmd,
@@ -123,7 +108,7 @@ function db_cache_glob(path,
 	FILECACHE[path] = split(glob, array, " ")
 	for (n in array) {
 		item = substr(array[n], head, length(array[n]) - head - tail)
-		FILECACHE[path ":" n] = "*=" db_format_val(item)
+		FILECACHE[path ":" n] = "*=" db_format_val("=" item)
 	}
 	return FILECACHE[path]
 }
@@ -184,16 +169,14 @@ function db_split(str, argv)
 }
 
 function db_key_value(argv, row, keys,
-	i, n, key, eq, val)
+	i, n, key, eq)
 {
 	for (i = 1; i in argv; i++) {
-		eq = index(argv[i], "=")
-		if (eq == 0) {
+		key = argv[i]
+		if (sub("[!=].*" , "", key) == 0) {
 			keys[++n] = argv[i]
 		} else {
-			key = substr(argv[i], 1, eq - 1)
-			val = substr(argv[i], eq + 1)
-			row[key] = val
+			row[key] = substr(argv[i], length(key) + 1)
 		}
 	}
 }
@@ -210,12 +193,27 @@ function db_get_row(file, row,
 	return 1
 }
 
+#
+# row[x] will always have key=value, but query may have key=value or key!value
+# extract the "=" or "!" and "value" out of "=value" or "!value"
+#
 function db_match(query, row,
-	x)
+	x, op, val)
 {
-	for (x in query)
-		if (!(x in row) || row[x] != query[x])
-			return 0
+	for (x in query) {
+		op = substr(query[x], 1, 1)
+		val = substr(query[x], 2)
+
+		if (x in row) {
+			if (op == "=" && row[x] != "="val)
+				return 0
+			if (op == "!" && row[x] == "="val)
+				return 0
+		} else {
+			if (op != "!")
+				return 0
+		}
+	}
 	return 1
 }
 
@@ -236,7 +234,7 @@ function db_query(file, keys, query, result,
 		for (i = 1; i in keys; i++) {
 			if (keys[i] in row)
 				found = 1
-			result[++n] = row[keys[i]]
+			result[++n] = substr(row[keys[i]], 2)
 		}
 		if (found)
 			return 1
@@ -246,9 +244,17 @@ function db_query(file, keys, query, result,
 
 function db_format_val(val)
 {
+	# strip the leading operator ("=", "!") prefix
+	val = substr(val, 2)
+
+	# sanitize the string
 	gsub("\t", " ", val)
+
+	# encode escape sequences back
 	gsub(/\\/, "\\s", val)
 	gsub(/"/, "\\q", val)
+
+	# return with quotes as needed
 	return index(val, " ") ? "\"" val "\"" : val
 }
 
@@ -401,13 +407,19 @@ function tpl_flush(texts, queries, lv,
 
 	n = split(lv, _, ".")
 	while (tpl_get_match(db_expand(queries[lv]), pos, n, row)) {
-		array_prefix(row, ENVIRON, n ":")
+
+		for (x in row)
+			ENVIRON[n ":" x] = substr(row[x], 2)
+
 		for (x = lv; x in texts; x = tpl_inc_tail(x)) {
 			printf "%s", tpl_replace(texts[x])
 			tpl_flush(texts, queries, tpl_inc_level(x))
 		}
 	}
-	array_delete(ENVIRON, n ":")
+
+	for (x in array)
+		if (substr(array[x], 1, length(prefix)) == prefix)
+			delete array[x]
 }
 
 function tpl_add_line(texts, lv, line)

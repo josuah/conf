@@ -1,7 +1,0 @@
-#for db/wireguard-peers
-
-[Peer]
-  PublicKey = {{ 1:pubkey }}
-  Endpoint = {{ 1:host }}.z0.is
-  AllowedIPs = {{ 1:net }}
-#end

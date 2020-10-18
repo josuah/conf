@@ -1,4 +1,0 @@
-# by {{ path }} at {{ date }}
-
-[Interface]
-  ListenPort = 51820
