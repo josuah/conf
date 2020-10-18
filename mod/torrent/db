@@ -1,0 +1,2 @@
+add=ospack cmd=transmission-daemon name=transmission
+add=service name=transmission_daemon

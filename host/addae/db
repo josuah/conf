@@ -1,0 +1,8 @@
+os=OpenBSD
+ip=10.191.255.53 v=4
+ip=10.191.255.41 v=4
+add=mod name=vmm
+add=mod name=base
+add=mod name=home user=josuah
+add=mod name=home user=root
+add=mod name=torrent

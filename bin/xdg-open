@@ -74,6 +74,8 @@ esac
 
 ## open
 
+echo " $proto $type $url "
+
 case " $proto $type $url " in
 (" "*" audio "*" "\
 |" "*" video "*" ")
@@ -93,6 +95,9 @@ case " $proto $type $url " in
 	;;
 (" "*" paper "*" ")
 	exec mupdf "$file"
+	;;
+(" "*" torrent "*" ")
+	exec transmission-remote -a "$url"
 	;;
 (" ftp "*" "*" ")
 	exec x-terminal-emulator ftp "$url"
@@ -120,9 +125,6 @@ case " $proto $type $url " in
 	;;
 (" ssh "*" "*" ")
 	exec x-terminal-emulator ssh "$url"
-	;;
-(" torrent "*" "*" ")
-	exec transmission-remote -a "$url"
 	;;
 (*)
 	echo "no handler for $url" >&2

@@ -2,7 +2,8 @@ os=OpenBSD
 ip=10.191.255.54 v=4
 add=mod name=term
 add=mod name=os-OpenBSD
-add=mod name=base pf=true
+add=mod name=base
 add=mod name=home user=root
 add=mod backup=true name=home user=josuah
+add=mod name=torrent
 add=mod name=backup
