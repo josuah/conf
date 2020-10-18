@@ -9,7 +9,7 @@ function ps_read(ps,
 		pid = $1
 
 		ps[$2":cpid"] = ps[$2":cpid"] "," pid
-		
+
 		sub("^( *[^ ]+ +)( *[^ ]+ +)", "")
 		ps[pid":info"] = $0
 
@@ -82,10 +82,10 @@ function tree_print(tree, n,
 	i1, i2)
 {
 	for (i1 = 1; i1 < n; i1++) {
-		printf("%6d  %s", tree[i1":pid"], tree[i1":info"])
+		printf("%6d %s", tree[i1":pid"], tree[i1":info"])
 		for (i2 = 1; tree[i1":"i2] != ""; i2++)
 			printf("%s", tree[i1":"i2])
-		printf("%-" 30 - i2 * 3 "s\n", tree[i1":args"])
+		printf("%s\n", tree[i1":args"])
 	}
 }
 

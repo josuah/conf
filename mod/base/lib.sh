@@ -1,6 +1,6 @@
 deploy_post() { set -eu
 	send "
-		touch "$HOME/.ssh/config_local"
+		touch '$HOME/.ssh/config_local'
 
 		printf '\n  %s\n\n' \"\$(uname -srnm)\" >/etc/motd
 
@@ -25,5 +25,9 @@ deploy_post() { set -eu
 		cat /etc/login/* >/etc/login.conf
 
 		cat /etc/inetd/* >/etc/inetd.conf
+
+		mkdir -p '$usr'
 	"
+
+	scp -qr "$bin" "root@$host:$usr"
 }
