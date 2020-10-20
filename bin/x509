@@ -9,6 +9,7 @@ CERT_OU				= Antarctic Treaty
 CERT_CN				= none
 CERT_EMAIL			= postmaster@$ENV::CERT_CN
 
+CA				= none
 KEYFILE				= none
 PASSWORD			= none
 X509V3				= none
@@ -68,7 +69,7 @@ subjectAltName			= DNS:$ENV::CERT_CN
 extendedKeyUsage		= serverAuth,clientAuth
 
 [ca]
-default_ca			= CA_default
+default_ca			= $ENV::CA
 
 [CA_default]
 database			= index.txt
@@ -96,6 +97,7 @@ umask 077
 
 case " $* " in
 (" ca "*?" create "*)
+	export CA=CA_default
 	export CERT_CN="$2"
 	export X509V3="x509v3_CA"
 	export PASSWORD="$(openssl rand -base64 33 | tr +/ z0)"
@@ -103,6 +105,7 @@ case " $* " in
 	mkdir "/etc/ssl/$CERT_CN"
 	cd "/etc/ssl/$CERT_CN"
 	awk 'BEGIN { print ENVIRON["PASSWORD"] }' >password.txt
+	echo "$openssl_cnf" | env
 	echo "$openssl_cnf" | openssl ca -config /dev/stdin
 	;;
 (" ca "*?" delete ")
@@ -132,4 +135,5 @@ case " $* " in
 	echo>&2	"	${0##*/} dhparam"
 	echo>&2	"	${0##*/} csr <name>"
 	echo>&2	"	${0##*/} ca <name> sign <csr>"
+	;;
 esac

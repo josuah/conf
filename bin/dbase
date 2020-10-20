@@ -189,7 +189,7 @@ function db_get_row(file, row,
 	db_split(file["line"], argv)
 	split("", row)
 	db_key_value(argv, row)
-	row["#"] = file["#"]
+	row["#"] = "=" file["#"]
 	return 1
 }
 

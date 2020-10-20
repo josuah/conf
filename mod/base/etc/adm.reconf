@@ -1,9 +1,8 @@
-#!/bin/sh -eu
-
-touch '$HOME/.ssh/config_local'
+#!/bin/sh
+set -eu
 
 exec >/etc/motd
-printf '\n  %s\n\n' \"\$(uname -srnm)\"
+printf '\n  %s\n\n' "$(uname -srnm)"
 
 exec >/etc/crontab
 cat /etc/crond/*
@@ -17,7 +16,7 @@ sed -n 's,^[^#/]*/,/,p' /etc/syslog.conf | xargs chown root:
 pkill -HUP syslogd
 
 exec >/etc/hosts
-touch /etc/hosts.conf /etc/hosts.local
+touch /etc/hosts.conf /etc/hosts.conf.local
 cat /etc/hosts.conf /etc/hosts.conf.local
 
 exec >/etc/newsyslog.conf
@@ -28,5 +27,3 @@ cat /etc/login/*
 
 exec >/etc/inetd.conf
 cat /etc/inetd/*
-
-mkdir -p '$usr'

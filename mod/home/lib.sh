@@ -11,5 +11,7 @@ deploy_pre() { set -eu
 		[ -f '$home/.ssh/id_ed25519' ] ||
 		  ssh-keygen -t ed25519 -N '' -f '$home/.ssh/id_ed25519'
 		chmod 700 '$home/.ssh'
+		touch '$home/.ssh/config_local'
+
 	"
 }

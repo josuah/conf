@@ -1,7 +1,5 @@
 deploy_post() { set -eu
 	send "
-		touch '$HOME/.ssh/config_local'
-
 		printf '\n  %s\n\n' \"\$(uname -srnm)\" >/etc/motd
 
 		mkdir -p /var/unbound/db
