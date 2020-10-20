@@ -1,3 +1,4 @@
+
 cmd_mod_install() { set -eu
 	local exit=0
 	local trap="rm -rf '$etc/mod/'*'/tmp'"

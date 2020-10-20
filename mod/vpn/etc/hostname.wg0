@@ -1,17 +1,17 @@
 # by {{ path }} at {{ date }}
 
 wgport 5555 wgkey {{ db/wireguard:privkey host=[host] }}
-inet 10.55.55.{{ db/wireguard:# host=[host] }}/32
+inet 10.55.55.{{ db/wireguard:id host=[host] }}/24
 #for db/wireguard host![host]
 
-wgpeer {{ 1:pubkey }}
+wgpeer {{ 1:pubkey }} \
 ##for host/[1:host]/db pub=true v=6
-wgendpoint {{ 2:ip }} 5555
+wgendpoint {{ 2:ip }} 5555 \
 ##end
 ##for host/[1:host]/db pub=true v=4
-wgendpoint {{ 2:ip }} 5555
+wgendpoint {{ 2:ip }} 5555 \
 ##end
-wgaip 10.55.55.0/24
+wgaip 10.55.55.{{ 1:id }}/32
 #end
 
 up
