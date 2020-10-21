@@ -1,49 +1,36 @@
 #!/bin/sh -eu
 openssl_cnf=' # adapted from OpenBSD /etc/ssl/ikeca.cnf
 
-CERT_C				= AQ
-CERT_ST				= Antarctica
-CERT_L				= World Park Base
-CERT_O				= Greenpeace
-CERT_OU				= Antarctic Treaty
-CERT_CN				= none
-CERT_EMAIL			= postmaster@$ENV::CERT_CN
-
-CA				= none
-KEYFILE				= none
-PASSWORD			= none
-X509V3				= none
-
 [req]
 distinguished_name		= distinguished_name
 attributes			= req_attributes
-req_extensions			= $ENV::X509V3
+req_extensions			= $X509V3
 default_bits			= 4096
 default_md			= sha256
 
 [distinguished_name]
 countryName			= Country Name (2 letter code)
-countryName_default		= $ENV::CERT_C
+countryName_default		= AQ
 countryName_min			= 2
 countryName_max			= 2
 stateOrProvinceName		= State or Province Name (full name)
-stateOrProvinceName_default	= $ENV::CERT_ST
+stateOrProvinceName_default	= Antarctica
 localityName			= Locality Name (eg, city)
-localityName_default		= $ENV::CERT_L
+localityName_default		= World Park Base
 0.organizationName		= Organization Name (eg, company)
-0.organizationName_default	= $ENV::CERT_O
+0.organizationName_default	= Greenpeace
 organizationalUnitName		= Organizational Unit Name (eg, section)
-organizationalUnitName_default	= $ENV::CERT_OU
+organizationalUnitName_default	= Antarctic Treaty
 commonName			= Common Name (eg, fully qualified host name)
 commonName_max			= 64
-commonName_default		= $ENV::CERT_CN
+commonName_default		= $COMMON_NAME
 emailAddress			= Email Address
 emailAddress_max		= 64
-emailAddress_default		= $ENV::CERT_EMAIL
+emailAddress_default		= postmaster@$COMMON_NAME
 
 [req_attributes]
 unstructuredName		= An optional company name
-challengePassword		= $ENV::PASSWORD
+challengePassword		= $PASSWORD
 challengePassword_min		= 8
 challengePassword_max		= 64
 
@@ -59,17 +46,17 @@ keyUsage			= digitalSignature,keyCertSign,cRLSign
 [x509v3_IPAddr]
 keyUsage			= digitalSignature,keyCertSign,cRLSign
 nsCertType			= server,client
-subjectAltName			= IP:$ENV::CERT_CN
+subjectAltName			= IP:$COMMON_NAME
 extendedKeyUsage		= serverAuth,clientAuth
 
 [x509v3_FQDN]
 keyUsage			= digitalSignature,keyCertSign,cRLSign
 nsCertType			= server,client
-subjectAltName			= DNS:$ENV::CERT_CN
+subjectAltName			= DNS:$COMMON_NAME
 extendedKeyUsage		= serverAuth,clientAuth
 
 [ca]
-default_ca			= $ENV::CA
+default_ca			= $CA
 
 [CA_default]
 database			= index.txt
@@ -79,7 +66,7 @@ default_days			= 365
 default_crl_days		= 365
 unique_subject			= yes
 email_in_dn			= yes
-private_key 			= $ENV::KEYFILE
+private_key 			= $KEYFILE
 policy				= CA_sign_policy
 
 [CA_sign_policy]
@@ -91,42 +78,75 @@ organizationalUnitName		= optional
 commonName			= supplied
 emailAddress			= optional
 
+[empty]
+
 ' # end
 
 umask 077
 
 case " $* " in
 (" ca "*?" create "*)
-	export CA=CA_default
-	export CERT_CN="$2"
-	export X509V3="x509v3_CA"
-	export PASSWORD="$(openssl rand -base64 33 | tr +/ z0)"
-	export KEYFILE="privkey.pem"
-	mkdir "/etc/ssl/$CERT_CN"
-	cd "/etc/ssl/$CERT_CN"
-	awk 'BEGIN { print ENVIRON["PASSWORD"] }' >password.txt
-	echo "$openssl_cnf" | env
-	echo "$openssl_cnf" | openssl ca -config /dev/stdin
+	ca=$2
+	mkdir "/etc/ssl/$ca"
+	cd "/etc/ssl/$ca"
+	touch password.txt privkey.pem
+	chmod 600 password.txt privkey.pem
+
+	openssl rand -base64 33 -out password.txt
+	openssl genrsa -out privkey.pem 1024
+	openssl ca -config /dev/stdin \
+	  -cert cert.pem -keyfile privkey.pem \
+	  <<EOF
+
+	CA			= empty
+	X509V3			= x509v3_CA
+	COMMON_NAME		= $ca
+	PASSWORD		= $(cat password.txt)
+	KEYFILE			= privkey.pem
+
+	$openssl_cnf
+EOF
 	;;
 (" ca "*?" delete ")
 	rm -rf "/etc/ssl/$2"
 	;;
 (" csr "*?" ")
-	dom=$2
+	cn=$2
 	dir=$(echo "$dom" | tr '*' '_')
 	mkdir -p /etc/ssl/private
 	cd /etc/ssl
-	echo "$openssl_cnf" | openssl req -config /dev/stdin -new -nodes \
-	  -keyout "$dom.key" -out "$dom.csr"
+
+	openssl req -new -nodes -keyout "$dom.key" -out "$dom.csr" \
+	  -config /dev/stdin <<EOF
+
+	CA			= CA_default
+	X509V3			= x509v3_FQDN
+	COMMON_NAME		= $cn
+	KEYFILE			= /etc/ssl/$cn.key
+
+	$openssl_cnf
+EOF
 	;;
 (" ca "*?" sign "*?" ")
-	echo "$openssl_cnf" | openssl x509 -config /dev/stdin -req \
+	ca=$2 cn=$4
+
+	openssl x509 -req \
 	  -in "/etc/ssl/private/$dom.csr" \
 	  -signkey "/etc/ssl/private/$dom.key" \
-	  -out "/etc/ssl/$dom.crt"
+	  -out "/etc/ssl/$dom.crt" \
+	  -config /dev/stdin <<EOF
+
+	CA			= CA_default
+	X509V3			= x509v3_CA
+	COMMON_NAME		= $cn
+	KEYFILE			= /etc/ssl/$ca/privkey.key
+
+	$openssl_cnf
+EOF
 	;;
 (" dhparam ")
 	[ -f "/etc/ssl/dhparam.pem" ] && exec echo "dhparam.pem already exists"
+
 	openssl dhparam -out /etc/ssl/dhparam.pem 2048
 	;;
 (*)
