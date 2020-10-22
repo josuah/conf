@@ -6,12 +6,12 @@ inet 10.55.55.{{ db/wireguard:id host=[host] }}/24
 
 wgpeer {{ 1:pubkey }} \
 ##for host/[1:host]/db pub=true v=6
-wgendpoint {{ 2:ip }} 5555 \
+	wgendpoint {{ 2:ip }} 5555 \
 ##end
 ##for host/[1:host]/db pub=true v=4
-wgendpoint {{ 2:ip }} 5555 \
+	wgendpoint {{ 2:ip }} 5555 \
 ##end
-wgaip 10.55.55.{{ 1:id }}/32
+	wgaip 10.55.55.{{ 1:id }}/32
 #end
 
 up

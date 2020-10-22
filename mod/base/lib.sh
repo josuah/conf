@@ -6,6 +6,8 @@ deploy_post() { set -eu
 		chown _unbound: /var/unbound/db
 		unbound-anchor -vvv -a /var/unbound/db/root.key
 
+		sh /etc/adm.sh
+
 		mkdir -p '$usr'
 	"
 
