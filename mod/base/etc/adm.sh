@@ -22,7 +22,7 @@ exec >/etc/login.conf
 cat /etc/login.d/*
 
 exec >/etc/inetd.conf
-cat /etc/inet.d/*
+cat /etc/inetd.d/*
 
 exec >/etc/hosts
 cat /etc/hosts.d/*
