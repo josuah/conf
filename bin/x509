@@ -1,15 +1,14 @@
 #!/bin/sh -eu
 
-openssl_cnf='
+conf="
 
 [req]
 default_bits			= 4096
 default_md			= sha256
-req_extensions			= req_extensions
-distinguished_name		= req_distinguished_name
+distinguished_name		= distinguished_name
 
-[req_distinguished_name]
-commonName			= CommonName
+[distinguished_name]
+commonName			= CN, CommonName
 
 [ca]
 default_ca			= ca_default
@@ -18,6 +17,14 @@ default_ca			= ca_default
 default_md			= sha256
 default_days			= 65535
 default_crl_days		= 1
+new_certs_dir			= /etc/ssl/ca/${2:-}/issued
+database			= /etc/ssl/ca/${2:-}/index.txt
+crl_dir				= /etc/ssl/ca/${2:-}/crl
+serial				= /etc/ssl/ca/${2:-}/serial
+private_key			= /etc/ssl/ca/${2:-}/private/ca.key
+certificate			= /etc/ssl/ca/${2:-}/ca.crt
+crlnumber			= /etc/ssl/ca/${2:-}/crlnumber
+crl				= /etc/ssl/ca/${2:-}/ca.crl
 policy				= ca_policy
 
 [ca_policy]
@@ -29,62 +36,44 @@ organizationalUnitName		= optional
 commonName			= supplied
 emailAddress			= optional
 
-' # end
-
-openssl_ca='
-
-[req_extensions]
+[ext_ca]
 basicConstraints		= critical,CA:true,pathlen:1
 keyUsage			= digitalSignature,keyCertSign,cRLSign
 
-' # end
-
-openssl_cert='
-
-[req_extensions]
+[ext_fqdn]
 keyUsage			= digitalSignature,keyCertSign,cRLSign
 nsCertType			= server,client
 extendedKeyUsage		= serverAuth,clientAuth
+subjectAltName			= DNS:${2:-}
 
-' # end
+" # end
 
 case " $* " in
-(" ca "*?" create ")
-	ca=${2:?}
-
-	mkdir -p "/etc/ssl/ca/$ca/private"
+(" ca "*" create ") ca=$2
+	mkdir -p "/etc/ssl/ca/$ca/issued"
 	cd "/etc/ssl/ca/$ca"
-	chmod 700 private
-
-	echo "$openssl_cnf $openssl_ca" |
-	openssl req -config /dev/stdin -x509 -newkey rsa:4096 -nodes \
+	mkdir -m 700 private 
+	touch index.txt
+	echo 0000 >serial
+	echo "$conf" | openssl req -config /dev/stdin -extensions ext_ca \
+	  -x509 -newkey rsa:1024 -nodes \
 	  -keyout private/ca.key -out ca.crt -subj "/CN=$ca"
 	;;
-(" ca "*?" delete ")
-	rm -r "/etc/ssl/$2/"
+(" ca "*" delete ") ca=$2
+	rm -r "/etc/ssl/ca/$ca/"
 	;;
-(" csr "*?" ")
-	cn=$2
-
+(" ca "*" sign "*" ") ca=$2 file=$4
+	[ -f "$file" ] || file=/etc/ssl/$file.csr
+	echo "$conf" | openssl ca -config /dev/stdin -extensions ext_fqdn \
+	  -extension ext_ca -batch -in "$file"
+	;;
+(" csr "*" ") cn=$2
 	mkdir -p /etc/ssl/private
 	cd /etc/ssl
-
-	echo "$openssl_cnf $openssl_cert subjectAltName=DNS:$cn" |
-	openssl req -config /dev/stdin -x509 -newkey rsa:4096 -nodes \
+	chmod 500 private
+	echo "$conf" | openssl req -config /dev/stdin -extensions ext_fqdn \
+	  -newkey rsa:1024 -nodes \
 	  -keyout "private/$cn.key" -out "$cn.csr" -subj "/CN=$cn"
-	;;
-(" ca "*?" sign "*?" ")
-	ca=$2 cn=$4
-
-	cd /etc/ssl
-
-	echo "$openssl_cnf $openssl_cert" |
-	openssl ca -config /dev/stdin -notext -in "$cn.csr" -out "$cn.crt" \
-	  -keyfile "ca/$ca/private/ca.key" -cert "ca/$ca/ca.crt"
-
-	cat "$ca/ca.crt" >>$cn.crt
-
-	chmod 444 "$cn.crt"
 	;;
 (" dhparam ")
 	if [ ! -f "dhparam.pem" ]; then
@@ -94,8 +83,8 @@ case " $* " in
 (*)
 	echo>&2	"usage:	${0##*/} ca <name> create"
 	echo>&2	"	${0##*/} ca <name> delete"
-	echo>&2	"	${0##*/} dhparam"
-	echo>&2	"	${0##*/} csr <name>"
 	echo>&2	"	${0##*/} ca <name> sign <csr>"
+	echo>&2	"	${0##*/} csr <name>"
+	echo>&2	"	${0##*/} dhparam"
 	;;
 esac

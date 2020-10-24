@@ -13,6 +13,7 @@ apply() { set -eu
 	export "$@"
 	export this="$(awk 'BEGIN { print ENVIRON[ENVIRON["os"]] }')"
 	export name="${this:-$name}"
+	unset IFS
 	if type "cmd_${add}_${do}" >/dev/null; then
 		echo "=>" "$@"
 		"cmd_${add}_${do}" </dev/null
@@ -26,7 +27,6 @@ export etc="${ADM_CONFIG:-/etc/adm}"
 export lib="$etc/lib"
 export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"
-export cache="${ADM_CACHE:-/var/cache/adm}"
 export os="$("$bin/dbase" "$etc/host/$host/db" get os)"
 export nl="
 "

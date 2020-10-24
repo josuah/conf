@@ -1,6 +1,6 @@
 os=OpenBSD
 ip=45.32.148.148 pub=true v=4
-ip=2001:19f0:6801:186d:5400:2ff:feef:74fc pub=true v=6
+ip=2001:19f0:6801:186d:7171:7171:7177:7171 pub=true v=6
 add=mod name=vpn
 add=mod name=mail pf=true
 add=mod name=OpenBSD
