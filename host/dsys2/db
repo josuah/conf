@@ -1,5 +1,5 @@
 os=DebianLinux
-ip=10.191.255.45 v=4
+ip=10.191.255.47 v=4
 add=mod name=home user=jdemangeon
 add=mod name=home user=root
 add=mod name=base

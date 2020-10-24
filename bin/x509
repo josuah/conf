@@ -1,75 +1,26 @@
 #!/bin/sh -eu
-openssl_cnf=' # adapted from OpenBSD /etc/ssl/ikeca.cnf
+
+openssl_cnf='
 
 [req]
-distinguished_name		= distinguished_name
-attributes			= req_attributes
-req_extensions			= $X509V3
 default_bits			= 4096
 default_md			= sha256
+req_extensions			= req_extensions
+distinguished_name		= req_distinguished_name
 
-[distinguished_name]
-countryName			= Country Name (2 letter code)
-countryName_default		= AQ
-countryName_min			= 2
-countryName_max			= 2
-stateOrProvinceName		= State or Province Name (full name)
-stateOrProvinceName_default	= Antarctica
-localityName			= Locality Name (eg, city)
-localityName_default		= World Park Base
-0.organizationName		= Organization Name (eg, company)
-0.organizationName_default	= Greenpeace
-organizationalUnitName		= Organizational Unit Name (eg, section)
-organizationalUnitName_default	= Antarctic Treaty
-commonName			= Common Name (eg, fully qualified host name)
-commonName_max			= 64
-commonName_default		= $COMMON_NAME
-emailAddress			= Email Address
-emailAddress_max		= 64
-emailAddress_default		= postmaster@$COMMON_NAME
-
-[req_attributes]
-unstructuredName		= An optional company name
-challengePassword		= $PASSWORD
-challengePassword_min		= 8
-challengePassword_max		= 64
-
-[x509v3_extensions]
-nsCaRevocationUrl		= http://127.0.0.1/ca-crl.pem
-nsComment			= "This is a comment"
-nsCertType			= 0x40
-
-[x509v3_CA]
-basicConstraints		= critical,CA:true,pathlen:1
-keyUsage			= digitalSignature,keyCertSign,cRLSign
-
-[x509v3_IPAddr]
-keyUsage			= digitalSignature,keyCertSign,cRLSign
-nsCertType			= server,client
-subjectAltName			= IP:$COMMON_NAME
-extendedKeyUsage		= serverAuth,clientAuth
-
-[x509v3_FQDN]
-keyUsage			= digitalSignature,keyCertSign,cRLSign
-nsCertType			= server,client
-subjectAltName			= DNS:$COMMON_NAME
-extendedKeyUsage		= serverAuth,clientAuth
+[req_distinguished_name]
+commonName			= CommonName
 
 [ca]
-default_ca			= $CA
+default_ca			= ca_default
 
-[CA_default]
-database			= index.txt
-serial				= serial.txt
+[ca_default]
 default_md			= sha256
-default_days			= 365
-default_crl_days		= 365
-unique_subject			= yes
-email_in_dn			= yes
-private_key 			= $KEYFILE
-policy				= CA_sign_policy
+default_days			= 65535
+default_crl_days		= 1
+policy				= ca_policy
 
-[CA_sign_policy]
+[ca_policy]
 countryName			= optional
 stateOrProvinceName		= optional
 localityName			= optional
@@ -78,76 +29,67 @@ organizationalUnitName		= optional
 commonName			= supplied
 emailAddress			= optional
 
-[empty]
+' # end
+
+openssl_ca='
+
+[req_extensions]
+basicConstraints		= critical,CA:true,pathlen:1
+keyUsage			= digitalSignature,keyCertSign,cRLSign
 
 ' # end
 
-umask 077
+openssl_cert='
+
+[req_extensions]
+keyUsage			= digitalSignature,keyCertSign,cRLSign
+nsCertType			= server,client
+extendedKeyUsage		= serverAuth,clientAuth
+
+' # end
 
 case " $* " in
-(" ca "*?" create "*)
-	ca=$2
-	mkdir "/etc/ssl/$ca"
-	cd "/etc/ssl/$ca"
-	touch password.txt privkey.pem
-	chmod 600 password.txt privkey.pem
+(" ca "*?" create ")
+	ca=${2:?}
 
-	openssl rand -base64 33 -out password.txt
-	openssl genrsa -out privkey.pem 1024
-	openssl ca -config /dev/stdin \
-	  -cert cert.pem -keyfile privkey.pem \
-	  <<EOF
+	mkdir -p "/etc/ssl/ca/$ca/private"
+	cd "/etc/ssl/ca/$ca"
+	chmod 700 private
 
-	CA			= empty
-	X509V3			= x509v3_CA
-	COMMON_NAME		= $ca
-	PASSWORD		= $(cat password.txt)
-	KEYFILE			= privkey.pem
-
-	$openssl_cnf
-EOF
+	echo "$openssl_cnf $openssl_ca" |
+	openssl req -config /dev/stdin -x509 -newkey rsa:4096 -nodes \
+	  -keyout private/ca.key -out ca.crt -subj "/CN=$ca"
 	;;
 (" ca "*?" delete ")
-	rm -rf "/etc/ssl/$2"
+	rm -r "/etc/ssl/$2/"
 	;;
 (" csr "*?" ")
 	cn=$2
-	dir=$(echo "$dom" | tr '*' '_')
+
 	mkdir -p /etc/ssl/private
 	cd /etc/ssl
 
-	openssl req -new -nodes -keyout "$dom.key" -out "$dom.csr" \
-	  -config /dev/stdin <<EOF
-
-	CA			= CA_default
-	X509V3			= x509v3_FQDN
-	COMMON_NAME		= $cn
-	KEYFILE			= /etc/ssl/$cn.key
-
-	$openssl_cnf
-EOF
+	echo "$openssl_cnf $openssl_cert subjectAltName=DNS:$cn" |
+	openssl req -config /dev/stdin -x509 -newkey rsa:4096 -nodes \
+	  -keyout "private/$cn.key" -out "$cn.csr" -subj "/CN=$cn"
 	;;
 (" ca "*?" sign "*?" ")
 	ca=$2 cn=$4
 
-	openssl x509 -req \
-	  -in "/etc/ssl/private/$dom.csr" \
-	  -signkey "/etc/ssl/private/$dom.key" \
-	  -out "/etc/ssl/$dom.crt" \
-	  -config /dev/stdin <<EOF
+	cd /etc/ssl
 
-	CA			= CA_default
-	X509V3			= x509v3_CA
-	COMMON_NAME		= $cn
-	KEYFILE			= /etc/ssl/$ca/privkey.key
+	echo "$openssl_cnf $openssl_cert" |
+	openssl ca -config /dev/stdin -notext -in "$cn.csr" -out "$cn.crt" \
+	  -keyfile "ca/$ca/private/ca.key" -cert "ca/$ca/ca.crt"
 
-	$openssl_cnf
-EOF
+	cat "$ca/ca.crt" >>$cn.crt
+
+	chmod 444 "$cn.crt"
 	;;
 (" dhparam ")
-	[ -f "/etc/ssl/dhparam.pem" ] && exec echo "dhparam.pem already exists"
-
-	openssl dhparam -out /etc/ssl/dhparam.pem 2048
+	if [ ! -f "dhparam.pem" ]; then
+		openssl dhparam -out /etc/ssl/dhparam.pem 2048
+	fi
 	;;
 (*)
 	echo>&2	"usage:	${0##*/} ca <name> create"

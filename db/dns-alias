@@ -9,4 +9,4 @@ dom=@ host=olor soa=josuah.net
 dom=www host=olor soa=josuah.net
 dom=@ host=olor soa=atelier-fu.fr
 dom=www host=olor soa=atelier-fu.fr
-dom=togihideki soa=z0.is
+dom=togihideki host=olor soa=z0.is
