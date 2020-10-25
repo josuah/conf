@@ -1,2 +1,0 @@
-add=pkg name=monit
-add=service name=monit

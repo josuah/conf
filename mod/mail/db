@@ -1,4 +1,3 @@
-add=groupnofiles
 add=pkg name=dovecot
 add=service name=dovecot
 add=service name=smtpd
