@@ -1,0 +1,32 @@
+#!/bin/sh -e
+
+case " $* " in
+(" install "*)
+	shift 1
+	for x in "$@"; do
+		echo "#!/usr/bin/env git hooks run" >$x/hooks/post-update
+		chmod +x "$x/hooks/post-update"
+	done
+	;;
+(" run "*" "*) name=$2 ref=${3:-master}
+	echo "${0##*/}: running '$1' on '$ref'"
+	git cat-file blob "$ref:.git$name" | sed 's/#!//' | {
+		read -r cmd arg
+		exec "$cmd" "$arg" /dev/stdin "$ref"
+	}
+	;;
+(" workdir "*" ") ref=$1
+	commit=$(git rev-parse "$ref")
+	workdir="/var/cache/git/workdir/$commit"
+	mkdir -p "$workdir"
+	trap 'rm -rf "$workdir"' INT EXIT TERM HUP
+	git archive --prefix="${workdir#/}/" --format="tar" "$ref" | (cd / && tar -xf -)
+	exec echo "$workdir"
+	;;
+(" "*" ")
+	echo>&2 "usage:	git hooks install		-- enable hooks in current directory"
+	echo>&2 "	git hooks run <name> <ref>	-- run hook <name> for object <ref>"
+	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in $tmp printed out"
+	exit 1
+	;;
+esac
