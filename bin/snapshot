@@ -18,7 +18,7 @@ EOF
 
 	# get a list of all hashes on the remote
 	ssh "$host" "cd '$path' && exec find . -type f -exec openssl sha256 -r {} +" \
-	| sed -r 's, \*\./,  ,' | LC_ALL=C sort -t " " -k 3, -o "tmp/$$/index"
+	| sed -r 's, \*\./,  ,' | LC_ALL=C sort -t " " -k 3,99 -o "tmp/$$/index"
 
 	# for each hash, check if we have it locally
 	sed -r 's,(..)(..),\1 \2 &,' "tmp/$$/index" \
