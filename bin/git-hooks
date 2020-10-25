@@ -1,12 +1,9 @@
 #!/bin/sh -e
 
 case " $* " in
-(" install "*)
-	shift 1
-	for x in "$@"; do
-		echo "#!/usr/bin/env git hooks run" >$x/hooks/post-update
-		chmod +x "$x/hooks/post-update"
-	done
+(" install ")
+	echo "#!/usr/bin/env git hooks run" >$x/hooks/post-update
+	chmod +x "$x/hooks/post-update"
 	;;
 (" run "*" "*) name=$2 ref=${3:-master}
 	echo "${0##*/}: running '$1' on '$ref'"

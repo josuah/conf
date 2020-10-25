@@ -20,10 +20,10 @@ apply() { set -eu
 	fi
 }
 
-export bin="${0%/*}"
 export cmd="${1:-help}"
 export host="${2:-$(hostname -s)}"
 export etc="${ADM_CONFIG:-/etc/adm}"
+export bin="$etc/bin"
 export lib="$etc/lib"
 export db="$etc/db"
 export usr="${ADM_PREFIX:-/usr/adm}"

@@ -11,6 +11,5 @@ deploy_post() { set -eu
 		mkdir -p '$usr'
 	"
 
-	set -x
 	scp -qr "$bin" "root@$host:$usr"
 }
