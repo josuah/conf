@@ -298,11 +298,12 @@ function db_print_tree(path, lv,
 {
 	file["path"] = path
 	while (db_get_row(file, row)) {
-		if ("add" in row) {
-			printf "%"(lv*2)"s", ""
-			print db_format_row(row)
-			db_print_tree(row["add"] "/" row["name"] "/db", lv + 1)
-		}
+		if (!("add" in row))
+			continue
+		printf "%"(lv*2)"s", ""
+		print db_format_row(row)
+		path = substr(row["add"], 2) "/" substr(row["name"], 2) "/db"
+		db_print_tree(path, lv + 1)
 	}
 }
 

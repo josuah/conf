@@ -1,11 +1,5 @@
 deploy_pre() { set -eu
-	dbase "$db/dns-alias" get dom soa host \
-	| while IFS='	' read dom soa host; do
-		case "$dom" in (*"*"*) ;;
-		(@) echo host="$host" dom="$soa" ;;
-		(*) echo host="$host" dom="$dom.$soa" ;;
-		esac
-	done >tmp/cert
+	send "ls /etc/ssl/*.crt" | sed 's,.*/,dom=,; s,.crt$,,' >tmp/cert
 }
 
 deploy_post() { set -eu

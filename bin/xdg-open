@@ -9,14 +9,14 @@ cmd() {
 
 export DISPLAY="${DISPLAY:-:0}"
 
-url=$(printf %s "$1" | tr A-Z a-z | sed 's,#.*,,; s,/*$,,')
+url=$(printf %s "$1" | sed 's,#.*,,; s,/*$,,')
 hash=$(printf %s "$url" | openssl sha256 | sed 's/(stdin)= //')
 proto=$(printf %s "$url" | sed -rn 's,([^/]+):.*,\1,p')
 
 
 ## categorise
 
-case "$url" in
+case "$(echo "$url" | tr A-Z a-z)" in
 (*://invidio.us/*\
 |*://*youtube.com/*\
 |*://youtu.be/*\

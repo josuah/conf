@@ -5,6 +5,10 @@
 
 cmd_service_install() {
        send "rcctl enable '$name'"
+
+	if [ "${flags:-}" ]; then
+		send "rcctl set '$name' flags '$flags'"
+	fi
 }
 
 cmd_service_uninstall() {

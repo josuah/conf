@@ -26,3 +26,6 @@ cat /etc/inetd.d/*
 
 exec >/etc/hosts
 cat /etc/hosts.d/*
+
+exec >/etc/pf.conf
+cat /etc/pf.d/*

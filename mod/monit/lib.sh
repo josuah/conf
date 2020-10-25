@@ -19,12 +19,12 @@ deploy_pre() { set -u
 
 		dbase "$etc/host/$host/db" get ip pub=true v=4 \
 		 | while read ip; do
-			echo "cmd=check-dns name=dns-$dom type=a ip=$ip host=$host dom=$dom"
+			echo "cmd=check-dns name=dns-a type=a ip=$ip host=$host dom=$dom"
 		done
 
 		dbase "$etc/host/$host/db" get ip pub=true v=6 \
 		 | while read ip; do
-			echo "cmd=check-dns name=dns-$dom type=aaaa ip=$ip host=$host dom=$dom"
+			echo "cmd=check-dns name=dns-aaaa type=aaaa ip=$ip host=$host dom=$dom"
 		done
 	done
 
