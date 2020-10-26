@@ -1,14 +1,13 @@
 #!/bin/sh -e
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/bin /usr/*/sbin)"
 
-printf ' "%s"' "$@"
-echo
+logger -s -p daemon.notice -t "git-hooks" "running $0 $*"
 
-case " $* " in
-(" install ")
-	echo "#!$0 run" >hooks/post-update
-	chmod +x hooks/post-update
+case "$# $* " in
+(1" install ")
+	ln -sf "$0" hooks/post-update
 	;;
-(" workdir "*" ") ref=$1
+(2" workdir "*" ") ref=$2
 	commit=$(git rev-parse "$ref")
 	workdir="/var/cache/git/workdir/$commit"
 	mkdir -p "$workdir"
@@ -16,16 +15,13 @@ case " $* " in
 	git archive --prefix="${workdir#/}/" --format="tar" "$ref" | (cd / && tar -xf -)
 	exec echo "$workdir"
 	;;
-
-(" run "*" "*) name=$2 ref=${3:-master}
-	echo "${0##*/}: running '$1' on '$ref'"
-	git cat-file blob "$ref:.git$name" | sed 's/#!//' | {
+(1" refs/heads/"*" ") ref=$1
+	git cat-file blob "$ref:.git$0" | sed 's/#!//' | {
 		read -r cmd arg
 		exec "$cmd" "$arg" /dev/stdin "$ref"
 	}
 	;;
-
-(" "*" ")
+(*)
 	echo>&2 "usage:	git hooks install		-- enable hooks in current directory"
 	echo>&2 "	git hooks run <name> <ref>	-- run hook <name> for object <ref>"
 	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in $tmp printed out"
