@@ -2,7 +2,6 @@ os=OpenBSD
 ip=45.32.148.148 pub=true v=4
 ip=2001:19f0:6801:186d:7171:7171:7177:7171 pub=true v=6
 add=mod name=vpn
-add=mod name=mail
 add=mod name=OpenBSD
 add=mod name=gopher
 add=mod name=http
@@ -14,3 +13,4 @@ add=mod name=relay
 add=mod backup=true name=home user=root
 add=mod backup=true name=home user=josuah
 add=mod name=base
+add=mod name=mail
