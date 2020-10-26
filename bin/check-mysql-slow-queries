@@ -1,0 +1,12 @@
+#!/bin/sh -eu
+export x "$@"
+
+: ${time:=30}
+
+q="
+	SELECT ID FROM INFORMATION_SCHEMA.PROCESSLIST
+		WHERE Time > $time
+	AND	Command != 'Sleep'
+"
+
+exec [ -z "$(exec mysql -Be "$q")" ]

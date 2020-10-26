@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+export x "$@"
+
+: ${method:=GET}
+
+exec curl -Lvs -X "$method" "$url" >/dev/null

@@ -1,0 +1,18 @@
+#!/bin/sh -eu
+#
+# Read a single key=value file as input, run the $cmd and store the result as
+# "$MONITOWER_SPOOL/$host/$name.log"
+#
+# This way, no complex configuration or parsing needed every run, and this
+# script is inexpensive enough to be run from a /etc/crontab.
+#
+
+check() { set -ue
+	local "$@"
+	if ! "$cmd" "$@" >/dev/null 2>&1; then
+		logger -cs -p "local0.${level:-alert}" -t monitower "$@"
+	fi
+}
+
+while read line; do check $line & done <${1:-/etc/monitower.conf}
+wait

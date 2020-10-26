@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+export x "$@"
+
+exec ssh-keyscan -T 1 "$ip"

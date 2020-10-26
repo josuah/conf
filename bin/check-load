@@ -1,0 +1,8 @@
+#!/bin/sh -eu
+export x "$@"
+
+: ${load:=2}
+
+stat=$(uptime | sed 'y/LOAD,/load./; s/.*load[^0-9]*//; s/[^0-9].*//')
+echo "$stat" >/dev/stderr
+exec [ "$stat" -gt "$load" ]

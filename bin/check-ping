@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+export x "$@"
+
+exec ping -c 1 -t 1 "$ip"

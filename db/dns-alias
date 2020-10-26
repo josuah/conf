@@ -7,3 +7,11 @@ dom=@ host=olor soa=josuah.net
 dom=www host=olor soa=josuah.net
 dom=@ host=olor soa=atelier-fu.fr
 dom=www host=olor soa=atelier-fu.fr
+dom=st.suckless host=olor soa=z0.is
+dom=home.suckless host=olor soa=z0.is
+dom=ev.suckless host=olor soa=z0.is
+dom=tools.suckless host=olor soa=z0.is
+dom=surf.suckless host=olor soa=z0.is
+dom=core.suckless host=olor soa=z0.is
+dom=dwm.suckless host=olor soa=z0.is
+dom=libs.suckless host=olor soa=z0.is
