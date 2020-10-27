@@ -18,10 +18,10 @@ case "$# $* " in
 	exec echo "$workdir"
 	;;
 (1" refs/heads/"*" ") ref=$1
-	git cat-file blob "$ref:.git$0" | {
-		IFS='!# ' read -r cmd arg
-		"$cmd" "$arg" /dev/fd/0 "$ref"
-	}
+	set +e
+	"$0" run stagit
+	"$0" run stagit-gopher
+	"$0" run make-dist
 	;;
 (2" run stagit ")
 	git cat-file blob master:.gitdescription >description
@@ -29,8 +29,8 @@ case "$# $* " in
 	mkdir -p  "/var/www/htdocs/git/$GITNAME"
 	cd "/var/www/htdocs/git/$GITNAME"
 	stagit -c stagit-cache "$GITDIR"
-	repos=$(ls "$GITDIR/"*"/git-daemon-export-ok" | sed 's,/[^/]*$,,')
-	stagit-index $repos >index.html
+	repos=$(ls /git/*/git-daemon-export-ok | sed 's,/[^/]*$,,')
+	stagit-index $repos >/var/www/htdocs/git/index.html
 	;;
 (2" run stagit-gopher ")
 	git cat-file blob master:.gitdescription >description
@@ -38,10 +38,10 @@ case "$# $* " in
 	mkdir -p  "/var/gopher/git/$GITNAME"
 	cd "/var/gopher/git/$GITNAME"
 	stagit-gopher -c stagit-gopher-cache "$GITDIR"
-	repos=$(ls "$GITDIR/"*"/git-daemon-export-ok" | sed 's,/[^/]*$,,')
-	stagit-gopher-index $repos >index.gph
+	repos=$(ls /git/*/git-daemon-export-ok | sed 's,/[^/]*$,,')
+	stagit-gopher-index $repos >/var/gopher/git/index.gph
 	;;
-(3" run make-dist ") ref=$1
+(2" run make-dist ") ref=$1
 	for v in $(git tag); do
 		export tmp=$(exec "$0" workdir "$v")
 		trap 'rm -rf "$tmp"' INT TERM EXIT HUP
@@ -55,7 +55,7 @@ case "$# $* " in
 	;;
 (*)
 	echo>&2 "usage:	git hooks install		-- enable hooks in current directory"
-	echo>&2 "	git hooks run stagit		-- to update stagit web index"
+	echo>&2 "	git hooks run <hook>		-- run built-in hook"
 	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in $tmp printed out"
 	exit 1
 	;;

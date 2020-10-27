@@ -1,5 +1,7 @@
 deploy_pre() { set -eu
-	send "ls /etc/ssl/*.crt" | sed 's,.*/,dom=,; s,.crt$,,' >tmp/cert
+	dbase "$db/dns-alias" get dom soa host="$host" \
+	 | sed '/[*]/ d; y,	,.,; s,^,dom=,; s,@[.],,' >tmp/cert
+	cat tmp/cert >&2
 }
 
 deploy_post() { set -eu

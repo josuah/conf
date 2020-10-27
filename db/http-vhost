@@ -3,3 +3,4 @@ host=olor vhost=notqmail
 host=olor vhost=atelier-fu
 host=olor vhost=togihideki
 host=olor vhost=z0is
+host=olor vhost=git
