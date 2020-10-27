@@ -12,13 +12,13 @@ $ORIGIN {{ zone }}.
 
 ; NS - name servers
 #for db/dns-ns
-	3600	IN	NS	ns{{ 1:# }}.{{ db/dns-soa:soa }}.
+	86400	IN	NS	ns{{ 1:# }}.{{ db/dns-soa:soa }}.
 #end
 
 ; MX - mail exchangers
 #for db/dns-soa soa=[zone] mx=true
 ##for db/dns-mx
-@	3600	IN	MX	{{ 2:# }} mx{{ 2:# }}.{{ db/dns-soa:soa }}.
+@	86400	IN	MX	{{ 2:# }} mx{{ 2:# }}.{{ db/dns-soa:soa }}.
 ##end
 #end
 
