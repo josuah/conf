@@ -11,7 +11,7 @@ wgpeer {{ 1:pubkey }} \
 ##for host/[1:host]/db pub=true v=4
 	wgendpoint {{ 2:ip }} 5555 \
 ##end
-	wgaip 10.55.55.{{ 1:id }}/32
+	wgpka 25 wgaip 10.55.55.{{ 1:id }}/32
 #end
 
 up

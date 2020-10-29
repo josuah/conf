@@ -1,2 +1,2 @@
 
-0	1	*	*	*	root		sed -rn 's,domain "(.*)".*,\1,p' /etc/acme-client.conf | xargs -tn1 acme-client -v
+0	1	*	*	*	root		sed -rn 's,domain "(.*)".*,\1,p' /etc/acme-client.conf | xargs -n1 acme-client -v
