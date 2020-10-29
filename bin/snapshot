@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 # non-posix dependencies: gzip rsync openssl
 
-: ${SNAPSHOT_DIR:=/var/lib/snapshot}
+: ${SNAPSHOT_DIR:=/var/backup/snapshot}
 
 case " $* " in
 (" take "*?" "*?" ")
