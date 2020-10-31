@@ -1,64 +1,58 @@
 #!/bin/sh -eu
 
 list() {
-	ls | grep -Ex 'v[0-9]+' | sort -n -k 2,2 -t v
+	ls -d "$1".* | sed -rn 's,.*\.v([0-9]+),\1,p' | sort -n
 }
 
-[ -h current ] && cur=$(readlink current) || cur=
+cur=$(readlink "$1" 2>/dev/null | sed -n 's,.*\.v,,p')
 
-case " $* " in
-(" init ")
-	url=$2
-	git clone --mirror "$url" repo
-	git -C repo config tar.umask 002
+case "$# $* " in
+(3" "*" init "*" ") path=$1 url=$3
+	git clone --mirror "$url" "$path.git"
+	git -C "$path.git" config tar.umask 002
 	;;
-(" pull "*?" ")
-	ref=${2%/}
-	new=$(list | awk -F v '$2 > v { v = $2 } END { print "v" v + 1 }')
+(1" "*" ") path=$1
+	exec "$0" "$path" pull "master"
+	;;
+(3" "*" pull "*" ") path=$1 ref=$3
+	v=$(($(list "$path" | sed -n '$p') + 1))
+	new=$(basename "$path").v$v
+	dir=$(dirname "$path")
 
-	git -C repo fetch origin "$ref"
-	git -C repo archive --prefix "$new/" "$ref" | tar -xf -
+	git -C "$path.git" fetch origin "$ref"
+	git -C "$path.git" archive --prefix "$new/" "$ref" | tar -C "$dir" -xf -
 
 	if type stagit >/dev/null; then
-		(cd repo; stagit .; ln -sf files.html index.html)
+		(cd "$path.git"; stagit .; ln -sf files.html index.html)
 	fi
 
-	mkdir -p shared "$new/v"
-	echo "$ref" >$new/v/ref
-	git -C repo rev-parse "$ref" >$new/v/commit
-	date +"%Y-%m-%d %H-%M-%S" >$new/v/date
+	if [ -f "$dir/$new/Makefile" ]; then
+		make -C "$dir/$new" deploy
+	fi
 
-	[ -f "$new/Makefile" ] && make -C "$new" deploy
-
-	echo "version $new ready"
-	"$0" clean 5
+	"$0" "$path" clean
+	"$0" "$path" link "$v"
 	;;
-(" go "*?" ")
-	rm -rf repo/current
-	ln -sf "$2" repo/current
-	mv repo/current .
-	;;
-(" list "*)
-	for v in $(list); do
-		read commit <$v/v/commit
-		read ref <$v/v/ref
-		read date <$v/v/date
-		[ "$cur" = "$v" ] && o=o || o=-
-		echo "" "$o" "$v" "$date" "$commit" "$ref"
-	done
-	;;
-(" clean "*)
-	list | awk -v cur="$cur" -v keep="${2:-5}" '
+([23]" "*" clean "*) path=$1 keep=${3:-3}
+	list "$path" | awk -v cur="$cur" -v path="$path" -v keep="$keep" '
 		$0 != cur { A[NR] = $0 }
-		END { for (i = 1; i <= NR - keep; i++ ) print A[i] }
+		END { for (i = 1; i <= NR - keep; i++ ) print path ".v" A[i] }
 	' | xargs -r rm -rf
 	;;
+(3" "*" link "*" ") path=$1 v=$3
+	set -x
+	tmp=$(mktemp -d)
+	name=$(basename "$path")
+	trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+	ln -fs "$name.v$v" "$tmp/$name"
+	mv -f "$tmp/$name" "$(dirname "$path")"
+	;;
 (*)
-	echo>&2 "usage:	${0##*/} init <url> - initialize the repository"
-	echo>&2 "	${0##*/} pull <ref> - deploy new git object <ref>"
-	echo>&2 "	${0##*/} list       - list available releases"
-	echo>&2 "	${0##*/} clean <n>  - keep only last <n> releases"
-	echo>&2 "	${0##*/} go <v>     - switch "current" to release <v>"
+	echo>&2 "usage:	${0##*/} <path> init <url> - initialize the repository"
+	echo>&2 "	${0##*/} <path>            - ${0##*/} <path> pull master"
+	echo>&2 "	${0##*/} <path> pull <ref> - deploy new git object <ref>"
+	echo>&2 "	${0##*/} <path> clean <n>  - keep only last <n> releases"
+	echo>&2 "	${0##*/} <path> link <v>   - switch "current" to release <v>"
 	exit 1
 	;;
 esac

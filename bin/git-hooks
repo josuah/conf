@@ -3,19 +3,11 @@ export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/bin /usr/*/sbin)"
 export GITDIR="$PWD"
 export GITNAME="${PWD##*/}"
 
-logger -s -p daemon.notice -t "git-hooks" "running $0 $*"
+logger -s -p daemon.notice -t "git-hooks" "$0 $*"
 
 case "$# $* " in
 (1" install ")
 	ln -sf "$0" hooks/post-update
-	;;
-(2" workdir "*" ") ref=$2
-	commit=$(git rev-parse "$ref")
-	workdir="/var/cache/git/workdir/$commit"
-	mkdir -p "$workdir"
-	trap 'rm -rf "$workdir"' INT EXIT TERM HUP
-	git archive --prefix="${workdir#/}/" --format="tar" "$ref" | (cd / && tar -xf -)
-	exec echo "$workdir"
 	;;
 (1" refs/heads/"*" ") ref=$1
 	! "$0" run stagit
@@ -46,7 +38,6 @@ case "$# $* " in
 (*)
 	echo>&2 "usage:	git hooks install		-- enable hooks in current directory"
 	echo>&2 "	git hooks run <hook>		-- run built-in hook"
-	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in a path printed out"
 	exit 1
 	;;
 esac
