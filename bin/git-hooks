@@ -18,10 +18,12 @@ case "$# $* " in
 	exec echo "$workdir"
 	;;
 (1" refs/heads/"*" ") ref=$1
-	set +e
-	"$0" run stagit
-	"$0" run stagit-gopher
-	"$0" run make-dist
+	! "$0" run stagit
+	! "$0" run stagit-gopher
+	git cat-file blob "$ref:.git$0" | sed 's/#!//' | {
+		read -r cmd arg
+		exec "$cmd" "$arg" /dev/stdin "$ref"
+	}
 	;;
 (2" run stagit ")
 	git cat-file blob master:.gitdescription >description
@@ -41,22 +43,10 @@ case "$# $* " in
 	repos=$(ls /git/*/git-daemon-export-ok | sed 's,/[^/]*$,,')
 	stagit-gopher-index $repos >/var/gopher/git/index.gph
 	;;
-(2" run make-dist ") ref=$1
-	for v in $(git tag); do
-		export tmp=$(exec "$0" workdir "$v")
-		trap 'rm -rf "$tmp"' INT TERM EXIT HUP
-		cd "$tmp"
-		make dist
-		mkdir -p /var/gopher/dl /var/www/htdocs/dl
-		cp *.gz /var/gopher/dl
-		cp *.gz /var/www/htdocs/dl
-		rm -rf "$tmp"
-	done
-	;;
 (*)
 	echo>&2 "usage:	git hooks install		-- enable hooks in current directory"
 	echo>&2 "	git hooks run <hook>		-- run built-in hook"
-	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in $tmp printed out"
+	echo>&2 "	git hooks workdir <ref>		-- extract <ref> in a path printed out"
 	exit 1
 	;;
 esac

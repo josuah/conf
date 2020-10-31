@@ -1,5 +1,10 @@
 #!/usr/bin/awk -f
 
+function pager(msg)
+{
+	printf "%s", msg | "exec ${PAGER:-less}"
+}
+
 function ps_read(ps,
 	i, pid, cmd)
 {
@@ -82,10 +87,10 @@ function tree_print(tree, n,
 	i1, i2)
 {
 	for (i1 = 1; i1 < n; i1++) {
-		printf("%6d %s", tree[i1":pid"], tree[i1":info"])
+		pager(sprintf("%6d %s", tree[i1":pid"], tree[i1":info"]))
 		for (i2 = 1; tree[i1":"i2] != ""; i2++)
-			printf("%s", tree[i1":"i2])
-		printf("%s\n", tree[i1":args"])
+			pager(sprintf("%s", tree[i1":"i2]))
+		pager(sprintf("%s\n", tree[i1":args"]))
 	}
 }
 
