@@ -1,4 +1,0 @@
-#!/bin/sh -eu
-
-export PASS="$(pass show unix/cirno/glenda)"
-exec drawterm -h 127.0.0.1 -a 127.0.0.1 -u glenda -c rio -i riostart &
