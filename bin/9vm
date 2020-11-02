@@ -128,7 +128,7 @@ case " $* " in
 	blind_install | "$0" shell qemu
 	;;
 
-##  9vm vmm  start -- run OpenBSD vmm with automated install
+##  9vm vmm start -- run OpenBSD vmm with automated install
 (" vmm start ")
 	mkdir -p /etc/vm
 	cat <<EOF >/etc/vm/$name.conf
@@ -140,8 +140,6 @@ case " $* " in
 	}
 EOF
 	vmctl load "/etc/vm/$name.conf"
-	sleep 0.5
-	echo >/dev/$(vmm_get "$name" TTY)
 	;;
 
 ##  9vm vmm shell -- interactive console for vmm
