@@ -2,6 +2,7 @@ export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/sbin /usr/*/bin)"
 export MAIL="$HOME/Maildir/"
 export ENV="$HOME/.profile"
 export LC_ALL="en_US.UTF-8"
+export PLAN9_CPU=10.191.254.11
 
 case " ${ok:-false} $- " in
 (" false "*i*" ")
