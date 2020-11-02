@@ -1,3 +1,4 @@
+#!/bin/sh -eu
 
 fetch_git() { set -eu
 	local bare="$cache/git/$name"

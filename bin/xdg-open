@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh -eu
 # override xdg-open so that it uses my environment
 
 cmd() {

@@ -7,6 +7,7 @@ add=mod name=vmm
 add=mod name=home user=josuah
 add=mod name=home user=root
 add=mod name=torrent
+add=mod name=qemu
 add=mod name=monit
 add=mod name=backup
 add=mod name=base

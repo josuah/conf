@@ -9,3 +9,4 @@ add=mod name=backup
 add=mod name=vpn
 add=mod name=monit
 add=mod name=base
+add=mod name=qemu

@@ -1,0 +1,44 @@
+#!/bin/sh -eu
+
+rel=8013.d9e940a768d1
+iso=/var/iso/9front.$rel.iso
+
+tmp=$(mktemp -d)
+trap='rm -rf "$tmp"'
+trap "$trap" INT TERM EXIT HUP
+
+# fetch the iso
+
+if [ ! -f "$iso" ]; then
+	transmission-cli -w "$tmp" \
+	  "http://9front.org/iso/9front-$rel.386.iso.gz.torrent" &
+
+	while [ ! -f "$tmp/9front-$rel.386.iso.gz" ]; do
+		sleep 1
+	done
+
+	gzip -cd "$tmp/9front-$rel.386.iso.gz" >$iso
+fi
+
+# headless install
+
+put() {
+	time=$1; shift 1
+
+	echo "$*" | fold -w 1 | while IFS= read -r c; do
+		printf %s "$c"
+		sleep 0.1
+	done
+	printf '\r\n'
+	sleep "$time"
+}
+
+eval "$trap"
+{
+	sleep 2
+	put  3
+	put  1 nobootprompt=local!/dev/sdC1/data
+	put  1 console=0 b19200 po
+	put 40 boot
+	put  1 glenda
+} | qemu install cirno "$iso" -nographic
