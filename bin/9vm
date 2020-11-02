@@ -1,0 +1,163 @@
+#!/bin/sh -eu
+
+put() {
+	time=$1; shift 1
+
+	echo "$*" | fold -w 1 | while IFS= read -r c; do
+		printf %s "$c"
+		sleep 0.1
+	done
+	printf '\r\n'
+	sleep "$time"
+}
+
+blind_install() {
+	put 1
+	put 1
+	put 1
+	put 1
+	put 1
+
+	put  1 console=0
+	put 30 boot
+
+	put  1
+	put  3 glenda
+	put 11 text
+
+	put  3 inst/start
+
+	put  1 configfs
+	put  5 hjfs
+
+	put  1 partdisk
+	put  3 sdC0
+	put  1 mbr
+	put  1 w
+	put  4 q
+
+	put  1 prepdisk
+	put  1
+	put  1 mbr
+	put  1 w
+	put  3 q
+
+	put  1 mountfs
+	put  1
+	put  1
+	put  10 yes
+
+	put  1 configdist
+	put  3 local
+
+	put  1 mountdist
+	put  1 /
+	put  3 /
+
+	put  1 tzsetup
+	put  5 CET
+
+	put $((10 * 60)) copydist
+
+	put  1 bootsetup
+	put  1
+	put  1 yes
+	put  3 yes
+
+	put  1 finish
+}
+
+vmm_get() { set -eux
+	vmctl show | awk -v NAME="$1" -v FIELD="$2" '
+		NR == 1 { for (i = 1; i <= NF; i++) F[$i] = i }
+		$F["NAME"] == NAME { print $F[FIELD] }
+	'
+}
+
+: ${rel:=8013.d9e940a768d1}
+: ${name:=9front}
+: ${iso:=/var/iso/$name.$rel.iso}
+: ${disk:=/var/disk/$name.qcow}
+: ${console:=/var/run/qemu/$name}
+
+if [ ! -f "$disk" ]; then
+	mkdir -p "$(dirname "$disk")"
+	qemu-img create -f qcow2 "$disk" 8G
+fi
+
+## usage:
+case " $* " in
+
+##  9vm download -- download the 9front.iso with transmission
+(" download ")
+	tmp=$(mktemp -d)
+	trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+	if [ ! -f "$iso" ]; then
+		transmission-cli -w "$tmp" \
+		  "http://9front.org/iso/9front-$rel.386.iso.gz.torrent" &
+		while [ ! -f "$tmp/9front-$rel.386.iso.gz" ]; do
+			sleep 1
+		done
+		gzip -cd "$tmp/9front-$rel.386.iso.gz" >$iso
+	fi
+	;;
+
+##  9vm qemu shell -- interactive console for qemu
+(" qemu shell ")
+	tail -f "$console.out" &
+	trap "kill $!" INT TERM EXIT HUP
+	cat >$console.in
+	;;
+
+##  9vm qemu start [qemu-args...] -- run qemu with automated install
+(" qemu start "*) shift 2
+	(exec qemu-system-x86_64 \
+	  -m 1G \
+	  -drive file="$disk",media=disk \
+	  -drive file="$iso",media=cdrom \
+	  -boot order=cd \
+	  -nic user,hostfwd=tcp::17019-:17019 \
+	  -chardev pipe,id=char0,path="$console" \
+	  -serial chardev:char0 \
+	  "$@" &) &
+	;;
+
+##  9vm qemu install -- start the VM with qemu and install it
+(" qemu install ")
+	"$0" start qemu "$@"
+	blind_install | "$0" shell qemu
+	;;
+
+##  9vm vmm  start -- run OpenBSD vmm with automated install
+(" vmm start ")
+	mkdir -p /etc/vm
+	cat <<EOF >/etc/vm/$name.conf
+	vm "$name" {
+		memory 1G
+		interface { switch "uplink" }
+		disk "$disk" format qcow2
+		disk "$iso" format raw
+	}
+EOF
+	vmctl load "/etc/vm/$name.conf"
+	sleep 0.5
+	echo >/dev/$(vmm_get "$name" TTY)
+	;;
+
+##  9vm vmm shell -- interactive console for vmm
+(" vmm shell ")
+	exec cu "/dev/$(vmm_get "$name" TTY)"
+	;;
+
+##  9vm vmm install -- start the VM with vmm and install it
+(" vmm install ")
+	"$0" start vmm "$@"
+	blind_install | "$0" shell vmm
+	;;
+
+##  9vm help -- this help message
+(*)
+	sed -n 's,^## ,,p' "$0"
+	exit 1
+	;;
+esac
