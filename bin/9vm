@@ -80,16 +80,12 @@ vmm_get() {
 : ${disk:=/var/disk/$name.qcow}
 : ${console:=/var/run/qemu/$name}
 
-if [ ! -f "$disk" ]; then
-	mkdir -p "$(dirname "$disk")"
-	qemu-img create -f qcow2 "$disk" 8G
-fi
-
 ## usage:
-case " $* " in
+case " $(uname) $* " in
 
 ##  9vm download -- download the 9front.iso with transmission
-(" download ")
+
+(" "*" download ")
 	tmp=$(mktemp -d)
 	trap 'rm -rf "$tmp"' INT TERM EXIT HUP
 	if [ ! -f "$iso" ]; then
@@ -102,34 +98,32 @@ case " $* " in
 	fi
 	;;
 
-##  9vm qemu shell -- interactive console for qemu
-(" qemu shell ")
-	tail -f "$console.out" &
-	trap "kill $!" INT TERM EXIT HUP
-	cat >$console.in
+##  9vm install -- start the VM with qemu and install it
+
+(" "*" install ")
+	if [ ! -f "$disk" ]; then
+		mkdir -p "$(dirname "$disk")"
+		qemu-img create -f qcow2 "$disk" 8G
+	fi
+	"$0" start "$@"
+	blind_install | "$0" shell
 	;;
 
-##  9vm qemu start [qemu-args...] -- run qemu with automated install
-(" qemu start "*) shift 2
-	(exec qemu-system-x86_64 \
+##  9vm start [qemu-args...] -- start the VM
+
+(" Linux start "*) shift 2
+	exec qemu-system-x86_64 \
 	  -m 1G \
+	  -accell kvm \
 	  -drive file="$disk",media=disk \
 	  -drive file="$iso",media=cdrom \
 	  -boot order=cd \
 	  -nic user,hostfwd=tcp::17019-:17019 \
-	  -chardev pipe,id=char0,path="$console" \
+	  -chardev socket,id=char0,path="$console",nowait \
 	  -serial chardev:char0 \
-	  "$@" &) &
+	  "$@" &
 	;;
-
-##  9vm qemu install -- start the VM with qemu and install it
-(" qemu install ")
-	"$0" start qemu "$@"
-	blind_install | "$0" shell qemu
-	;;
-
-##  9vm vmm start -- run OpenBSD vmm with automated install
-(" vmm start ")
+(" OpenBSD start ")
 	mkdir -p /etc/vm
 	cat <<EOF >/etc/vm/$name.conf
 	vm "$name" {
@@ -142,18 +136,17 @@ EOF
 	vmctl load "/etc/vm/$name.conf"
 	;;
 
-##  9vm vmm shell -- interactive console for vmm
-(" vmm shell ")
+##  9vm shell -- interactive console
+
+(" Linux shell ")
+	exec socat unix:"$console" stdio
+	;;
+(" OpenBSD shell ")
 	exec cu "/dev/$(vmm_get "$name" TTY)"
 	;;
 
-##  9vm vmm install -- start the VM with vmm and install it
-(" vmm install ")
-	"$0" start vmm "$@"
-	blind_install | "$0" shell vmm
-	;;
-
 ##  9vm help -- this help message
+
 (*)
 	sed -n 's,^## ,,p' "$0"
 	exit 1
