@@ -3,4 +3,4 @@
 export HOST="${PLAN9_CPU:-127.0.0.1}"
 export PASS="$(pass show unix/cirno/glenda)"
 
-exec drawterm -h "$HOST" -a "$HOST" -u glenda &
+exec drawterm -h "$HOST" -a "$HOST" -u glenda -c "$@"&
