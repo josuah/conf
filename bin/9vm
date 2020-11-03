@@ -67,7 +67,7 @@ blind_install() {
 	put  1 finish
 }
 
-vmm_get() { set -eux
+vmm_get() {
 	vmctl show | awk -v NAME="$1" -v FIELD="$2" '
 		NR == 1 { for (i = 1; i <= NF; i++) F[$i] = i }
 		$F["NAME"] == NAME { print $F[FIELD] }
