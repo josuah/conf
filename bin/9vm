@@ -145,6 +145,7 @@ case " $(uname) $* " in
 	  -nographic \
 	  &
 	sleep 0.3 # for the unix domain socket has time to be created
+	using interface tap9
 	;;
 (" OpenBSD start ")
 	mkdir -p /etc/vm
@@ -157,6 +158,7 @@ case " $(uname) $* " in
 	}
 EOF
 	vmctl load "/etc/vm/$name.conf"
+	using interface tap9
 	;;
 
 ##  9vm shell -- interactive console
