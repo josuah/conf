@@ -44,7 +44,6 @@ keyUsage			= digitalSignature,keyCertSign,cRLSign
 keyUsage			= digitalSignature,keyCertSign,cRLSign
 nsCertType			= server,client
 extendedKeyUsage		= serverAuth,clientAuth
-subjectAltName			= DNS:${2:-}
 
 " # end
 
@@ -56,7 +55,7 @@ case " $* " in
 	touch index.txt
 	echo 0000 >serial
 	echo "$conf" | openssl req -config /dev/stdin -extensions ext_ca \
-	  -x509 -newkey rsa:1024 -nodes \
+	  -x509 -newkey rsa:4096 -nodes \
 	  -keyout private/ca.key -out ca.crt -subj "/CN=$ca"
 	;;
 (" ca "*" delete ") ca=$2
@@ -65,14 +64,14 @@ case " $* " in
 (" ca "*" sign "*" ") ca=$2 file=$4
 	[ -f "$file" ] || file=/etc/ssl/$file.csr
 	echo "$conf" | openssl ca -config /dev/stdin -extensions ext_fqdn \
-	  -extension ext_ca -batch -in "$file"
+	  -batch -in "$file"
 	;;
 (" csr "*" ") cn=$2
 	mkdir -p /etc/ssl/private
 	cd /etc/ssl
 	chmod 500 private
 	echo "$conf" | openssl req -config /dev/stdin -extensions ext_fqdn \
-	  -newkey rsa:1024 -nodes \
+	  -newkey rsa:4096 -nodes \
 	  -keyout "private/$cn.key" -out "$cn.csr" -subj "/CN=$cn"
 	;;
 (" dhparam ")
