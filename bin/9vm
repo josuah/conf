@@ -1,84 +1,9 @@
 #!/bin/sh -eu
 
-put() {
-	time=$1; shift 1
-
-	echo "$*" | fold -w 1 | while IFS= read -r c; do
-		printf %s "$c"
-		sleep 0.1
-	done
-	printf '\r\n'
-	sleep "$time"
-}
-
-blind_install() {
-	put 1
-	put 1
-	put 1
-	put 1
-	put 1
-
-	put  1 console=0
-	put 30 boot
-
-	put  1
-	put  3 glenda
-	put 11 text
-
-	put  3 inst/start
-
-	put  1 configfs
-	put  5 hjfs
-
-	put  1 partdisk
-	put  3 sdC0
-	put  1 mbr
-	put  1 w
-	put  4 q
-
-	put  1 prepdisk
-	put  1
-	put  1 mbr
-	put  1 w
-	put  3 q
-
-	put  1 mountfs
-	put  1
-	put  1
-	put  10 yes
-
-	put  1 configdist
-	put  3 local
-
-	put  1 mountdist
-	put  1 /
-	put  3 /
-
-	put  1 tzsetup
-	put  5 CET
-
-	put $((10 * 60)) copydist
-
-	put  1 bootsetup
-	put  1
-	put  1 yes
-	put  3 yes
-
-	put  1 finish
-}
-
-vmm_get() {
-	vmctl show | awk -v NAME="$1" -v FIELD="$2" '
-		NR == 1 { for (i = 1; i <= NF; i++) F[$i] = i }
-		$F["NAME"] == NAME { print $F[FIELD] }
-	'
-}
-
 : ${rel:=8013.d9e940a768d1}
-: ${name:=9front}
-: ${iso:=/var/iso/$name.$rel.iso}
-: ${disk:=/var/disk/$name.qcow}
-: ${console:=/var/run/qemu/$name}
+: ${iso:=/var/iso/9front.$rel.iso}
+: ${disk:=/var/disk/9front.qcow}
+: ${console:=/var/run/qemu/9front}
 : ${drawterm:=https://code.9front.org/hg/drawterm/archive/tip.tar.gz}
 
 ## usage:
@@ -100,6 +25,7 @@ case " $(uname) $* " in
 	;;
 
 ##  9vm drawterm -- install drawterm from source
+
 (" "*" drawterm ")
 	if type drawterm 2>/dev/null; then
 		exec echo "drawterm already installed" >&2
@@ -109,68 +35,77 @@ case " $(uname) $* " in
 	cd "$tmp"
 	curl -L "$drawterm" | gzip -cd | tar -xf -
 	cd */
-	make CONF=unix
+	make CONF="$(uname | tr A-Z a-z)"
 	mkdir -p /usr/local/bin
 	cp drawterm /usr/local/bin
 	;;
 
-##  9vm install -- start the VM with qemu and install it
+##  9vm start -- start the vm
 
-(" "*" install "*) shift 1
-	if [ ! -f "$disk" ]; then
-		mkdir -p "$(dirname "$disk")"
-		qemu-img create -f qcow2 "$disk" 8G
-	fi
-	"$0" start "$@"
-	blind_install | "$0" shell
+(" OpenBSD start ")
+	ifconfig tap9 >/dev/null 2>&1 || ifconfig tap9 create
+	mkdir -p /etc/vm
+	echo 'vm "9front" {
+		memory 1G
+		disable
+		#interface tap9 { switch "uplink" }
+		disk '"$iso"' format raw
+		disk '"$disk"' format qcow2
+	}' >/etc/vm/9front.conf
+	vmctl load "/etc/vm/9front.conf"
+	vmctl start 9front
+	echo using interface tap9 >&2
 	;;
+(" "*" start ") 
+	case $(uname) in
+	(Linux) set -- -accel kvm ;;
+	(NetBSD) set -- -accel hax ;;
+	(*) set -- ;;
+	esac
 
-##  9vm start [qemu-args...] -- start the VM
-
-(" Linux start "*) shift 1
 	qemu-system-x86_64 \
+	  -name 9front \
 	  -m 1G \
-	  -machine accel=kvm \
-	  \
 	  -drive file="$disk",media=disk \
 	  -drive file="$iso",media=cdrom \
 	  -boot order=cd \
-	  \
-	  -netdev tap,id=net0,script=no,ifname=tap9 \
-	  -device virtio-net-pci,netdev=net0 \
-	  \
-	  -chardev socket,id=char0,path="$console",server,nowait \
-	  -serial chardev:char0 \
-	  -monitor none \
+	  -netdev tap,id=n0,script=no,ifname=tap9 \
+	  -device virtio-net-pci,netdev=n0 \
+	  -chardev socket,id=c0,path="$console",server,nowait \
+	  -serial chardev:c0 \
 	  -nographic \
-	  &
-	sleep 0.3 # for the unix domain socket has time to be created
-	using interface tap9
+	  "$@" &
+
+	sleep 0.2 # create the unix domain socket
+	echo using interface tap9 >&2
 	;;
-(" OpenBSD start ")
-	mkdir -p /etc/vm
-	cat <<EOF >/etc/vm/$name.conf
-	vm "$name" {
-		memory 1G
-		nterface tap0 { switch "uplink" }
-		disk "$disk" format qcow2
-		disk "$iso" format raw
-	}
-EOF
-	vmctl load "/etc/vm/$name.conf"
-	using interface tap9
+
+##  9vm stop -- kill the vm
+
+(" OpenBSD stop ")
+	exec vmctl stop 9front
+	;;
+(" "*" stop ")
+	exec pkill -f "qemu-system-.* -name 9front "
+	;;
+
+##  9vm status -- is the vm running?
+
+(" OpenBSD status ")
+	exec vmctl show 9front
+	;;
+(" "*" status ")
+	exec pgrep -fa "qemu-system-.* -name 9front "
 	;;
 
 ##  9vm shell -- interactive console
 
-(" Linux shell ")
+(" OpenBSD shell ")
+	exec cu "/dev/$(vmctl show 9front | awk 'NR == 2 { print $6 }')"
+	;;
+(" "*" shell ")
 	exec socat unix:"$console" stdio
 	;;
-(" OpenBSD shell ")
-	exec cu "/dev/$(vmm_get "$name" TTY)"
-	;;
-
-##  9vm help -- this help message
 
 (*)
 	sed -n 's,^## ,,p' "$0"
