@@ -22,15 +22,20 @@ $ORIGIN {{ zone }}.
 ##end
 #end
 
+; TXT - text records
+#for db/dns-txt soa=[zone]
+{{ 1:dom }} 3600 IN TXT "{{ 1:txt }}"
+#end
+
 ; A/AAAA - addresses of service servers
 #for db/dns-soa #=1 soa=[zone]
 ##for db/dns-type
 ###for db/dns-[2:type]
 ####for host/[3:host]/db pub=true v=4
-{{ 2:type }}{{ 3:# }}  3600  IN  A  {{ 4:ip }}
+{{ 2:type }}{{ 3:# }} 3600 IN A {{ 4:ip }}
 ####end
 ####for host/[3:host]/db pub=true v=6
-{{ 2:type }}{{ 3:# }}  3600  IN  AAAA  {{ 4:ip }}
+{{ 2:type }}{{ 3:# }} 3600 IN AAAA {{ 4:ip }}
 ####end
 ###end
 ##end
@@ -39,10 +44,10 @@ $ORIGIN {{ zone }}.
 ; A/AAAA - addresses of hosts
 #for host/*
 ##for host/[1:*]/db pub=true v=4
-{{ 1:* }}  3600  IN  A  {{ 2:ip }}
+{{ 1:* }} 3600 IN A {{ 2:ip }}
 ##end
 ##for host/[1:*]/db pub=true v=6
-{{ 1:* }}  3600  IN  AAAA  {{ 2:ip }}
+{{ 1:* }} 3600 IN AAAA {{ 2:ip }}
 ##end
 #end
 
@@ -50,10 +55,10 @@ $ORIGIN {{ zone }}.
 #for db/dns-soa soa=[zone] #=1
 ##for db/http-vhost
 ###for host/[2:host]/db pub=true v=4
-{{ 2:vhost }}  3600  IN  A  {{ 3:ip }}
+{{ 2:vhost }} 3600 IN A {{ 3:ip }}
 ###end
 ###for host/[1:host]/db pub=true v=6
-{{ 2:vhost }}  3600  IN  AAAA  {{ 3:ip }}
+{{ 2:vhost }} 3600 IN AAAA {{ 3:ip }}
 ###end
 ##end
 #end
@@ -61,9 +66,9 @@ $ORIGIN {{ zone }}.
 ; A/AAAA - alias addresses
 #for db/dns-alias soa=[zone]
 ##for host/[1:host]/db pub=true v=4
-{{ 1:dom }}  3600  IN  A  {{ 2:ip }}
+{{ 1:dom }} 3600 IN A  {{ 2:ip }}
 ##end
 ##for host/[1:host]/db pub=true v=6
-{{ 1:dom }}  3600  IN  AAAA  {{ 2:ip }}
+{{ 1:dom }} 3600 IN AAAA {{ 2:ip }}
 ##end
 #end
