@@ -1,9 +1,9 @@
 #!/bin/sh -eu
 
+: ${tap:=9}
 : ${rel:=8013.d9e940a768d1}
 : ${iso:=/var/iso/9front.$rel.iso}
 : ${disk:=/var/disk/9front.qcow}
-: ${console:=/var/run/qemu/9front}
 : ${drawterm:=https://code.9front.org/hg/drawterm/archive/tip.tar.gz}
 
 ## usage:
@@ -48,7 +48,7 @@ case " $(uname) $* " in
 	echo 'vm "9front" {
 		memory 1G
 		disable
-		#interface tap9 { switch "uplink" }
+		interface tap9 { switch "uplink" }
 		disk '"$iso"' format raw
 		disk '"$disk"' format qcow2
 	}' >/etc/vm/9front.conf
@@ -71,7 +71,7 @@ case " $(uname) $* " in
 	  -boot order=cd \
 	  -netdev tap,id=n0,script=no,ifname=tap9 \
 	  -device virtio-net-pci,netdev=n0 \
-	  -chardev socket,id=c0,path="$console",server,nowait \
+	  -chardev socket,id=c0,path=/var/run/qemu/9front,server,nowait \
 	  -serial chardev:c0 \
 	  -nographic \
 	  "$@" &
@@ -104,7 +104,7 @@ case " $(uname) $* " in
 	exec cu "/dev/$(vmctl show 9front | awk 'NR == 2 { print $6 }')"
 	;;
 (" "*" shell ")
-	exec socat unix:"$console" stdio
+	exec socat unix:/var/run/qemu/9front stdio
 	;;
 
 (*)

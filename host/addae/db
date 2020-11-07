@@ -1,5 +1,7 @@
 os=OpenBSD
 ip=10.191.255.56 v=4
+ip=fd00:10e2:10e8:1:: v=6
+net=fd00:10e2:10e8:1 v=6
 add=mod name=vpn
 add=mod name=OpenBSD
 add=mod name=vmm
