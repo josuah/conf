@@ -32,4 +32,7 @@ cat /etc/pf.d/*
 exec >/etc/dhcpd.conf
 cat /etc/dhcpd.d/*
 
+exec >/etc/rad.conf
+cat /etc/rad.d/*
+
 true

@@ -1,0 +1,39 @@
+#!/bin/sh -eu
+# generate random strings
+
+n=${2:-1}
+
+case ${1:-help} in
+
+##  pass -- random password
+(pass)
+	openssl rand -base64 $((n * 18)) | tr -d '\n' | tr '+/' 'az' \
+	 | sed -r "s/(.{24})/$(date +%y%m%d)-\1\$/g"
+	;;
+
+##  mac -- random mac address
+(mac)
+	openssl rand -hex $((n * 6)) \
+	 | sed -r 's/(..)(..)(..)(..)(..)(..)/00:\2:\3:\4:\5:\6$/g'
+
+##  ula -- random IPv6 Unique Local Address
+(ula)
+	openssl rand -hex $((n * 6)) \
+	 | sed -r 's/(....)(....)(....)/fd00:\1:\2:\3$/g'
+	;;
+
+##  suffix -- random IPv6 suffix
+(suffix)
+	openssl rand -hex $((n * 8)) \
+	 | sed -r 's/(....)(....)(....)(....)/\1:\2:\3:\4$/g'
+	;;
+
+##  help -- this help message
+(*)
+	exec >&2
+	echo usage:
+	sed -n 's/^## //p' "$0"
+	exit 1
+	;;
+
+esac | tr -d '\n' | tr '$' '\n'

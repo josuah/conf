@@ -1,6 +1,9 @@
 os=OpenBSD
 ip=136.244.112.11 pub=true v=4
 ip=2001:19f0:6801:14ef:5400:2ff:feba:162e pub=true v=6
+prefix=fd00:10e2:10e8:1 v=6
+suffix= v=6
+ip=fd00:10e2:10e8:1:: v=6
 add=mod name=vpn
 add=mod name=OpenBSD
 add=mod name=vpn
