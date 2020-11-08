@@ -15,8 +15,8 @@ case "$# $* " in
 	exec "$0" "$path" pull "master"
 	;;
 (3" "*" pull "*" ") path=$1 ref=$3
-	v=$(($(list "$path" | sed -n '$p') + 1))
-	new=$(basename "$path").v$v
+	v=v$(($(list "$path" | sed -n '$p') + 1))
+	new=$(basename "$path").$v
 	dir=$(dirname "$path")
 
 	git -C "$path.git" fetch origin "$ref"
@@ -44,7 +44,7 @@ case "$# $* " in
 	tmp=$(mktemp -d)
 	name=$(basename "$path")
 	trap 'rm -rf "$tmp"' INT TERM EXIT HUP
-	ln -fs "$name.v$v" "$tmp/$name"
+	ln -fs "$name.$v" "$tmp/$name"
 	mv -f "$tmp/$name" "$(dirname "$path")"
 	;;
 (*)
