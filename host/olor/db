@@ -1,6 +1,8 @@
 os=OpenBSD
 ip=45.32.148.148 pub=true v=4
 ip=2001:19f0:6801:186d:7171:7171:7177:7171 pub=true v=6
+prefix=fd00:10e2:10e8:4 v=6
+suffix=9eff:b827:efcb:c0e6 v=6
 add=mod name=vpn
 add=mod name=OpenBSD
 add=mod name=gopher

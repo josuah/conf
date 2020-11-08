@@ -1,2 +1,0 @@
-inet6 {{ host/[host]/db:prefix v=6 }}::{{ host/[host]/db:suffix v=6 }}
-up

@@ -1,6 +1,5 @@
 #!/bin/sh -eu
 
-: ${tap:=9}
 : ${rel:=8013.d9e940a768d1}
 : ${iso:=/var/iso/9front.$rel.iso}
 : ${disk:=/var/disk/9front.qcow}
@@ -43,18 +42,16 @@ case " $(uname) $* " in
 ##  9vm start -- start the vm
 
 (" OpenBSD start ")
-	ifconfig tap9 >/dev/null 2>&1 || ifconfig tap9 create
 	mkdir -p /etc/vm
 	echo 'vm "9front" {
 		memory 1G
 		disable
-		interface tap9 { switch "uplink" }
+		interface { switch "uplink" }
 		disk '"$iso"' format raw
 		disk '"$disk"' format qcow2
 	}' >/etc/vm/9front.conf
 	vmctl load "/etc/vm/9front.conf"
 	vmctl start 9front
-	echo using interface tap9 >&2
 	;;
 (" "*" start ") 
 	case $(uname) in
@@ -69,7 +66,7 @@ case " $(uname) $* " in
 	  -drive file="$disk",media=disk \
 	  -drive file="$iso",media=cdrom \
 	  -boot order=cd \
-	  -netdev tap,id=n0,script=no,ifname=tap9 \
+	  -netdev tap,id=n0,script=no,ifname=tap0 \
 	  -device virtio-net-pci,netdev=n0 \
 	  -chardev socket,id=c0,path=/var/run/qemu/9front,server,nowait \
 	  -serial chardev:c0 \
@@ -77,7 +74,6 @@ case " $(uname) $* " in
 	  "$@" &
 
 	sleep 0.2 # create the unix domain socket
-	echo using interface tap9 >&2
 	;;
 
 ##  9vm stop -- kill the vm
