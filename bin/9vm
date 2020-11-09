@@ -2,7 +2,7 @@
 
 : ${rel:=8013.d9e940a768d1}
 : ${iso:=/var/iso/9front.$rel.iso}
-: ${disk:=/var/disk/9front.qcow}
+: ${disk:=/var/vm/9front.qcow}
 : ${drawterm:=https://code.9front.org/hg/drawterm/archive/tip.tar.gz}
 
 ## usage:
@@ -39,6 +39,14 @@ case " $(uname) $* " in
 	cp drawterm /usr/local/bin
 	;;
 
+##  9vm mac [addr] -- generate or get MAC address
+
+(" "*" mac ")
+	[ -f /var/vm/9front.mac ] || openssl rand -hex 5 \
+	 | sed -r 's/(..)/:\1/g; s/^/ae/' >/var/vm/9front.mac
+	cat /var/vm/9front.mac
+	;;
+
 ##  9vm start -- start the vm
 
 (" OpenBSD start ")
@@ -46,8 +54,11 @@ case " $(uname) $* " in
 	echo 'vm "9front" {
 		memory 1G
 		disable
-		interface { switch "uplink" }
-		disk '"$iso"' format raw
+		interface {
+			switch "uplink"
+			lladdr "'"$("$0" mac)"'"
+		}
+		#disk '"$iso"' format raw
 		disk '"$disk"' format qcow2
 	}' >/etc/vm/9front.conf
 	vmctl load "/etc/vm/9front.conf"
@@ -59,20 +70,18 @@ case " $(uname) $* " in
 	(NetBSD) set -- -accel hax ;;
 	(*) set -- ;;
 	esac
-
 	qemu-system-x86_64 \
 	  -name 9front \
 	  -m 1G \
 	  -drive file="$disk",media=disk \
 	  -drive file="$iso",media=cdrom \
 	  -boot order=cd \
-	  -netdev tap,id=n0,script=no,ifname=tap0 \
+	  -netdev tap,id=n0,script=no,mac="$("$0" mac)" \
 	  -device virtio-net-pci,netdev=n0 \
 	  -chardev socket,id=c0,path=/var/run/qemu/9front,server,nowait \
 	  -serial chardev:c0 \
 	  -nographic \
 	  "$@" &
-
 	sleep 0.2 # create the unix domain socket
 	;;
 

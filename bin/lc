@@ -1,2 +1,2 @@
 #!/bin/sh -eu
-exec ls
+exec ls "$@"
