@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+
+ip link set "$1" up
+ip link set "$1" master bridge0

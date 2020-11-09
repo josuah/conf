@@ -2,6 +2,8 @@ os=DebianLinux
 ip=10.191.255.47 v=4
 prefix=fd00:10e2:10e8:3 v=6
 suffix=1844:7037:7c15:54a3 v=6
+prefix=172.22.3 v=4
+add=mod name=Linux
 add=mod name=home user=jdemangeon
 add=mod name=home user=root
 add=mod name=base

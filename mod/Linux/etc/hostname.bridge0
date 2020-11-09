@@ -1,0 +1,1 @@
+inet {{ host/[host]/db:prefix v=4 }}.1/24

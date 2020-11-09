@@ -44,7 +44,7 @@ case ${1:-help} in
 		length($f) > 3 && length($f) <= 6 && !F[$f]++ { print $f }
 	' >/var/tmp/bird.csv
 
-	awk -v r=$RANDOM -v n=$n '
+	awk -v r="$(openssl rand 2 | od -An -d)" -v n="$n" '
 		BEGIN { srand(r) } { bird[NR] = $0 }
 		END { while (n-- > 0) print bird[int(rand() * NR)] }
 	' /var/tmp/bird.csv
