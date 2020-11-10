@@ -30,6 +30,9 @@ ifeval() { set -eu
 			shift 1
 			ip route add "$1" via "$2"
 			;;
+		(" up "|" down ")
+			ip link set "$iface" "$1"
+			;;
 		(" dhcp ")
 			pgrep -f "dhclient $name" || dhclient "$name"
 			;;

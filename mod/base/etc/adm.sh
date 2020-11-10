@@ -32,6 +32,9 @@ cat /etc/pf.d/*
 exec >/etc/dhcpd.conf
 cat /etc/dhcpd.d/*
 
+exec >/etc/sysctl.conf
+cat /etc/sysctl.d/*
+
 exec >/etc/rad.conf
 cat /etc/rad.d/*
 

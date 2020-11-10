@@ -76,10 +76,11 @@ case " $(uname) $* " in
 	  -drive file="$disk",media=disk \
 	  -drive file="$iso",media=cdrom \
 	  -boot order=cd \
-	  -netdev tap,id=n0,script=no,mac="$("$0" mac)" \
-	  -device virtio-net-pci,netdev=n0 \
+	  -netdev tap,id=n0 \
+	  -device virtio-net-pci,netdev=n0,mac="$("$0" mac)" \
 	  -chardev socket,id=c0,path=/var/run/qemu/9front,server,nowait \
 	  -serial chardev:c0 \
+	  -serial mon:stdio \
 	  -nographic \
 	  "$@" &
 	sleep 0.2 # create the unix domain socket
@@ -109,7 +110,7 @@ case " $(uname) $* " in
 	exec cu "/dev/$(vmctl show 9front | awk 'NR == 2 { print $6 }')"
 	;;
 (" "*" shell ")
-	exec socat unix:/var/run/qemu/9front stdio
+	exec socat unix:/var/run/qemu/9front stdio,raw,echo=0
 	;;
 
 (*)
