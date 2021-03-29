@@ -1,1 +1,0 @@
-add=ospack name=wireguard cmd=wg OpenBSD=net/wireguard-tools AlpineLinux=wireguard-tools

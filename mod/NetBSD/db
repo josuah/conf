@@ -1,2 +1,0 @@
-add=pkg name=mozilla-rootcerts
-add=git name=pkgsrc url=https://github.com/netbsd/pkg/src path=/usr/pkgsrc

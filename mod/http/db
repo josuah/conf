@@ -1,2 +1,0 @@
-add=service name=httpd
-add=service name=relayd

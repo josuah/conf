@@ -1,0 +1,4 @@
+# by {{ path }} at {{ date }}
+#Min	#Hour	#DoM	#Mon	#DoW	#User		#Command
+
+*/10	*	*	*	*	root		newsyslog

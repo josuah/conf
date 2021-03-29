@@ -1,2 +1,0 @@
-HiddenServiceDir /var/lib/tor/hs/git
-HiddenServicePort 9418 127.0.0.1:9418

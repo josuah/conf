@@ -1,5 +1,0 @@
-# by {{ path }} at {{ date }}
-
-#for db/dns-soa mx=true
-{{ 1:soa }}
-#end

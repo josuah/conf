@@ -1,2 +1,0 @@
-add=ospack name=liblzma cmd=lzma
-add=ospack name=cmake

@@ -1,1 +1,0 @@
-add=service flags=--base-path=/git name=gitdaemon

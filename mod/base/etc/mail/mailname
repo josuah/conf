@@ -1,3 +1,0 @@
-{{ host }}.{{ db/dns-soa:soa }}
-
-# by {{ path }} at {{ date }}

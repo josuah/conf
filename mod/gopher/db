@@ -1,2 +1,0 @@
-add=pkg name=geomyidae
-add=service name=geomyidae flags="-u _geomyidae -g nobody -b /var/gopher -t /etc/ssl/private/z0.is.key /etc/ssl/z0.is.crt"

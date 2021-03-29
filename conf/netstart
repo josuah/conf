@@ -1,0 +1,58 @@
+#!/bin/sh
+set -eu
+
+ifcreate() { set -eu
+	local name=$1
+	local type="${name%%[0-9]*}"
+
+	if ! ip link show "$name" >/dev/null 2>&1; then
+		ip link add name "$name" type "$type"
+	fi
+}
+
+ifeval() { set -eu
+	local path="$1"
+	local name="${path##*.}"
+	local type="${name%%[0-9]*}"
+	local line
+
+	while read line; do
+		set -- $line
+		case " $* " in
+		(" inet"*" "*" ")
+			ip address show dev "$name" | grep -Fq "inet $2 " \
+			 || ip address add "$2" dev "$name"
+			;;
+		(" add "*" ")
+			ip link set "$2" master "$name"
+			;;
+		(" !route add "*" "*" ")
+			shift 1
+			ip route add "$1" via "$2"
+			;;
+		(" up "|" down ")
+			ip link set "$iface" "$1"
+			;;
+		(" dhcp ")
+			pgrep -f "dhclient $name" || dhclient "$name"
+			;;
+		(*)
+			echo "unknown option $line" >&2
+			;;
+		esac
+	done <$path
+}
+
+if [ $# = 0 ]; then
+	for iface in /etc/hostname.*; do
+		set -- "$@" "${iface##*.}"
+	done
+fi
+
+exit=0
+for iface in "$@"; do
+	ifcreate "$iface"
+	ifeval "/etc/hostname.$iface" || exit=1
+done
+
+exit $exit

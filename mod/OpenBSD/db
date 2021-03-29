@@ -1,2 +1,0 @@
-add=pkg name=git
-add=git name=ports url=https://github.com/openbsd/ports path=/usr/ports

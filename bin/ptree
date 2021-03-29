@@ -2,7 +2,7 @@
 
 function pager(msg)
 {
-	printf "%s", msg | "exec ${PAGER:-less}"
+	printf "%s", msg | "exec ${PAGER:-less -S}"
 }
 
 function ps_read(ps,
@@ -29,7 +29,6 @@ function ps_read(ps,
 	close(cmd)
 }
 
-#
 # Using the informations from the child pid in ps[], build the absolute
 # path from PID 1 to each pid:
 #
@@ -59,7 +58,6 @@ function tree_fill(tree, ps, pid, n, lv,
 	return n
 }
 
-#
 # Transform tree[] into a tree by replacing some LINE by VOID when needed.
 # The tree is walked from the bottom to the top, and column by column
 # toward the right until an empty column is met.

@@ -1,0 +1,83 @@
+#!/bin/sh -eu
+
+case " $* " in
+(" start "*" "|" stop "*" "|" enable "*" "|" disable "*" ")
+	;;
+(" status "*" "|" list ")
+	;;
+(" list "*" ")
+	shift 1
+	exec awk -v self="'$0'" 'BEGIN {
+		printf("%-20s", "host")
+		for (i = 1; i in ARGV; i++) {
+			gsub("[^-@._A-Za-z0-9]", "", ARGV[i])
+			cmd = "exec ssh "ARGV[i]" exec sh /dev/stdin list <"self
+			while ((cmd | getline) > 0) {
+				stat[ARGV[i]" "$1] = $2;
+				if (!uniq[$1]++) sv[ns++] = $1
+			}
+			printf "%-"length(ARGV[i])"s ", ARGV[i]
+		}
+		printf "\n"
+
+		for (is = 0; is < ns; is++) {
+			printf "%-20s", sv[is]
+			for (i = 1; i in ARGV; i++) {
+				s = stat[ARGV[i]" "sv[is]] ? stat[ARGV[i]" "sv[is]] : "-"
+				printf " %-"length(ARGV[i])"s", s
+			}
+			printf "\n"
+		}
+	}' "$@"
+	;;
+(*)
+	exec >&2
+	echo "usage: ${0##*/} (start|stop|enable|disable|status) daemon"
+	echo "       ${0##*/} list [host...]"
+	exit 1
+	;;
+esac
+
+if command -v rcctl >/dev/null; then
+	case $1 in
+	(status)
+		exec rcctl check "$2" 2>/dev/null
+		;;
+	(list)
+		exec awk 'BEGIN {
+			while (("exec rcctl ls started" | getline) > 0)
+				sv[$0]++
+			ignore["pf"] = ignore["check_quotas"] = ignore["library_aslr"] = 1
+			while (("exec rcctl ls on" | getline) > 0) {
+				if ($0 in ignore) continue
+				printf("%s %s\n", $0, ($0 in sv) ? "ok" : "err")
+			}
+		}'
+		;;
+	(*)
+		exec rcctl "$@"
+		;;
+	esac
+
+elif command -v openrc-run >/dev/null; then
+	case $1 in
+	(list)
+		rc-status -f ini \
+		 | sed -n 's/ *= *started *$/ ok/p; s/ *=.*/ err/p'
+		;;
+	(*)
+		exec "/etc/init.d/$2" "$1"
+		;;
+	esac
+
+elif command -v systemd >/dev/null; then
+	case $1 in
+	(*)
+		exec systemd "$@"
+		;;
+	esac
+
+else
+	echo "${0##*/}: no service manager found" >&2
+	exit 1
+fi

@@ -9,9 +9,7 @@ case ${1:-help} in
 
 ##  pass -- random password
 (pass)
-	openssl rand -base64 $((n * 18)) | tr -d '\n' | tr '+/' 'az' \
-	 | sed -r "s/(.{24})/$(date +%y%m%d)-\1\$/g" | tr -d '\n' \
-	 | tr -d '\n' | tr '$' '\n'
+	openssl rand -base64 $((n * 48)) | tr '+/' 'az' | cut -c 1-24
 	;;
 
 ##  mac -- random mac address

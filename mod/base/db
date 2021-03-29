@@ -1,7 +1,0 @@
-add=service name=cron
-add=service name=syslogd
-add=service name=inetd
-add=pkg name=inetd
-add=service name=unbound
-add=pkg name=unbound
-DebianLinux=ssh add=service name=sshd
