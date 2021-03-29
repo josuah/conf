@@ -1,14 +1,4 @@
-#!/bin/sh
-set -eu
-
-ifcreate() { set -eu
-	local name=$1
-	local type="${name%%[0-9]*}"
-
-	if ! ip link show "$name" >/dev/null 2>&1; then
-		ip link add name "$name" type "$type"
-	fi
-}
+#!/bin/sh -eu
 
 ifeval() { set -eu
 	local path="$1"
@@ -51,7 +41,10 @@ fi
 
 exit=0
 for iface in "$@"; do
-	ifcreate "$iface"
+	if ! ip link show "$iface" >/dev/null 2>&1; then
+		ip link add name "$iface" type "${iface%%[0-9]*}"
+	fi
+
 	ifeval "/etc/hostname.$iface" || exit=1
 done
 

@@ -4,10 +4,12 @@ install:
 	mkdir -p ${PREFIX}/bin
 	cp -rf bin/* ${PREFIX}/bin
 
-dotfiles:
+dot:
 	cp -rf dot/.* ${HOME}
 
-push:
-	while read host; do
-		git archive | ssh "$host" "mkdir -p /etc/adm
-	done
+sync:
+	rsync -va --delete * ${HOST}:/etc/adm
+
+ssh:
+
+.PHONY: ssh dot
