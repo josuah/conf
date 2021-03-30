@@ -1,0 +1,65 @@
+#!/bin/sh -eu
+
+tpl_interface='[Interface]
+PrivateKey = %s
+ListenPort = 51820
+'
+
+tpl_peer='[Peer]
+PublicKey = %s
+'
+
+mkdir -p -m 700 /etc/wireguard
+
+sec=$(openssl rand -base64 32)
+if [ -f /etc/wireguard/interface.conf ]; then
+	sec=$(awk '{sub(" *= *", " ")} tolower($1)=="privatekey" {print $2}' \
+	  /etc/wireguard/interface.conf)
+else
+	sec=$(openssl rand -base64 32)
+	printf "$tpl_interface" "$sec" >/etc/wireguard/interface.conf 
+fi
+
+case $(uname) in
+(Linux)
+	export sec
+	pub=$(awk 'BEGIN { print ENVIRON["sec"] }' | wg pubkey)
+	;;
+(OpenBSD)
+	trap 'ifconfig wg99999 destroy' INT TERM EXIT HUP
+	ifconfig wg99999 create wgport 51820 wgkey "$sec"
+	pub=$(ifconfig wg99999 | awk '$1 == "wgpubkey" { print $2 }')
+	;;
+esac
+
+cp /etc/wireguard/interface.conf /etc/wireguard/wireguard.conf
+for peer in "$@"; do
+	[ "${peer##*/}" = "$(hostname -s)" ] && continue
+	echo
+	cat "$peer"
+done >>/etc/wireguard/wireguard.conf
+
+[ "$(uname)" = OpenBSD ] && awk '
+	{ gsub(" ", ""); sub("=", " "); $1 = tolower($1) }
+	$1 == "[interface]" || $1 == "[peer]" { section = $1 n[$1]++ }
+	{ conf[section$1] = $2 }
+	END {
+		printf "wgport %s", conf["interface0listenport"]
+		printf " wgkey \"%s\"", conf["interface0privatekey"]
+		printf " wgpka 25"
+		for (i = 0; i < n["peer"]; i++) {
+			printf "wgpeer %s", conf["peer"i"publickey"]
+			if ("peer"i"endpoint" in conf) {
+				sub(":", " ", conf["peer"i"endpoint"]
+				printf " wgendpoint %s", conf["peer"i"endpoint"]
+			}
+			if ("peer"i"allowedips" in conf) {
+				split(conf["peer"i"allowedips"], allowedips, ",")
+				for (i in allowedips)
+					printf " wgaip %s", allowedips[i]
+			}
+		}
+	}
+' /etc/wireguard/wireguard.conf >/etc/hostname.wg0
+
+printf "$tpl_peer" "$pub"

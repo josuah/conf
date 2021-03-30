@@ -1,4 +1,4 @@
-HOSTS = shag corax
+HOSTS = shag corax pelios
 PREFIX = /usr/local
 
 install:
