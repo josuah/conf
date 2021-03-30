@@ -1,0 +1,11 @@
+# by %%file%% at %%date%% (privkey ip
+
+wgport 5555 wgkey %%privkey%%
+inet %%ip%%
+
+%% grep -Fv "key=$pubkey " wgpeers | while read line; do
+%%	export $line
+wgpeer %%key%% wgendpoint %%ip%% 5555 wgpka 25  wgaip %%net%%
+%% end
+
+up

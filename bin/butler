@@ -1,11 +1,11 @@
 #!/bin/sh -eu
 
-case " $* " in
-(" start "*" "|" stop "*" "|" enable "*" "|" disable "*" ")
+# general commands
+
+case "$*" in
+("start "*|"stop "*|"enable "*|"disable "*|"status "*|"list")
 	;;
-(" status "*" "|" list ")
-	;;
-(" list "*" ")
+("list "*)
 	shift 1
 	exec awk -v self="'$0'" 'BEGIN {
 		printf("%-20s", "host")
@@ -23,8 +23,8 @@ case " $* " in
 		for (is = 0; is < ns; is++) {
 			printf "%-20s", sv[is]
 			for (i = 1; i in ARGV; i++) {
-				s = stat[ARGV[i]" "sv[is]] ? stat[ARGV[i]" "sv[is]] : "-"
-				printf " %-"length(ARGV[i])"s", s
+				s = stat[ARGV[i]" "sv[is]]
+				printf " %-"length(ARGV[i])"s", s ? s : "-"
 			}
 			printf "\n"
 		}
@@ -37,6 +37,8 @@ case " $* " in
 	exit 1
 	;;
 esac
+
+# each system's service management handler
 
 if command -v rcctl >/dev/null; then
 	case $1 in
@@ -72,6 +74,13 @@ elif command -v openrc-run >/dev/null; then
 
 elif command -v systemd >/dev/null; then
 	case $1 in
+	(list)
+		systemctl list-units -t service --plain --no-legend | sed -r '
+			s/(@[^.]*)?\.service +[^ ]+ /;/ # clean the input
+			s/;failed .*/ err/; s/;.*/ ok/ # print err or ok
+		'
+		exit 0
+		;;
 	(*)
 		exec systemd "$@"
 		;;

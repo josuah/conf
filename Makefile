@@ -1,3 +1,4 @@
+HOSTS = shag corax
 PREFIX = /usr/local
 
 install:
@@ -7,8 +8,9 @@ install:
 dot:
 	cp -rf dot/.* ${HOME}
 
-sync:
-	rsync -va --delete * ${HOST}:/etc/adm
+sync: ${HOSTS}
+${HOSTS}:
+	rsync -va --delete * $@:/etc/adm
 
 ssh:
 

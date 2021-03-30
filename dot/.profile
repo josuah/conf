@@ -12,8 +12,8 @@ case " ${ok:-false} $- " in
 	export PS1="$(hostname -s):\$PWD\\\$\${?#0} "
 
 	if [ -z "$SSH_CONNECTION" ]; then
-		export SSH_AUTH_SOCK="$HOME/.ssh/sock/agent"
-		if ! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK" >/dev/null; then
+		export SSH_AUTH_SOCK="$HOME/.ssh/auth.sock"
+		if ! pgrep -fx "ssh-agent -a $SSH_AUTH_SOCK"; then
 			rm -f "$SSH_AUTH_SOCK"
 			ssh-agent -a "$SSH_AUTH_SOCK"
 		fi
