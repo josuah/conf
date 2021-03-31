@@ -41,24 +41,26 @@ done >>/etc/wireguard/wireguard.conf
 
 [ "$(uname)" = OpenBSD ] && awk '
 	{ gsub(" ", ""); sub("=", " "); $1 = tolower($1) }
-	$1 == "[interface]" || $1 == "[peer]" { section = $1 n[$1]++ }
+	sub(/^\[/, "") && sub(/\]$/, "") { section = $1 n[$1]++ }
 	{ conf[section$1] = $2 }
 	END {
-		printf "wgport %s", conf["interface0listenport"]
-		printf " wgkey \"%s\"", conf["interface0privatekey"]
-		printf " wgpka 25"
+		print "wgkey \""conf["interface"0"privatekey"]"\""
+		print "wgport \""conf["interface"0"listenport"]"\""
 		for (i = 0; i < n["peer"]; i++) {
-			printf "wgpeer %s", conf["peer"i"publickey"]
+			print ""
+			print "wgpeer \""conf["peer"i"publickey"]"\" \\"
 			if ("peer"i"endpoint" in conf) {
-				sub(":", " ", conf["peer"i"endpoint"]
-				printf " wgendpoint %s", conf["peer"i"endpoint"]
+				sub(":", " ", conf["peer"i"endpoint"])
+				print "  wgendpoint "conf["peer"i"endpoint"]" \\"
 			}
-			if ("peer"i"allowedips" in conf) {
-				split(conf["peer"i"allowedips"], allowedips, ",")
-				for (i in allowedips)
-					printf " wgaip %s", allowedips[i]
-			}
+			split(conf["peer"i"allowedips"], allowedips, ",")
+			for (ip in allowedips)
+				print "  wgaip "allowedips[ip]" \\"
+			print "  wgpka 25"
 		}
+		print ""
+		print "inet "conf["interface"0"address"]
+		print "up"
 	}
 ' /etc/wireguard/wireguard.conf >/etc/hostname.wg0
 

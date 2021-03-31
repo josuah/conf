@@ -1,0 +1,32 @@
+#!/bin/sh -e
+
+key="$HOME/.ssh/id_ed25519"
+
+mkdir -p "$HOME/.password-store"
+cd "$HOME/.password-store"
+
+err() {
+	echo "error: $1" >&2
+	exit 2
+}
+
+case $1 in
+(get)
+	exec age -d -i "$key" "$2"
+	;;
+(set)
+	[ -e "$2" ] && err "password $2 already exist"
+	mkdir -p "${2%/*}"
+	exec age -e -a -R "$key.pub" >$2
+	;;
+("")
+	file=$(find * -type f | dmenu -p pass)
+	"$0" get "$file" | tr -d '\n' | xsel -i
+	echo "${file##*/}" | tr -d '\n' | xsel -bi
+	;;
+(*)
+	exec >&2
+	echo "usage: ${0##*/} (set|get) resource/account-name"
+	echo "       ${0##*/}"
+	;;
+esac

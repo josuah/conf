@@ -1,0 +1,4 @@
+[Peer]
+PublicKey = vCXAdb/4IUlh3htsKrnxoozIMYCO0uzmuz9n48b8+2Q=
+EndPoint = pelios.wan.z0.is:51820
+AllowedIPs = 172.22.0.5/32
