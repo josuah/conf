@@ -7,6 +7,7 @@ ListenPort = 51820
 
 tpl_peer='[Peer]
 PublicKey = %s
+AllowedIPs = fe80::/10
 '
 
 mkdir -p -m 700 /etc/wireguard
@@ -22,8 +23,7 @@ fi
 
 case $(uname) in
 (Linux)
-	export sec
-	pub=$(awk 'BEGIN { print ENVIRON["sec"] }' | wg pubkey)
+	pub=$(echo "$sec" | wg pubkey)
 	;;
 (OpenBSD)
 	trap 'ifconfig wg99999 destroy' INT TERM EXIT HUP

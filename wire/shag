@@ -1,4 +1,4 @@
 [Peer]
 PublicKey = HTYtRpXXlosTqGocds+WIEKetx7MPHgn7btzaU5USWU=
 EndPoint = shag.wan.z0.is:51820
-AllowedIPs = 172.22.0.7/32
+AllowedIPs = fe80::/10
