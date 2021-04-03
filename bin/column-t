@@ -1,0 +1,20 @@
+#!/usr/bin/awk -f
+# format text in aligned two-space separated columns
+
+{
+	for (f = 1; f <= NF; f++) {
+		l = length($f)
+		if (l > len[f]) len[f] = l
+		field[NR" "f] = $f
+	}
+	if (--f > count)
+		count = f
+}
+
+END {
+	for (r = 1; r <= NR; r++) {
+		for (f = 1; f < count; f++)
+			printf("%-"len[f]"s  ", field[r" "f])
+		printf("%s\n", field[r" "f])
+	}
+}

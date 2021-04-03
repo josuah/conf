@@ -1,0 +1,39 @@
+#!/bin/sh -eu
+
+export PREFIX="${PREFIX:=/usr/pack}"
+
+pack=$1
+
+pack_download() {
+	curl -o 
+}
+
+pack_extract() {
+	curl -o "$pack.$version.$ext"
+}
+
+pack_configure() {
+	if [ -f configure ]; then
+		./configure --prefix="$PREFIX"
+	fi
+}
+
+pack_build() {
+	if [ -f Makefile ]; then
+		make
+	fi
+}
+
+pack_install() {
+	trap 'rm -rf "$PREFIX"'
+	make PREFIX="$PREFIX/build/$pack" install
+}
+
+. "/etc/adm/pack/$1/build.sh"
+
+mkdir -p -m 755 "/usr/pack/build/$1"
+
+cd "/usr/pack/tar/$1"
+pack_download
+
+pack_extract
