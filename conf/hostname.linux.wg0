@@ -1,0 +1,8 @@
+if=${0#*.} me=%%me%%
+
+ip link del $if
+ip link add $if type wireguard
+wg setconf $if /etc/wireguard/$if.conf
+ip addr flush dev $if
+ip addr add dev $if fe80::$me/10
+ip link set $if up

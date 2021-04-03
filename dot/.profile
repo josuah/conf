@@ -6,7 +6,7 @@ export LC_ALL="en_US.UTF-8"
 case " ${ok:-false} $- " in
 (" false "*i*" ")
 	export EDITOR="vim"
-	export PAGER="less"
+	export PAGER="less -S"
 	export MANPAGER="less"
 	export LESSHISTFILE="/tmp/lesshist"
 	export PS1="$(hostname -s):\$PWD\\\$\${?#0} "

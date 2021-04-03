@@ -1,0 +1,4 @@
+if=${0#*.}
+
+ip link set $if up
+udhcpc -i $if
