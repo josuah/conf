@@ -1,16 +1,23 @@
-HOSTS = shag corax pelios
+HOSTS_CONF = shag corax pelios
+HOSTS_HOME = bitreich.org server10.openbsd.amsterdam
 PREFIX = /usr/local
 
-install: home
-	mkdir -p ${PREFIX}/bin
-	cp -rf bin/* ${PREFIX}/bin
+all: home conf
 
 home:
 	sort -u -o home/.ssh/authorized_keys home/.ssh/authorized_keys
 	cp -rf home/.??* "$$HOME"
 
-sync: ${HOSTS}
-${HOSTS}:
+conf:
+	mkdir -p ${PREFIX}/bin
+	cp -rf bin/* ${PREFIX}/bin
+
+sync: ${HOSTS_CONF} ${HOSTS_HOME}
+
+${HOSTS_CONF}:
 	rsync -va --delete * $@:/etc/adm
 
-.PHONY: home
+${HOSTS_HOME}:
+	rsync -va home/ $@:./
+
+.PHONY: conf home

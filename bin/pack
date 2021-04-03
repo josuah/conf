@@ -9,7 +9,7 @@ pack_download() {
 }
 
 pack_extract() {
-	curl -o "$pack.$version.$ext"
+	curl -o "$pack.$version.tgz" "$url"
 }
 
 pack_configure() {
