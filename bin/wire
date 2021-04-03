@@ -7,7 +7,6 @@ ListenPort = 51820
 
 tpl_peer='[Peer]
 PublicKey = %s
-AllowedIPs = fe80::/10
 '
 
 mkdir -p -m 700 /etc/wireguard
@@ -32,12 +31,12 @@ case $(uname) in
 	;;
 esac
 
-cp /etc/wireguard/interface.conf /etc/wireguard/wireguard.conf
+cp /etc/wireguard/interface.conf /etc/wireguard/wg0.conf
 for peer in "$@"; do
 	[ "${peer##*/}" = "$(hostname -s)" ] && continue
 	echo
 	cat "$peer"
-done >>/etc/wireguard/wireguard.conf
+done >>/etc/wireguard/wg0.conf
 
 [ "$(uname)" = OpenBSD ] && awk '
 	{ gsub(" ", ""); sub("=", " "); $1 = tolower($1) }
@@ -59,9 +58,9 @@ done >>/etc/wireguard/wireguard.conf
 			print "  wgpka 25"
 		}
 		print ""
-		print "inet "conf["interface"0"address"]
+		print "inet6 "conf["interface"0"address"]
 		print "up"
 	}
-' /etc/wireguard/wireguard.conf >/etc/hostname.wg0
+' /etc/wireguard/wg0.conf >/etc/hostname.wg0
 
 printf "$tpl_peer" "$pub"
