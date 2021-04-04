@@ -8,7 +8,7 @@ function pager(msg)
 function ps_read(ps,
 	i, pid, cmd)
 {
-	cmd = "exec ps ax -o pid,ppid,state,user,args"
+	cmd = "exec ps ax -o pid,ppid,stat,user,args"
 	cmd | getline
 	while ((cmd | getline) > 0) {
 		pid = $1

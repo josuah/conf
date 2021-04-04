@@ -16,11 +16,11 @@ case "$(echo "$url" | tr A-Z a-z)" in
 	exec git clone "$url"
 	;;
 (*.jpg|*.jpeg|*.png|*.gif)
-	curl -o "$file" "$url"
+	[ -f "$url" ] && file=$url || curl -Lo "$file" "$url"
 	sxiv "$file"
 	;;
 (*.pdf|*.ps)
-	curl -o "$file" "$url"
+	[ -f "$url" ] && file=$url || curl -Lo "$file" "$url"
 	exec mupdf "$file"
 	;;
 (*.mkv|*.webm|*.avi|*.mp4)
@@ -30,7 +30,7 @@ case "$(echo "$url" | tr A-Z a-z)" in
 	exec ffplay "$url"
 	;;
 (*.txt|*.md|*.sh|*.c)
-	curl -o "$file"
+	[ -f "$url" ] && file=$url || curl -Lo "$file"
 	exec x-terminal-emulator less "$file"
 	;;
 (magnet:*|*.torrent)
