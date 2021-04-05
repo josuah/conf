@@ -1,6 +1,4 @@
 #!/bin/sh -eu
-export x "$@"
-
 : ${timeout:=3}
 
-exec dig +timeout="$timeout" -t "$type" "@$ip" "$dom"
+exec dig +timeout="$timeout" -t "$type" "$dom" "@$ns"

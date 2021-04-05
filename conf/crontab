@@ -1,4 +1,6 @@
-# by {{ path }} at {{ date }}
+# by %%file%% at %%date%%
 #Min	#Hour	#DoM	#Mon	#DoW	#User		#Command
 
 */10	*	*	*	*	root		newsyslog
+*/5	*	*	*	*	root		rdate -s pool.ntp.org
+*/10	*	*	*	*	root		o="$(motd)" && echo "$o" >/etc/motd

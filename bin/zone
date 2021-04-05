@@ -41,11 +41,10 @@ function ip4_rev(ip4)
 	 arr[4], arr[3], arr[2], arr[1])
 }
 
-function add_rr(dom, type, value, ttl,
+function add_rr(dom, type, val, ttl,
 	i, soa, rr)
 {
-	debug("add "dom" "type" "value)
-	TYPES[type]++
+	debug("add "dom" "type" "val)
 
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
@@ -53,8 +52,7 @@ function add_rr(dom, type, value, ttl,
 	} 
 	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
 	ttl = ttl ? ttl : TTL
-	rr = sprintf("%-32s %-7d IN %-5s %s", dom, ttl, type, value)
-	RR[soa" "N[soa]++] = rr
+	RR[soa] = RR[soa] sprintf("%-32s %-7d IN %-5s %s\n", dom, ttl, type, val)
 }
 
 function add_ip(dom, host,
@@ -76,10 +74,10 @@ BEGIN {
 { debug(FILENAME": "$0) }
 
 FILENAME == "rr.soa" {
-	assert(SOA[$1] == 0, "soa declared twice for "$1)
+	assert(!($1 in SOA), "soa declared twice for "$1)
 	if (NR == 1)
 		MAIN = $1
-	SOA[$1]++
+	SOA[$1] = ","$2","
 
 	x = "("NOW" "TTL" "TTL" 86400 86400)"
 	add_rr($1, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
@@ -115,17 +113,18 @@ FILENAME == "rr.mx" {
 
 	add_ip(dom, $1)
 	for (soa in SOA)
-		add_rr(soa, "MX", MX" "dom".")
-	for (host in HOST)
-		add_rr(host"."MAIN, "MX", MX" "dom".")
+		if (index(SOA[soa], ",mx,"))
+			add_rr(soa, "MX", MX" "dom".")
+}
+
+FILENAME == "rr.data" {
+	dom = $1
+	type = $2
+	sub("^[ \t]*([^ \t]+[ \t]+){2}", "")
+	add_rr(dom, type, $0)
 }
 
 END {
-	for (soa in SOA) {
-		file = DIR"/"soa
-		print "$ORIGIN "soa"." >file
-		print "" >>file
-		for (i = 0; (soa" "i) in RR; i++)
-			print RR[soa" "i] >>file
-	}
+	for (soa in SOA)
+		printf "$ORIGIN %s\n\n%s", soa, RR[soa] >(DIR"/"soa)
 }

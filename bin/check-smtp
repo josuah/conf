@@ -1,4 +1,6 @@
 #!/bin/sh -eu
 
-exec openssl s_client </dev/null \
+openssl s_client -starttls smtp </dev/null \
   -servername "$dom" -connect "$dom:$port" -verify_return_error -verify_depth 3
+
+dig t

@@ -1,6 +1,6 @@
 # by %%file%% at %%date%%
 %% rr=/etc/adm/zone/rr 
-%% read dom <$rr.soa
+%% read dom _ <$rr.soa
 %% export dom me="$(hostname -s)"
 
 127.0.0.1                       localhost

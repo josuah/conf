@@ -1,18 +1,20 @@
-CONF_BASE = hosts syslog.conf
-CONF_MAIL = mail/smtpd.conf
-CONF_HTTP = httpd.conf
-CONF_TLS = relayd.conf
-HOST_CONF = shag corax pelios
-HOST_HOME = bitreich.org server10.openbsd.amsterdam
 PREFIX = /usr/adm
+RR = rr.soa rr.host rr.ns rr.mx rr.alias rr.data
 ZONEDIR = /var/nsd/zones/master
-RR = rr.soa rr.host rr.ns rr.mx rr.alias
+
+SYNC_CONF = shag corax pelios
+SYNC_HOME = bitreich.org server10.openbsd.amsterdam
+
+CONF_BASE = hosts syslog.conf crontab
+CONF_HTTP = httpd.conf
+CONF_MAIL = mail/smtpd.conf
+CONF_MONIT = monitower.conf
+CONF_TLS = relayd.conf
 
 all: base home
 
 home:
-	sort -u -o home/.ssh/authorized_keys home/.ssh/authorized_keys
-	cp -rf home/.??* "$$HOME"
+	cp -r home/.??* ${HOME}
 
 zone: zone/sshfp
 	cd zone && DIR=${ZONEDIR} ${PWD}/bin/zone ${RR}
@@ -20,20 +22,24 @@ zone: zone/sshfp
 zone/sshfp: zone/rr.host
 	awk '!u[$$1]++ { print $$1 }' zone/rr.host | xargs -n1 ssh-keygen -r >$@
 
-sync: ${HOST_CONF} ${HOST_HOME}
-${HOST_CONF}:
-	rsync -va --delete * $@:$$PWD
-${HOST_HOME}:
+sync: ${SYNC_CONF} ${SYNC_HOME}
+
+${SYNC_CONF}:
+	rsync -va --delete * $@:${PWD}
+
+${SYNC_HOME}:
 	rsync -va home/ $@:./
+
+${CONF_BASE} ${CONF_HTTP} ${CONF_MAIL} ${CONF_MONIT} ${CONF_TLS}:
+	bin/template conf/$@ >/etc/$@
 
 base: ${CONF_BASE}
 	mkdir -p ${PREFIX}
-	ln -sf $$PWD/bin ${PREFIX}
+	ln -sf ${PWD}/bin ${PREFIX}
+
 http: ${CONF_HTTP}
 mail: ${CONF_MAIL}
+monit: ${CONF_MONIT}
 tls: ${CONF_TLS}
 
-${CONF_BASE} ${CONF_HTTP} ${CONF_MAIL} ${CONF_TLS}:
-	bin/template conf/$@ >/etc/$@
-
-.PHONY: base home zone
+.PHONY: home zone

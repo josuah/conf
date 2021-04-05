@@ -1,4 +1,3 @@
 #!/bin/sh -e
 
-butler list "$(hostname -s)" | awk 'NR > 1 && $2 == "err"'
-echo
+butler list | awk 'NR > 1 && $2 == "err"' | column-t
