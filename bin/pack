@@ -7,7 +7,7 @@ pack_download() {
 	(*.tgz|*.tar.gz)
 		curl "$url" | tar -xzf-
 		;;
-	(*)
+	(git://*|*.git)
 		git clone --depth 1 --branch "$ver" "$url" "$pack-$ver"
 		rm -rf "$pack-$ver/.git"
 		;;
