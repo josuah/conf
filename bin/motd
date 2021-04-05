@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+butler list "$(hostname -s)" | awk 'NR > 1 && $2 == "err"'
+echo

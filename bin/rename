@@ -4,8 +4,9 @@
 pattern=$1
 shift
 
-for old; do
+for old in "$@"; do
 	new=$(printf '%s\n' "$old" | sed -r "$pattern")
+	echo "$new"
 	mkdir -p "$(dirname "$new")"
 	[ "$old" = "$new" ] || mv "$old" "$new"
 done

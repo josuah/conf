@@ -67,6 +67,7 @@ function add_ip(dom, host,
 
 BEGIN {
 	TTL = "TTL" in ENVIRON ? ENVIRON["TTL"] : 3600
+	DIR = "DIR" in ENVIRON ? ENVIRON["DIR"] : "."
 	"date +%s" | getline NOW
 }
 
@@ -113,13 +114,14 @@ FILENAME == "rr.mx" {
 	dom = "mx"++MX"."MAIN
 
 	add_ip(dom, $1)
-	for (i = 1; i in SOA; i++)
-		add_rr(SOA[i], "MX", MX" "dom".")
+	add_rr(dom, "MX", dom".")
+	for (soa in SOA)
+		add_rr(soa, "MX", dom".")
 }
 
 END {
 	for (soa in SOA) {
-		file = "zone."soa
+		file = DIR"/"soa
 		print "$ORIGIN "soa"." >file
 		print "" >>file
 		for (i = 0; (soa" "i) in RR; i++)
