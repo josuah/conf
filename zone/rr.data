@@ -1,0 +1,5 @@
+josuah.net		TXT	v=spf1 mx -all
+z0.is			TXT	v=spf1 mx -all
+atelier-fu.fr		TXT	v=spf1 mx -all
+_sip._tcp.z0.is		SRV	1 1 5060 sip.z0.is
+_sip._tcp.josuah.net	SRV	1 1 5060 sip.z0.is
