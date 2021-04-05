@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh -eu
 
 key=$HOME/.ssh/id_ed25519
 
@@ -10,7 +10,7 @@ err() {
 	exit 2
 }
 
-case $1 in
+case ${1:-} in
 (get)
 	exec age -d -i "$key" "$2"
 	;;
@@ -29,6 +29,7 @@ case $1 in
 		export pass
 		awk '{ print ENVIRON["pass"] }' | "$0" set "$id"
 	done
+	;;
 ("")
 	file=$(find * -type f | dmenu -fn terminus:pixelsize=16 -p pass)
 	"$0" get "$file" | tr -d '\n' | xsel -i

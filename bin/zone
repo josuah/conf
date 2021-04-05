@@ -114,9 +114,9 @@ FILENAME == "rr.mx" {
 	dom = "mx"++MX"."MAIN
 
 	add_ip(dom, $1)
-	add_rr(dom, "MX", dom".")
+	add_rr(dom, "MX", MX" "dom".")
 	for (soa in SOA)
-		add_rr(soa, "MX", dom".")
+		add_rr(soa, "MX", MX" "MAIN".")
 }
 
 END {
