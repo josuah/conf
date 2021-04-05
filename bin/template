@@ -40,7 +40,7 @@ NR == 1 {
 		$0 = esctxt($0)
 		if(enter("text")) shell("echo -n '")
 	}
-	while(match($0, /%%[-_:0-9a-zA-Z]+%%/)){
+	while(match($0, /%%[-_0-9a-zA-Z]+%%/)){
 		shell(substr($0, 1, RSTART-1))
 		shell(escvar(substr($0, RSTART+2, RLENGTH-4)))
 		$0 = substr($0, RSTART + RLENGTH)

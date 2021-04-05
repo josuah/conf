@@ -1,0 +1,15 @@
+# by %%file%% at %%date%%
+%% rr=/etc/adm/zone/rr 
+%% read dom <$rr.soa
+%% export dom me="$(hostname -s)"
+
+127.0.0.1                       localhost
+::1                             localhost
+
+%% awk '
+%%	{ printf "%-31s %s %s.%s", $2, $1, $1, ENVIRON["dom"] }
+%%	$1 == ENVIRON["me"] { printf " wan%s", $1 ~ /:/ ? 4 : 6 }
+%%	{ printf "\n" }
+%% ' <$rr.host
+
+%% [ -f /etc/hosts.local ] && cat /etc/hosts.local
