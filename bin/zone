@@ -126,5 +126,5 @@ FILENAME == "rr.data" {
 
 END {
 	for (soa in SOA)
-		printf "$ORIGIN %s\n\n%s", soa, RR[soa] >(DIR"/"soa)
+		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >(DIR"/"soa)
 }

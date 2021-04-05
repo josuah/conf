@@ -3,7 +3,7 @@ RR = rr.soa rr.host rr.ns rr.mx rr.alias rr.data
 ZONEDIR = /var/nsd/zones/master
 
 SYNC_CONF = shag corax pelios
-SYNC_HOME = bitreich.org server10.openbsd.amsterdam
+SYNC_HOME = shag corax pelios josuah@shag bitreich.org server10.openbsd.amsterdam
 
 CONF_BASE = hosts syslog.conf crontab
 CONF_HTTP = httpd.conf
