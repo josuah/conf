@@ -1,3 +1,2 @@
 #!/bin/sh -e
-
 butler list | awk 'NR > 1 && $2 == "err"' | column-t

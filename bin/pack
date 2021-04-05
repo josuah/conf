@@ -1,15 +1,17 @@
 #!/bin/sh -eu
 
-export PREFIX="${PREFIX:=/usr/pack}"
-
 pack=$1
 
 pack_download() {
-	curl -o 
-}
-
-pack_extract() {
-	curl -o "$pack.$version.tgz" "$url"
+	case $url in
+	(*.tgz|*.tar.gz)
+		curl "$url" | tar -xzf-
+		;;
+	(*)
+		git clone --depth 1 --branch "$ver" "$url" "$pack-$ver"
+		rm -rf "$pack-$ver/.git"
+		;;
+	esac
 }
 
 pack_configure() {
@@ -26,14 +28,24 @@ pack_build() {
 
 pack_install() {
 	trap 'rm -rf "$PREFIX"'
-	make PREFIX="$PREFIX/build/$pack" install
+	make PREFIX="$PREFIX" install
 }
 
-. "/etc/adm/pack/$1/build.sh"
+. "recipe/$pack.sh"
 
-mkdir -p -m 755 "/usr/pack/build/$1"
+export PREFIX="$PWD/build/$pack-$ver"
 
-cd "/usr/pack/tar/$1"
-pack_download
+mkdir -p -m 755 source
+if [ ! -d "source/$pack-$ver" ]; then
+	(cd source && pack_download)
+fi
 
-pack_extract
+trap "rm -rf '$PWD/build/$pack'" INT TERM EXIT HUP
+if [ ! -d "build/$pack-$ver" ]; then
+	mkdir -p -m 755  "build/$pack-$ver"
+	(cd source/$pack-$ver && pack_configure)
+	(cd source/$pack-$ver && pack_build)
+	(cd source/$pack-$ver && pack_install)
+fi
+
+exec echo "built $pack in $PWD/build/$pack-$ver"

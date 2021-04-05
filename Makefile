@@ -1,20 +1,26 @@
-PREFIX = /usr/adm
+PREFIX = /usr/local
 RR = rr.soa rr.host rr.ns rr.mx rr.alias rr.data
 ZONEDIR = /var/nsd/zones/master
 
 SYNC_CONF = shag corax pelios
-SYNC_HOME = shag corax pelios josuah@shag bitreich.org server10.openbsd.amsterdam
+SYNC_HOME = root@shag root@corax josuah@corax root@pelios josuah@shag \
+  josuah@bitreich.org josuah@server10.openbsd.amsterdam
 
-CONF_BASE = hosts syslog.conf crontab
+CONF_BASE = hosts syslog.conf crontab profile
 CONF_HTTP = httpd.conf
 CONF_MAIL = mail/smtpd.conf
 CONF_MONIT = monitower.conf
 CONF_TLS = relayd.conf
 
-all: base home
+all: base home pack
 
 home:
 	cp -r home/.??* ${HOME}
+
+pack:
+	mkdir -p /home/pack
+	ln -s "${PWD}/pack" recipe
+	mv recipe /home/pack
 
 zone: zone/sshfp
 	cd zone && DIR=${ZONEDIR} ${PWD}/bin/zone ${RR}
@@ -25,21 +31,21 @@ zone/sshfp: zone/rr.host
 sync: ${SYNC_CONF} ${SYNC_HOME}
 
 ${SYNC_CONF}:
-	rsync -va --delete * $@:${PWD}
+	rsync -vr --delete * $@:${PWD}
 
 ${SYNC_HOME}:
-	rsync -va home/ $@:./
+	rsync -vr home/ $@:./
 
 ${CONF_BASE} ${CONF_HTTP} ${CONF_MAIL} ${CONF_MONIT} ${CONF_TLS}:
 	bin/template conf/$@ >/etc/$@
 
 base: ${CONF_BASE}
-	mkdir -p ${PREFIX}
-	ln -sf ${PWD}/bin ${PREFIX}
+	mkdir -p ${PREFIX}/bin
+	ln -sf ${PWD}/bin/* ${PREFIX}/bin
 
 http: ${CONF_HTTP}
 mail: ${CONF_MAIL}
 monit: ${CONF_MONIT}
 tls: ${CONF_TLS}
 
-.PHONY: home zone
+.PHONY: home zone pack
