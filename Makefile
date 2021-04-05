@@ -18,7 +18,7 @@ home:
 
 zone: zone/sshfp
 	cd zone && DIR=${ZONEDIR} ${PWD}/bin/zone ${RR}
-	cat zone/sshfp >>${ZONEDIR}/$$(sed q zone/rr.soa)
+	cat zone/sshfp >>${ZONEDIR}/$$(awk 'NR == 1 { print $$1 }' zone/rr.soa)
 zone/sshfp: zone/rr.host
 	awk '!u[$$1]++ { print $$1 }' zone/rr.host | xargs -n1 ssh-keygen -r >$@
 
