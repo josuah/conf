@@ -1,6 +1,7 @@
 HOSTS_CONF = shag corax pelios
 HOSTS_HOME = bitreich.org server10.openbsd.amsterdam
 PREFIX = /usr/adm
+ZONEDIR = /var/nsd/zones/master
 RR = rr.soa rr.host rr.ns rr.mx rr.alias
 
 all: init home
@@ -13,8 +14,12 @@ init:
 	mkdir -p ${PREFIX}
 	ln -sf $$PWD/bin ${PREFIX}
 
-zone:
-	cd zone && DIR=/var/nsd/zones/master ${PWD}/bin/zone ${RR}
+zone: zone/sshfp
+	cd zone && DIR=${ZONEDIR} ${PWD}/bin/zone ${RR}
+	cat zone/sshfp >>${ZONEDIR}/$$(sed q zone/rr.soa)
+
+zone/sshfp: rr.host
+	awk '!u[$$1]++ { print $$1 }' zone/rr.host | xargs -n1 ssh-keygen -r >$@
 
 sync: ${HOSTS_CONF} ${HOSTS_HOME}
 

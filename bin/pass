@@ -26,8 +26,7 @@ case ${1:-} in
 	;;
 (import)
 	while read id pass; do
-		export pass
-		awk '{ print ENVIRON["pass"] }' | "$0" set "$id"
+		echo "$pass" | "$0" set "$id"
 	done
 	;;
 ("")

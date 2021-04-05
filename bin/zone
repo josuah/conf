@@ -106,17 +106,18 @@ FILENAME == "rr.ns" {
 	dom = "ns"++NS"."MAIN
 
 	add_ip(dom, $1)
-	for (i in SOA)
-		add_rr(i, "NS", dom".", 86400)
+	for (soa in SOA)
+		add_rr(soa, "NS", dom".", 86400)
 }
 
 FILENAME == "rr.mx" {
 	dom = "mx"++MX"."MAIN
 
 	add_ip(dom, $1)
-	add_rr(dom, "MX", MX" "dom".")
 	for (soa in SOA)
-		add_rr(soa, "MX", MX" "MAIN".")
+		add_rr(soa, "MX", MX" "dom".")
+	for (host in HOST)
+		add_rr(host"."MAIN, "MX", MX" "dom".")
 }
 
 END {
