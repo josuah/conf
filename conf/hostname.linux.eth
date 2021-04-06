@@ -5,4 +5,5 @@ ip route flush dev $if
 ip route flush default
 ip address flush dev $if
 ip address add dev $if $ip
+
 ip route add default via %%gw%%

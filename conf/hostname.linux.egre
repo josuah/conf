@@ -1,8 +1,8 @@
-if=${0##*.} n=${if##*[!0-9]} me=%%me%%
+if=${0##*.}
 
 ip link del $if
-ip link add $if type ip6gretap local fe80::$me remote fe80::$n dev wg0 ttl 64
-ip address flush dev $if
-ip address add dev $if 2a03:6000:6f66:602::$me/64
+ip link add $if type ip6gretap local fe80::%%me%% remote fe80::%%peer%% dev wg0 ttl 64
+ip address add dev $if %%prefix%%::$me/64
 ip link set $if up
-ip route add ::/0 via 2a03:6000:6f66:602::1 dev $if
+
+ip route add dev $if ::/0 via %%prefix%%::1
