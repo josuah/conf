@@ -3,7 +3,7 @@
 # general commands
 
 case "$*" in
-("start "*|"stop "*|"enable "*|"disable "*|"status "*|"list")
+("start "*|"stop "*|"restart "*|"enable "*|"disable "*|"status "*|"list")
 	;;
 ("list "*)
 	shift 1

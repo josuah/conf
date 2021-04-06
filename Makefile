@@ -53,9 +53,7 @@ zones: rrdata sshfp
 	cat sshfp >>zones/$$(awk '$$1=="$$MAIN" {print$$2}' rrdata).zone
 
 sshfp: rrdata
-	mkdir -p zones
-	awk '$$3 == "HOST" && !uniq[$$1]++ { print$$1 }' rrdata \
-	 | xargs -n1 ssh-keygen -r >$@
+	ssh-keyscan -D $$(awk '$$3=="HOST" && !uniq[$$1]++ {print$$1}' rrdata) >$@
 
 sign zsk ksk: zones
 	for zone in zones/*.zone; do dnssec $@ "$$zone"; done
