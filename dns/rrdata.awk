@@ -48,7 +48,7 @@ function add_rr(dom, type, val, ttl,
 
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
-		assert(i > 0, "no soa declaration found for "dom)
+		assert(i > 0, "no ZONE declaration found for "dom)
 	} 
 	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
 	ttl = ttl ? ttl : TTL
@@ -64,8 +64,7 @@ function add_ip(dom, host,
 }
 
 BEGIN {
-	TTL = "TTL" in ENVIRON ? ENVIRON["TTL"] : 3600
-	DIR = "DIR" in ENVIRON ? ENVIRON["DIR"] : "."
+	TTL = 3600
 	"date +%s" | getline NOW
 }
 
@@ -73,58 +72,68 @@ BEGIN {
 /^$/ { next }
 { debug(FILENAME": "$0) }
 
-FILENAME == "rr.soa" {
+$1 == "$MAIN" {
+	MAIN = $2
+	next
+}
+
+{ assert($2 == "IN", "second field is always \"IN\"") }
+
+$3 == "ZONE" {
 	assert(!($1 in SOA), "soa declared twice for "$1)
-	if (NR == 1)
-		MAIN = $1
-	SOA[$1] = ","$2","
+	SOA[$1] = ","$4","
 
 	x = "("NOW" "TTL" "TTL" 86400 86400)"
 	add_rr($1, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
+	next
 }
 
-FILENAME == "rr.host" {
+$3 == "HOST" {
 	dom = $1"."MAIN
-	HOST[$1] = HOST[$1] (HOST[$1] ? " " : "") $2
+	HOST[$1] = HOST[$1] (HOST[$1] ? " " : "") $4
 
-	if ($2 ~ /:/) {
-		add_rr(dom, "AAAA", $2)
-		add_rr(ip6_rev($2), "PTR", dom".")
+	if ($4 ~ /:/) {
+		add_rr(dom, "AAAA", $4)
+		add_rr(ip6_rev($4), "PTR", dom".")
 	} else {
-		add_rr(dom, "A", $2)
-		add_rr(ip4_rev($2), "PTR", dom".")
+		add_rr(dom, "A", $4)
+		add_rr(ip4_rev($4), "PTR", dom".")
 	}
+	next
 }
 
-FILENAME == "rr.alias" {
-	add_ip($2, $1)
+$3 == "IP" {
+	add_ip($1, $4)
+	next
 }
 
-FILENAME == "rr.ns" {
+$3 == "DNS" {
 	dom = "ns"++NS"."MAIN
 
 	add_ip(dom, $1)
 	for (soa in SOA)
 		add_rr(soa, "NS", dom".", 86400)
+	next
 }
 
-FILENAME == "rr.mx" {
+$3 == "MAIL" {
 	dom = "mx"++MX"."MAIN
 
 	add_ip(dom, $1)
 	for (soa in SOA)
-		if (index(SOA[soa], ",mx,"))
+		if (index(SOA[soa], ",MX,"))
 			add_rr(soa, "MX", MX" "dom".")
+	next
 }
 
-FILENAME == "rr.data" {
+{
 	dom = $1
-	type = $2
-	sub("^[ \t]*([^ \t]+[ \t]+){2}", "")
+	type = $3
+	sub("^([^ ]+ ){2}", "")
 	add_rr(dom, type, $0)
 }
 
 END {
 	for (soa in SOA)
-		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >(DIR"/"soa)
+		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >("zone/"soa)
 }

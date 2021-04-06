@@ -27,20 +27,19 @@ pack_build() {
 }
 
 pack_install() {
-	trap 'rm -rf "$PREFIX"'
 	make PREFIX="$PREFIX" install
 }
 
 . "recipe/$pack.sh"
 
 export PREFIX="$PWD/build/$pack-$ver"
+trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
 
-mkdir -p -m 755 source
 if [ ! -d "source/$pack-$ver" ]; then
+	mkdir -p -m 755 source
 	(cd source && pack_download)
 fi
 
-trap "rm -rf '$PWD/build/$pack'" INT TERM EXIT HUP
 if [ ! -d "build/$pack-$ver" ]; then
 	mkdir -p -m 755  "build/$pack-$ver"
 	(cd source/$pack-$ver && pack_configure)

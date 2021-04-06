@@ -1,6 +1,4 @@
 PREFIX = /usr/local
-RR = rr.soa rr.host rr.ns rr.mx rr.alias rr.data
-ZONEDIR = /var/nsd/zones/master
 
 SYNC_CONF = shag corax pelios
 SYNC_HOME = root@shag root@corax josuah@corax root@pelios josuah@shag \
@@ -21,12 +19,6 @@ pack:
 	mkdir -p /home/pack
 	ln -s "${PWD}/pack" recipe
 	mv recipe /home/pack
-
-zone: zone/sshfp
-	cd zone && DIR=${ZONEDIR} ${PWD}/bin/zone ${RR}
-	cat zone/sshfp >>${ZONEDIR}/$$(awk 'NR == 1 { print $$1 }' zone/rr.soa)
-zone/sshfp: zone/rr.host
-	awk '!u[$$1]++ { print $$1 }' zone/rr.host | xargs -n1 ssh-keygen -r >$@
 
 sync: ${SYNC_CONF} ${SYNC_HOME}
 
