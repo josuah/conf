@@ -120,7 +120,7 @@ $3 == "MAIL" {
 	add_ip(dom, $4)
 	for (soa in SOA)
 		if (index(SOA[soa], ",MX,"))
-			add_rr(soa, "MX", $1" dom)
+			add_rr(soa, "MX", $1" "dom)
 	next
 }
 
