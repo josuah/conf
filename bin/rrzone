@@ -51,8 +51,7 @@ function add_rr(dom, type, val, ttl,
 		assert(i > 0, "no ZONE declaration found for "dom)
 	} 
 	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
-	ttl = ttl ? ttl : TTL
-	RR[soa] = RR[soa] sprintf("%-32s %-7d IN %-5s %s\n", dom, ttl, type, val)
+	RR[soa] = RR[soa] sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
 }
 
 function add_ip(dom, host,
@@ -64,7 +63,6 @@ function add_ip(dom, host,
 }
 
 BEGIN {
-	TTL = 3600
 	"date +%s" | getline NOW
 }
 
@@ -83,7 +81,7 @@ $3 == "ZONE" {
 	assert(!($1 in SOA), "soa declared twice for "$1)
 	SOA[$1] = ","$4","
 
-	x = "("NOW" "TTL" "TTL" 86400 86400)"
+	x = "("NOW" 3600 600 86400 60)"
 	add_rr($1, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
 	next
 }
@@ -129,11 +127,11 @@ $3 == "MAIL" {
 {
 	dom = $1
 	type = $3
-	sub("^([^ ]+ ){2}", "")
+	sub("^([^ ]+ ){3}", "")
 	add_rr(dom, type, $0)
 }
 
 END {
 	for (soa in SOA)
-		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >("zone/"soa)
+		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >(soa".zone")
 }

@@ -1,6 +1,4 @@
 #!/bin/sh -eu
-export x "$@"
-
 : ${time:=30}
 
 q="

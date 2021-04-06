@@ -1,0 +1,27 @@
+#!/bin/sh -eu
+
+zonefile=$2
+soa=$(awk '$1 == "$ORIGIN" { print $2 }' "$zonefile")
+
+case "$*" in
+("zsk "*)
+	mkdir -p -m 700 "/etc/dnssec/$soa+zsk"
+	cd "/etc/dnssec/$soa+zsk"
+	ldns-keygen -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
+	;;
+("ksk "*)
+	mkdir -p -m 700 "/etc/dnssec/$soa+zsk"
+	cd "/etc/dnssec/$soa+zsk"
+	ldns-keygen -k -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
+	;;
+("sign "*)
+	zsk=/etc/dnssec/$soa+zsk/$(tail -n 1 /etc/dnssec/$soa+zsk/log)
+	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
+	ldns-sign "$zonefile" "$ksk" "$zsk" >$zonefile.signed
+	echo "ksk=${ksk##*/}" "zsk=${zsk##*/}"
+	;;
+(*)
+	echo "usage: ${0##*/} (ksk|zsk|sign) zonefile" >&2
+	exit 1
+	;;
+esac

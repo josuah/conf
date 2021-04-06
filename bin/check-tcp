@@ -1,6 +1,4 @@
 #!/bin/sh -eu
-export x "$@"
-
 : ${timeout:=3}
 
 exec nc -w "$timeout" -vz "$ip" "$port"
