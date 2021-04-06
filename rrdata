@@ -9,7 +9,7 @@ atelier-fu.fr			IN ZONE	MX
 61.77.45.in-addr.arpa		IN ZONE
 2.0.6.0.6.6.f.6.0.0.0.6.3.0.a.2.ip6.arpa IN ZONE
 
-;; hosts to IP binding, creating PTR, A, AAAA entries
+;; hosts definitions, creating PTR, A, AAAA entries
 pelios				IN HOST 31.37.164.83
 pelios				IN HOST 2a03:6000:6f66:602::5
 corax				IN HOST 2a03:6000:6f66:602::3
@@ -17,6 +17,13 @@ shag				IN HOST 46.23.94.12
 shag				IN HOST 2a03:6000:6f66:602::7
 felix				IN HOST 45.77.61.129
 dis-sys-2			IN HOST 2a03:6000:6f66:602::4
+
+;; create MX entries for all domains declared with ZONE MX above
+1				IN MAIL shag
+
+;; create NS entries for all domains declared with ZONE MX above
+1				IN DNS shag
+2				IN DNS pelios
 
 ;; create A, AAAA entries matching IPs of hosts above
 z0.is				IN IP shag
@@ -31,13 +38,6 @@ p9cpu.z0.is			IN IP felix
 log1.z0.is			IN IP corax
 log2.z0.is			IN IP pelios
 log3.z0.is			IN IP dis-sys-2
-
-;; create MX entries for all domains declared with ZONE MX above
-shag				IN MAIL
-
-;; create NS entries for all domains declared with ZONE MX above
-shag				IN DNS
-pelios				IN DNS
 
 ;; regular zone entries for special cases
 josuah.net			IN TXT v=spf1 mx -all

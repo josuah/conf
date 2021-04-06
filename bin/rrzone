@@ -68,7 +68,7 @@ BEGIN {
 
 { gsub("[ \t]+", " "); sub(";.*", ""); sub("^ ", ""); sub(" $", "") }
 /^$/ { next }
-{ debug(FILENAME": "$0) }
+{ debug($0) }
 
 $1 == "$MAIN" {
 	MAIN = $2
@@ -106,21 +106,21 @@ $3 == "IP" {
 }
 
 $3 == "DNS" {
-	dom = "ns"++NS"."MAIN
+	dom = "ns"$1"."MAIN
 
-	add_ip(dom, $1)
+	add_ip(dom, $4)
 	for (soa in SOA)
-		add_rr(soa, "NS", dom".", 86400)
+		add_rr(soa, "NS", "ns"$1"."MAIN".", 86400)
 	next
 }
 
 $3 == "MAIL" {
-	dom = "mx"++MX"."MAIN
+	dom = "mx"$1"."MAIN
 
-	add_ip(dom, $1)
+	add_ip(dom, $4)
 	for (soa in SOA)
 		if (index(SOA[soa], ",MX,"))
-			add_rr(soa, "MX", MX" "dom".")
+			add_rr(soa, "MX", $1" dom)
 	next
 }
 

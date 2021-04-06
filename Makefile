@@ -54,7 +54,7 @@ sshfp: rrdata
 sign zsk ksk: zone
 	for zone in zone/*.zone; do dnssec $@ "$$zone"; done
 
-clear:
+clean:
 	rm -f zone/*
 
 .PHONY: home zone pack
