@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 
-zonefile=$2
-soa=$(awk '$1 == "$ORIGIN" { print $2 }' "$zonefile")
+zone=$2
+soa=$(awk '$1 == "$ORIGIN" { sub(/\.$/,"", $2); print $2 }' "$zone")
 
 case "$*" in
 ("zsk "*)
@@ -10,14 +10,15 @@ case "$*" in
 	ldns-keygen -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
 	;;
 ("ksk "*)
-	mkdir -p -m 700 "/etc/dnssec/$soa+zsk"
-	cd "/etc/dnssec/$soa+zsk"
+	mkdir -p -m 700 "/etc/dnssec/$soa+ksk"
+	cd "/etc/dnssec/$soa+ksk"
 	ldns-keygen -k -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
 	;;
 ("sign "*)
 	zsk=/etc/dnssec/$soa+zsk/$(tail -n 1 /etc/dnssec/$soa+zsk/log)
 	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
-	ldns-sign "$zonefile" "$ksk" "$zsk" >$zonefile.signed
+	salt=$(openssl rand -hex 64)
+	ldns-signzone -n -s "$salt" "$zone" "$ksk" "$zsk" >$zone.signed
 	echo "ksk=${ksk##*/}" "zsk=${zsk##*/}"
 	;;
 (*)
