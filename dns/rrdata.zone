@@ -1,5 +1,6 @@
 $MAIN z0.is
 
+;; zone files collecting entries below
 z0.is				IN ZONE	MX
 josuah.net			IN ZONE	MX
 atelier-fu.fr			IN ZONE	MX
@@ -8,6 +9,7 @@ atelier-fu.fr			IN ZONE	MX
 61.77.45.in-addr.arpa		IN ZONE
 2.0.6.0.6.6.f.6.0.0.0.6.3.0.a.2.ip6.arpa IN ZONE
 
+;; hosts to IP binding, creating PTR, A, AAAA entries
 pelios				IN HOST 31.37.164.83
 pelios				IN HOST 2a03:6000:6f66:602::5
 corax				IN HOST 2a03:6000:6f66:602::3
@@ -16,6 +18,7 @@ shag				IN HOST 2a03:6000:6f66:602::7
 felix				IN HOST 45.77.61.129
 dis-sys-2			IN HOST 2a03:6000:6f66:602::4
 
+;; create A, AAAA entries matching IPs of hosts above
 z0.is				IN IP shag
 josuah.net			IN IP shag
 www.josuah.net			IN IP shag
@@ -29,17 +32,18 @@ log1.z0.is			IN IP corax
 log2.z0.is			IN IP pelios
 log3.z0.is			IN IP dis-sys-2
 
+;; create MX entries for all domains declared with ZONE MX above
 shag				IN MAIL
 
+;; create NS entries for all domains declared with ZONE MX above
 shag				IN DNS
 pelios				IN DNS
 
+;; regular zone entries for special cases
 josuah.net			IN TXT v=spf1 mx -all
 z0.is				IN TXT v=spf1 mx -all
 atelier-fu.fr			IN TXT v=spf1 mx -all
-
 _sip._tcp.z0.is			IN SRV 1 1 5060 sip.z0.is.
 _sip._tcp.josuah.net		IN SRV 1 1 5060 sip.z0.is.
-
 atelier-fu.fr			IN MX 1 spool.mail.gandi.net.
 atelier-fu.fr			IN MX 2 fb.mail.gandi.net.

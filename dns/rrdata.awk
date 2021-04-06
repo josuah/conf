@@ -68,7 +68,7 @@ BEGIN {
 	"date +%s" | getline NOW
 }
 
-{ gsub("[ \t]+", " "); sub("#.*", ""); sub("^ ", ""); sub(" $", "") }
+{ gsub("[ \t]+", " "); sub(";.*", ""); sub("^ ", ""); sub(" $", "") }
 /^$/ { next }
 { debug(FILENAME": "$0) }
 
