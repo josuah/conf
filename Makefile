@@ -3,6 +3,7 @@ SYNC_CONF = shag corax pelios
 SYNC_HOME = root@shag root@corax josuah@corax root@pelios josuah@shag \
   josuah@bitreich.org josuah@server10.openbsd.amsterdam
 CONF_BASE = hosts syslog.conf crontab profile
+
 CONF_DNS = nsd/nsd.conf
 CONF_HTTP = httpd.conf
 CONF_MAIL = mail/smtpd.conf
@@ -61,4 +62,4 @@ sign zsk ksk: zones
 clean:
 	rm -f zones/*
 
-.PHONY: home zones pack
+.PHONY: home zones pack wire

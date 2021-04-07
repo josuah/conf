@@ -1,4 +1,4 @@
 [Peer]
 PublicKey = 35IR2Nm2o6GswyEt/g8uZQJPwgo5L1PsLGxjXNKfJD8=
 AllowedIPs = fe80::5/128
-Endpoint = pelios.z0.is
+Endpoint = 31.37.164.83:51820
