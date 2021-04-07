@@ -44,7 +44,7 @@ function ip4_rev(ip4)
 function add_rr(dom, type, val, ttl,
 	i, soa, rr)
 {
-	debug("add "dom" "type" "val)
+	debug("+ "dom" "type" "val)
 
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
@@ -68,7 +68,7 @@ BEGIN {
 
 { gsub("[ \t]+", " "); sub(";.*", ""); sub("^ ", ""); sub(" $", "") }
 /^$/ { next }
-{ debug($0) }
+{ debug(""); debug($0) }
 
 $1 == "$MAIN" {
 	MAIN = $2
@@ -106,21 +106,26 @@ $3 == "IP" {
 }
 
 $3 == "DNS" {
-	dom = "ns"$1"."MAIN
+	dom = $1"."MAIN
 
 	add_ip(dom, $4)
 	for (soa in SOA)
-		add_rr(soa, "NS", "ns"$1"."MAIN".", 86400)
+		add_rr(soa, "NS", dom".", 86400)
 	next
 }
 
 $3 == "MAIL" {
-	dom = "mx"$1"."MAIN
+	dom = $1"."MAIN
 
 	add_ip(dom, $4)
 	for (soa in SOA)
 		if (index(SOA[soa], ",MX,"))
-			add_rr(soa, "MX", $1" "dom)
+			add_rr(soa, "MX", $1" "dom".")
+	next
+}
+
+$3 == "REV" {
+	add_rr(ip6_rev($1), "PTR", $4)
 	next
 }
 

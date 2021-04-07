@@ -9,6 +9,13 @@ atelier-fu.fr			IN ZONE	MX
 61.77.45.in-addr.arpa		IN ZONE
 2.0.6.0.6.6.f.6.0.0.0.6.3.0.a.2.ip6.arpa IN ZONE
 
+8.e.0.1.3.e.0.1.2.4.d.f.ip6.arpa IN ZONE
+
+fd42:10e3:10e8::		IN REV hakyoku.net.z0.dn42.
+fd42:10e3:10e8:0025::		IN REV mx.net.z0.dn42.
+fd42:10e3:10e8:0053::		IN REV ns.net.z0.dn42.
+fd42:10e3:10e8:0123::		IN REV ntp.net.z0.dn42.
+
 ;; hosts definitions, creating PTR, A, AAAA entries
 pelios				IN HOST 31.37.164.83
 pelios				IN HOST 2a03:6000:6f66:602::5
