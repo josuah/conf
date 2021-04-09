@@ -31,11 +31,11 @@ fd42:10e3:10e8:0123::		IN REV ntp.net.z0.dn42.
 45.77.61.129			IN HOST	felix
 
 ;; create MX entries for all domains declared with ZONE MX above
-mx1				IN MAIL shag
+1				IN MAIL shag
 
 ;; create NS entries for all domains declared with ZONE MX above
-ns1				IN DNS shag
-ns2				IN DNS pelios
+1				IN DNS shag
+2				IN DNS pelios
 
 ;; create A, AAAA entries matching IPs of hosts above
 z0.is				IN IP shag

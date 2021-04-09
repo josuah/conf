@@ -110,7 +110,7 @@ $3 == "IP" {
 }
 
 $3 == "DNS" {
-	dom = $1"."MAIN
+	dom = "ns"$1"."MAIN
 
 	add_ip(dom, $4)
 	for (soa in SOA)
@@ -119,7 +119,7 @@ $3 == "DNS" {
 }
 
 $3 == "MAIL" {
-	dom = $1"."MAIN
+	dom = "mx"$1"."MAIN
 
 	add_ip(dom, $4)
 	for (soa in SOA)
