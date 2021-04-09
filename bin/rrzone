@@ -48,7 +48,7 @@ function add_rr(dom, type, val, ttl,
 
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
-		assert(i > 0, "no ZONE declaration found for "dom)
+		assert(i > 0, "no SOA found for "dom)
 	} 
 	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
 	RR[soa] = RR[soa] sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
@@ -60,6 +60,14 @@ function add_ip(dom, host,
 	assert(host in HOST, "no host declaration found for "host)
 	for (i = split(HOST[host], ip); i > 0; i--)
 		add_rr(dom, ip[i] ~ /:/ ? "AAAA" : "A", ip[i])
+}
+
+function add_soa(dom, flags)
+{
+	assert(!(dom in SOA), "SOA declared twice for "dom)
+	SOA[dom] = flags
+	x = "("NOW" 3600 600 86400 60)"
+	add_rr(dom, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
 }
 
 BEGIN {
@@ -78,24 +86,20 @@ $1 == "$MAIN" {
 { assert($2 == "IN", "second field is always \"IN\"") }
 
 $3 == "ZONE" {
-	assert(!($1 in SOA), "soa declared twice for "$1)
-	SOA[$1] = ","$4","
-
-	x = "("NOW" 3600 600 86400 60)"
-	add_rr($1, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
+	add_soa($1, $4)
 	next
 }
 
 $3 == "HOST" {
-	dom = $1"."MAIN
-	HOST[$1] = HOST[$1] (HOST[$1] ? " " : "") $4
+	dom = $4"."MAIN
+	HOST[$4] = HOST[$1] (HOST[$1] ? " " : "") $1
 
-	if ($4 ~ /:/) {
-		add_rr(dom, "AAAA", $4)
-		add_rr(ip6_rev($4), "PTR", dom".")
+	if ($1 ~ /:/) {
+		add_rr(dom, "AAAA", $1)
+		add_rr(ip6_rev($1), "PTR", dom".")
 	} else {
-		add_rr(dom, "A", $4)
-		add_rr(ip4_rev($4), "PTR", dom".")
+		add_rr(dom, "A", $1)
+		add_rr(ip4_rev($1), "PTR", dom".")
 	}
 	next
 }
@@ -119,13 +123,28 @@ $3 == "MAIL" {
 
 	add_ip(dom, $4)
 	for (soa in SOA)
-		if (index(SOA[soa], ",MX,"))
+		if (index(","SOA[soa]",", ",MX,"))
 			add_rr(soa, "MX", $1" "dom".")
 	next
 }
 
 $3 == "REV" {
 	add_rr(ip6_rev($1), "PTR", $4)
+	next
+}
+
+$3 == "ARPA" {
+	split(tolower($1), net, "/")
+	if ($1 ~ /:/) {
+		dom = ip6_rev(net[1])
+		skip = (128 - net[2]) / 4
+	} else {
+		dom = ip4_rev(net[1])
+		skip = (32 - net[2]) / 8
+	}
+	sub("^([0-9a-f]+\\.){"skip"}", "", dom)
+	print dom
+	add_soa(dom)
 	next
 }
 

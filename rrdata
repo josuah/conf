@@ -2,35 +2,40 @@ $MAIN z0.is
 
 ;; zone files collecting entries below
 z0.is				IN ZONE	MX
+z0.dn42				IN ZONE MX
 josuah.net			IN ZONE	MX
 atelier-fu.fr			IN ZONE	MX
-164.37.31.in-addr.arpa		IN ZONE
-94.23.46.in-addr.arpa		IN ZONE
-61.77.45.in-addr.arpa		IN ZONE
-2.0.6.0.6.6.f.6.0.0.0.6.3.0.a.2.ip6.arpa IN ZONE
 
-8.e.0.1.3.e.0.1.2.4.d.f.ip6.arpa IN ZONE
-
+;; DN42
+fd42:10e3:10e8::/48		IN ARPA
 fd42:10e3:10e8::		IN REV hakyoku.net.z0.dn42.
 fd42:10e3:10e8:0025::		IN REV mx.net.z0.dn42.
 fd42:10e3:10e8:0053::		IN REV ns.net.z0.dn42.
 fd42:10e3:10e8:0123::		IN REV ntp.net.z0.dn42.
 
-;; hosts definitions, creating PTR, A, AAAA entries
-pelios				IN HOST 31.37.164.83
-pelios				IN HOST 2a03:6000:6f66:602::5
-corax				IN HOST 2a03:6000:6f66:602::3
-shag				IN HOST 46.23.94.12
-shag				IN HOST 2a03:6000:6f66:602::7
-felix				IN HOST 45.77.61.129
-dis-sys-2			IN HOST 2a03:6000:6f66:602::4
+;; OBSD-AMS
+2a03:6000:6f66:602::/64		IN ARPA
+2a03:6000:6f66:602::3		IN HOST corax
+2a03:6000:6f66:602::4		IN HOST dis-sys-2
+2a03:6000:6f66:602::5		IN HOST pelios
+2a03:6000:6f66:602::7		IN HOST shag
+46.23.94.12			IN ARPA
+46.23.94.12			IN HOST shag
+
+;; BOUYGUES
+31.37.164.83/32			IN ARPA
+31.37.164.83			IN HOST pelios
+
+;; VULTR
+45.77.61.129/32			IN ARPA
+45.77.61.129			IN HOST	felix
 
 ;; create MX entries for all domains declared with ZONE MX above
-1				IN MAIL shag
+mx1				IN MAIL shag
 
 ;; create NS entries for all domains declared with ZONE MX above
-1				IN DNS shag
-2				IN DNS pelios
+ns1				IN DNS shag
+ns2				IN DNS pelios
 
 ;; create A, AAAA entries matching IPs of hosts above
 z0.is				IN IP shag
