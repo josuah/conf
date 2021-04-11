@@ -15,18 +15,32 @@ function debug(msg)
 		print(msg) >"/dev/stderr"
 }
 
-function ip6_hex(ip6,
+
+function ip6_hex(ip,
 	hex, i, arr)
 {
-	sub("::", substr("::::::::", split(ip6, arr, ":") - 1), ip6)
-	split(ip6, arr, ":")
+	sub("::", substr("::::::::", split(ip, arr, ":") - 1), ip)
+	split(ip, arr, ":")
 	for (i = 1; i <= 8; i++)
 		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
 	return hex
 }
 
+function ip4_hex(ip,
+	arr)
+{
+	split(ip, arr, ".")
+	return sprintf("000000000000000000000000%02x%02x%02x%02x",
+	  arr[1], arr[2], arr[3], arr[4])
+}
+
+function ip_hex(ip)
+{
+	return ip ~ /:/ ? ip6_hex(ip) : ip4_hex(ip)
+}
+
 function ip6_rev(ip6,
-	out)
+	i, out)
 {
 	ip6 = ip6_hex(ip6)
 	for (i = 4 * 8; i > 0; i--)
@@ -41,15 +55,43 @@ function ip4_rev(ip4)
 	 arr[4], arr[3], arr[2], arr[1])
 }
 
-function add_rr(dom, type, val, ttl,
-	i, soa, rr)
+function ip_match(ip, net, len)
 {
-	debug("+ "dom" "type" "val)
+	len = (len + (net !~ /:/) * 96) / 4
+	return substr(ip_hex(ip), 1, len) == substr(ip_hex(net), 1, len)
+}
 
+function ip_soa(ip,
+	x, i, net, max, dom)
+{
+	for (x in NET) {
+		i = split(x, net, "/")
+		assert(i == 2, "invalid network name: "x)
+		if (ip_match(ip, net[1], net[2]) && net[2] > max) {
+			dom = NET[x]
+			max = net[2]
+		}
+	}
+	assert(dom, "no NET entry found matching "ip)
+	return dom
+}
+
+function dom_soa(dom,
+	soa, i)
+{
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
 		assert(i > 0, "no SOA found for "dom)
-	} 
+	}
+	return soa
+}
+
+function add_rr(dom, type, val, ttl,
+	soa, rr)
+{
+	debug("+ "dom" "type" "val)
+
+	soa = dom_soa(dom)
 	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
 	RR[soa] = RR[soa] sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
 }
@@ -58,16 +100,17 @@ function add_ip(dom, host,
 	ip, i)
 {
 	assert(host in HOST, "no host declaration found for "host)
-	for (i = split(HOST[host], ip); i > 0; i--)
-		add_rr(dom, ip[i] ~ /:/ ? "AAAA" : "A", ip[i])
+	for (i = split(HOST[host], ip); i > 0; i--) {
+		if (ip_soa(ip[i]) == SOA[dom_soa(dom)] && !IP[dom" "ip[i]]++)
+			add_rr(dom, ip[i] ~ /:/ ? "AAAA" : "A", ip[i])
 }
 
-function add_soa(dom, flags)
+function add_soa(dom, main)
 {
 	assert(!(dom in SOA), "SOA declared twice for "dom)
-	SOA[dom] = flags
+	SOA[dom] = main
 	x = "("NOW" 3600 600 86400 60)"
-	add_rr(dom, "SOA", "ns1."MAIN". postmaster."MAIN". "x, 86400)
+	add_rr(dom, "SOA", "ns1."main". postmaster."main". "x, 86400)
 }
 
 BEGIN {
@@ -77,22 +120,32 @@ BEGIN {
 { gsub("[ \t]+", " "); sub(";.*", ""); sub("^ ", ""); sub(" $", "") }
 /^$/ { next }
 { debug(""); debug($0) }
-
-$1 == "$MAIN" {
-	MAIN = $2
-	next
-}
-
 { assert($2 == "IN", "second field is always \"IN\"") }
 
 $3 == "ZONE" {
-	add_soa($1, $4)
+	FEATURES[$1] = $4
+	add_soa($1, $5)
+	next
+}
+
+$3 == "NET" {
+	NET[$1] = $4
+	split(tolower($1), net, "/")
+	if ($1 ~ /:/) {
+		dom = ip6_rev(net[1])
+		skip = (128 - net[2]) / 4
+	} else {
+		dom = ip4_rev(net[1])
+		skip = (32 - net[2]) / 8
+	}
+	sub("^([0-9a-f]+\\.){"skip"}", "", dom)
+	add_soa(dom, $4)
 	next
 }
 
 $3 == "HOST" {
-	dom = $4"."MAIN
-	HOST[$4] = HOST[$1] (HOST[$1] ? " " : "") $1
+	dom = $4"."ip_soa($1)
+	HOST[$4] = HOST[$4] (HOST[$4] ? " " : "") $1
 
 	if ($1 ~ /:/) {
 		add_rr(dom, "AAAA", $1)
@@ -110,41 +163,29 @@ $3 == "IP" {
 }
 
 $3 == "DNS" {
-	dom = "ns"$1"."MAIN
-
-	add_ip(dom, $4)
-	for (soa in SOA)
+	for (soa in SOA) {
+		dom = $1"."SOA[soa]
+		add_ip(dom, $4)
 		add_rr(soa, "NS", dom".", 86400)
+	}
 	next
 }
 
 $3 == "MAIL" {
-	dom = "mx"$1"."MAIN
+	MX++
 
-	add_ip(dom, $4)
-	for (soa in SOA)
-		if (index(","SOA[soa]",", ",MX,"))
-			add_rr(soa, "MX", $1" "dom".")
+	for (soa in SOA) {
+		if (!index(","FEATURES[soa]",", ",MX,"))
+			continue
+		dom = $1"."SOA[soa]
+		add_ip(dom, $4)
+		add_rr(soa, "MX", MX" "dom".")
+	}
 	next
 }
 
 $3 == "REV" {
 	add_rr(ip6_rev($1), "PTR", $4)
-	next
-}
-
-$3 == "ARPA" {
-	split(tolower($1), net, "/")
-	if ($1 ~ /:/) {
-		dom = ip6_rev(net[1])
-		skip = (128 - net[2]) / 4
-	} else {
-		dom = ip4_rev(net[1])
-		skip = (32 - net[2]) / 8
-	}
-	sub("^([0-9a-f]+\\.){"skip"}", "", dom)
-	print dom
-	add_soa(dom)
 	next
 }
 

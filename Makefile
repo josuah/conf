@@ -1,7 +1,7 @@
 PREFIX = /usr/local
-SYNC_CONF = shag corax pelios
+SYNC_CONF = shag corax pelios laptop-p-g
 SYNC_HOME = root@shag root@corax josuah@corax root@pelios josuah@shag \
-  josuah@bitreich.org josuah@server10.openbsd.amsterdam
+  josuah@bitreich.org josuah@server10.openbsd.amsterdam root@laptop-p-g
 CONF_BASE = hosts syslog.conf crontab profile
 
 CONF_DNS = nsd/nsd.conf
