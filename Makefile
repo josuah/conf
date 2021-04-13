@@ -10,24 +10,26 @@ CONF_MAIL = mail/smtpd.conf
 CONF_MONIT = monitower.conf
 CONF_TLS = relayd.conf
 
+ZONE_MAIN = z0.is z0.dn42
+
 all: home pack base
 
 home:
-	cp -r home/.??* ${HOME}
+	exec cp -r home/.??* ${HOME}
 
 pack:
-	mkdir -p /home/pack
-	ln -s "${PWD}/pack" recipe
-	mv recipe /home/pack
+	exec mkdir -p /home/pack
+	exec ln -s "${PWD}/pack" recipe
+	exec mv recipe /home/pack
 
 base: ${CONF_BASE}
-	mkdir -p ${PREFIX}/bin
-	ln -sf ${PWD}/bin/* ${PREFIX}/bin
+	exec mkdir -p ${PREFIX}/bin
+	exec ln -sf ${PWD}/bin/* ${PREFIX}/bin
 
 dns: ${CONF_DNS}
-	rm -rf /var/nsd/zones
-	mkdir -p /var/nsd
-	cp -r zones /var/nsd
+	exec rm -rf /var/nsd/zones
+	exec mkdir -p /var/nsd
+	exec cp -r zones /var/nsd/zones
 
 http: ${CONF_HTTP}
 
@@ -38,29 +40,33 @@ monit: ${CONF_MONIT}
 tls: ${CONF_TLS}
 
 ${CONF_BASE} ${CONF_DNS} ${CONF_HTTP} ${CONF_MAIL} ${CONF_MONIT} ${CONF_TLS}:
-	bin/template conf/$@ >/etc/$@
+	exec bin/template conf/$@ >/etc/$@
 
 sync: ${SYNC_CONF} ${SYNC_HOME}
 
 ${SYNC_CONF}:
-	rsync -vr --delete * $@:${PWD}
+	exec rsync -vr --delete * $@:${PWD}
 
 ${SYNC_HOME}:
-	rsync -vr home/ $@:./
+	exec rsync -vr home/ $@:./
 
-zones: rrdata sshfp
-	mkdir -p zones
-	cd zones && rrzone ${PWD}/rrdata
-	cat sshfp >>zones/$$(awk '$$1=="$$MAIN" {print$$2}' rrdata).zone
+zone: ${ZONE_MAIN} ${ZONE_EXTRA}
 
-sshfp: rrdata
-	ssh-keyscan -D $$(awk '$$3=="HOST" && !uniq[$$4]++ {print$$4}' rrdata) \
+zone/out:
+	exec mkdir -p zone/out
+
+zone: zone/out zone/sshfp.zone
+	cd zone && nsdom=$@ template %head.zone | zone $@.zone >out/$@.zone
+	cd zone && exec cat sshfp.zone >>out/$@.zone
+
+zone/sshfp.zone:
+	ssh-keyscan -D $$(awk '$$3=="A"||$$3=="AAAA" && !uniq[$$4]++ {print$$4}' zones/*.zone) \
 	 | sort -u -o $@
 
 sign zsk ksk: zones
 	for zone in zones/*.zone; do dnssec $@ "$$zone"; done
 
 clean:
-	rm -f zones/*
+	exec rm -f zone/out/*
 
 .PHONY: home zones pack wire

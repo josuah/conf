@@ -15,7 +15,6 @@ function debug(msg)
 		print(msg) >"/dev/stderr"
 }
 
-
 function ip6_hex(ip,
 	hex, i, arr)
 {
@@ -86,31 +85,48 @@ function dom_soa(dom,
 	return soa
 }
 
-function add_rr(dom, type, val, ttl,
+}
+
+function rr(dom, type, val, ttl,
+	soa, i, host, v1, v2)
+{
+	if (match(val, "@[-0-9a-z]+")) {
+		host = substr(val, RRSTART+1, RRLENGTH-1)
+		v1 = substr(val, 1, RRSTART)
+		v2 = substr(val, RRSTART+RRLENGTH+1)
+		assert(host in HOST, "no host found for @"host)
+		for (i = split(HOST[host], ip); i > 0; i--)
+			rr_expand_dom(dom, type, v1 ip[i] v2, ttl)
+	} else {
+		rr_expand_dom(dom, type, val, ttl)
+	}
+}
+
+function rr_expand_dom(dom, type, val, ttl)
+{
+	if (i = index(dom, "@")) {
+	} else {
+		rr_raw(dom, type, val, ttl)
+	}
+}
+
+function rr_raw(dom, type, val, ttl,
 	soa, rr)
 {
 	debug("+ "dom" "type" "val)
 
 	soa = dom_soa(dom)
-	dom = soa == dom ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
-	RR[soa] = RR[soa] sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
+	dom = (soa == dom) ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
+	rr = sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
+	RR[soa] = RR[soa] rr
 }
 
-function add_ip(dom, host,
-	ip, i)
-{
-	assert(host in HOST, "no host declaration found for "host)
-	for (i = split(HOST[host], ip); i > 0; i--) {
-		if (ip_soa(ip[i]) == SOA[dom_soa(dom)] && !IP[dom" "ip[i]]++)
-			add_rr(dom, ip[i] ~ /:/ ? "AAAA" : "A", ip[i])
-}
-
-function add_soa(dom, main)
+function rr_soa(dom, main)
 {
 	assert(!(dom in SOA), "SOA declared twice for "dom)
 	SOA[dom] = main
 	x = "("NOW" 3600 600 86400 60)"
-	add_rr(dom, "SOA", "ns1."main". postmaster."main". "x, 86400)
+	rr(dom, "SOA", "ns1."main". postmaster."main". "x, 86400)
 }
 
 BEGIN {
@@ -122,24 +138,24 @@ BEGIN {
 { debug(""); debug($0) }
 { assert($2 == "IN", "second field is always \"IN\"") }
 
-$3 == "ZONE" {
-	FEATURES[$1] = $4
-	add_soa($1, $5)
-	next
-}
-
 $3 == "NET" {
-	NET[$1] = $4
+	NET[$1] = $5
 	split(tolower($1), net, "/")
 	if ($1 ~ /:/) {
-		dom = ip6_rev(net[1])
+		$5 = ip6_rev(net[1])
 		skip = (128 - net[2]) / 4
 	} else {
-		dom = ip4_rev(net[1])
+		$5 = ip4_rev(net[1])
 		skip = (32 - net[2]) / 8
 	}
-	sub("^([0-9a-f]+\\.){"skip"}", "", dom)
-	add_soa(dom, $4)
+	sub("^([0-9a-f]+\\.){"skip"}", "", $5)
+	$3 = "ZONE"
+	$4 = ":NS:"
+}
+
+$3 == "ZONE" {
+	FEATURES[$1] = $4
+	rr_soa($1, $5)
 	next
 }
 
@@ -148,44 +164,12 @@ $3 == "HOST" {
 	HOST[$4] = HOST[$4] (HOST[$4] ? " " : "") $1
 
 	if ($1 ~ /:/) {
-		add_rr(dom, "AAAA", $1)
-		add_rr(ip6_rev($1), "PTR", dom".")
+		rr(dom, "AAAA", $1)
+		rr(ip6_rev($1), "PTR", dom".")
 	} else {
-		add_rr(dom, "A", $1)
-		add_rr(ip4_rev($1), "PTR", dom".")
+		rr(dom, "A", $1)
+		rr(ip4_rev($1), "PTR", dom".")
 	}
-	next
-}
-
-$3 == "IP" {
-	add_ip($1, $4)
-	next
-}
-
-$3 == "DNS" {
-	for (soa in SOA) {
-		dom = $1"."SOA[soa]
-		add_ip(dom, $4)
-		add_rr(soa, "NS", dom".", 86400)
-	}
-	next
-}
-
-$3 == "MAIL" {
-	MX++
-
-	for (soa in SOA) {
-		if (!index(","FEATURES[soa]",", ",MX,"))
-			continue
-		dom = $1"."SOA[soa]
-		add_ip(dom, $4)
-		add_rr(soa, "MX", MX" "dom".")
-	}
-	next
-}
-
-$3 == "REV" {
-	add_rr(ip6_rev($1), "PTR", $4)
 	next
 }
 
@@ -193,7 +177,7 @@ $3 == "REV" {
 	dom = $1
 	type = $3
 	sub("^([^ ]+ ){3}", "")
-	add_rr(dom, type, $0)
+	rr(dom, type, $0)
 }
 
 END {

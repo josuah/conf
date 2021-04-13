@@ -1,6 +1,6 @@
-inet6 fe80::%%me%%
-inet6 alias %%net%%::%%me%%/64
-tunnel fe80::%%me%%%wg0 fe80::%%peer%%%wg0
+inet6 fe80::{{me}}
+inet6 alias {{net}}::{{me}}/64
+tunnel fe80::{{me}}%wg0 fe80::{{peer}}%wg0
 up
 
-!route add ::/0 %%net%%::1
+!route add ::/0 {{net}}::1

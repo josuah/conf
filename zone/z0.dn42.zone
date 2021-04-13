@@ -1,0 +1,13 @@
+@				IN MX	1 mx1.z0.dn42.
+
+@				IN NET	fd42:10e3:10e8::/48
+
+ns1				IN AAAA	fd42:10e3:10e8:53::1
+ns2				IN AAAA	fd42:10e3:10e8:53::2
+mx1				IN AAAA	fd42:10e3:10e8:25::1
+
+pelios				IN AAAA	fd42:10e3:10e8::5
+corax				IN AAAA	fd42:10e3:10e8::3
+shag				IN AAAA	fd42:10e3:10e8::7
+
+@				IN IP	pelios
