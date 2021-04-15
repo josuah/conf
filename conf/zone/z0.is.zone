@@ -1,5 +1,5 @@
-%% zone=${file##*/} zone=${zone%.zone}
-%% template "${file%/*}/%head.zone"
+%% zone=z0.is nsdom=z0.is template "$dirname/%head.zone"
+
 @				IN MX	1 mx1.z0.is
 @				IN TXT	v=spf1 mx -all
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
@@ -17,13 +17,13 @@ shag				IN AAAA	2a03:6000:6f66:602::7
 shag				IN A	46.23.94.12
 felix				IN A	45.77.61.129
 
-mx1				IN IP	shag
-ns1				IN IP	shag
-ns2				IN IP	shag
-@				IN IP	shag
-git				IN IP	shag
-xen1				IN IP	shag
-p9auth				IN IP	felix
-log1				IN IP	corax
-log2				IN IP	felix
-log3				IN IP	pelios
+mx1				IN ALIAS shag.z0.is.
+ns1				IN ALIAS shag.z0.is.
+ns2				IN ALIAS shag.z0.is.
+@				IN ALIAS shag.z0.is.
+git				IN ALIAS shag.z0.is.
+xen1				IN ALIAS shag.z0.is.
+p9auth				IN ALIAS felix.z0.is.
+log1				IN ALIAS corax.z0.is.
+log2				IN ALIAS felix.z0.is.
+log3				IN ALIAS pelios.z0.is.

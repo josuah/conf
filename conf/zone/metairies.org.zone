@@ -1,0 +1,8 @@
+%% zone=metairies.org nsdom=z0.is template "$dirname/%head.zone"
+
+@				IN MX	1 spool.mail.gandi.net.
+@				IN MX	2 fb.mail.gandi.net.
+@				IN TXT	v=spf1 mx -all
+
+@				IN ALIAS shag.z0.is.
+www				IN ALIAS shag.z0.is.

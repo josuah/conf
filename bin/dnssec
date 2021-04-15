@@ -21,6 +21,10 @@ case "$*" in
 	ldns-signzone -n -s "$salt" "$zone" "$ksk" "$zsk" >$zone.signed
 	echo "ksk=${ksk##*/}" "zsk=${zsk##*/}"
 	;;
+("sshfp "*)
+	awk '/[ \t](A|AAAA)[ \t]/ && !uniq[$1]++ { print $1 }' "$zone" \
+	 | sort | xargs ssh-keyscan -D
+	;;
 (*)
 	echo "usage: ${0##*/} (ksk|zsk|sign) zonefile" >&2
 	exit 1

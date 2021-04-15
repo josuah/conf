@@ -1,23 +1,9 @@
 #!/usr/bin/awk -f
 
-function esctxt(txt)
-{
-	gsub(/'/, "'\''", txt)
-	return txt
-}
-
-function escvar(var)
-{
-	sub(/.*/, "'\"$&\"'", var)
-	return var
-}
-
 function shell(cmd)
 {
-	if("DEBUG" in ENVIRON)
-		printf("%s", cmd)
-	else
-		printf("%s", cmd) | "exec sh -eu"
+	if ("DEBUG" in ENVIRON) printf("%s", cmd)
+	else printf("%s", cmd) | "exec sh -eu"
 }
 
 function enter(to, was)
@@ -30,25 +16,26 @@ function enter(to, was)
 NR == 1 {
 	enter("code")
 	shell("file='"FILENAME"'\n")
+	shell("dirname=$(dirname \"$file\")\n")
 	shell("date=$(date +%Y-%m-%d)\n")
 	shell("now=$(date +%s)\n")
 }
 
 {
-	if(sub(/^%% ?/, "")){
-		if(enter("code")) shell("'\n")
-	}else{
-		$0 = esctxt($0)
-		if(enter("text")) shell("echo -n '")
+	if (sub(/^%% ?/, "")) {
+		if (enter("code")) shell("'\n")
+	} else {
+		gsub(/'/, "'\''")
+		if (enter("text")) shell("echo -n '")
 	}
-	while(match($0, /{{[-_0-9a-zA-Z]+}}/)){
+	while (match($0, /\{\{[_0-9a-zA-Z]+\}\}/)) {
 		shell(substr($0, 1, RSTART-1))
-		shell(escvar(substr($0, RSTART+2, RLENGTH-4)))
+		shell("'\"$"substr($0, RSTART+2, RLENGTH-2-2)"\"'")
 		$0 = substr($0, RSTART + RLENGTH)
 	}
 	shell($0"\n")
 }
 
 END {
-	if(enter("code")) shell("'\n")
+	if (enter("code")) shell("'\n")
 }

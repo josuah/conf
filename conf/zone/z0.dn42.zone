@@ -1,3 +1,5 @@
+%% zone=z0.dn42 nsdom=z0.dn42 template "$dirname/%head.zone"
+
 @				IN MX	1 mx1.z0.dn42.
 
 @				IN NET	fd42:10e3:10e8::/48
@@ -10,4 +12,4 @@ pelios				IN AAAA	fd42:10e3:10e8::5
 corax				IN AAAA	fd42:10e3:10e8::3
 shag				IN AAAA	fd42:10e3:10e8::7
 
-@				IN IP	pelios
+@				IN ALIAS pelios.z0.dn42.

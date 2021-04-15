@@ -9,178 +9,137 @@ function assert(expr, msg)
 	}
 }
 
-function debug(msg)
+function env(key)
 {
-	if ("DEBUG" in ENVIRON)
-		print(msg) >"/dev/stderr"
+	assert(key in ENVIRON, "missing-env '"key"'")
+	return ENVIRON[key]
 }
 
 function ip6_hex(ip,
-	hex, i, arr)
+	hex, i, ar)
 {
-	sub("::", substr("::::::::", split(ip, arr, ":") - 1), ip)
-	split(ip, arr, ":")
+	sub("::", substr("::::::::", split(ip, ar, ":") - 1), ip)
+	split(ip, ar, ":")
 	for (i = 1; i <= 8; i++)
-		hex = hex substr("0000" arr[i], length(arr[i]) + 1)
+		hex = hex substr("0000" ar[i], length(ar[i]) + 1)
 	return hex
 }
 
-function ip4_hex(ip,
-	arr)
-{
-	split(ip, arr, ".")
-	return sprintf("000000000000000000000000%02x%02x%02x%02x",
-	  arr[1], arr[2], arr[3], arr[4])
-}
-
-function ip_hex(ip)
-{
-	return ip ~ /:/ ? ip6_hex(ip) : ip4_hex(ip)
-}
-
-function ip6_rev(ip6,
+function ip6_arpa(ip6,
 	i, out)
 {
 	ip6 = ip6_hex(ip6)
 	for (i = 4 * 8; i > 0; i--)
 		out = out substr(ip6, i, 1)"."
-	return out"ip6.arpa"
+	return out"ip6.arpa."
 }
 
-function ip4_rev(ip4)
+function inaddr_arpa(ip4,
+	i, ar)
 {
-	split(ip4, arr, ".")
-	return sprintf("%s.%s.%s.%s.in-addr.arpa",
-	 arr[4], arr[3], arr[2], arr[1])
+	i = split(ip4, ar, ".")
+	assert(i == 4, "invalid-ip4 '"ip4"'")
+	return sprintf("%s.%s.%s.%s.in-addr.arpa.", ar[4], ar[3], ar[2], ar[1])
 }
 
-function ip_match(ip, net, len)
+function net_arpa(net,
+	i, ar, arpa, skip)
 {
-	len = (len + (net !~ /:/) * 96) / 4
-	return substr(ip_hex(ip), 1, len) == substr(ip_hex(net), 1, len)
-}
+	i = split(net, ar, "/")
+	assert(i == 2, "invalid-network '"net"'")
 
-function ip_soa(ip,
-	x, i, net, max, dom)
-{
-	for (x in NET) {
-		i = split(x, net, "/")
-		assert(i == 2, "invalid network name: "x)
-		if (ip_match(ip, net[1], net[2]) && net[2] > max) {
-			dom = NET[x]
-			max = net[2]
-		}
+	if (ar[1] ~ /:/) {
+		arpa = ip6_arpa(ar[1])
+		skip = (128 - ar[2]) / 4
+	} else {
+		arpa = inaddr_arpa(ar[1])
+		skip = (32 - ar[2]) / 8
 	}
-	assert(dom, "no NET entry found matching "ip)
-	return dom
-}
-
-function dom_soa(dom,
-	soa, i)
-{
-	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
-		i = index(soa, ".")
-		assert(i > 0, "no SOA found for "dom)
-	}
-	return soa
-}
-
+	sub("^([0-9a-f]+\\.){"skip"}", "", arpa)
+	return arpa
 }
 
 function rr(dom, type, val, ttl,
-	soa, i, host, v1, v2)
+	i, soa)
 {
-	if (match(val, "@[-0-9a-z]+")) {
-		host = substr(val, RRSTART+1, RRLENGTH-1)
-		v1 = substr(val, 1, RRSTART)
-		v2 = substr(val, RRSTART+RRLENGTH+1)
-		assert(host in HOST, "no host found for @"host)
-		for (i = split(HOST[host], ip); i > 0; i--)
-			rr_expand_dom(dom, type, v1 ip[i] v2, ttl)
-	} else {
-		rr_expand_dom(dom, type, val, ttl)
+	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
+		i = index(soa, ".")
+		assert(i > 0, "no-soa '"dom"'")
 	}
-}
-
-function rr_expand_dom(dom, type, val, ttl)
-{
-	if (i = index(dom, "@")) {
-	} else {
-		rr_raw(dom, type, val, ttl)
-	}
-}
-
-function rr_raw(dom, type, val, ttl,
-	soa, rr)
-{
-	debug("+ "dom" "type" "val)
-
-	soa = dom_soa(dom)
 	dom = (soa == dom) ? "@" : substr(dom, 1, length(dom) - length(soa) - 1)
-	rr = sprintf("%-32s %-5s IN %-5s %s\n", dom, ttl, type, val)
-	RR[soa] = RR[soa] rr
+	printf("%s %s IN %s %s\n", dom, ttl, type, val) >>(soa"zone")
 }
 
-function rr_soa(dom, main)
+function fqdn(dom)
 {
-	assert(!(dom in SOA), "SOA declared twice for "dom)
-	SOA[dom] = main
-	x = "("NOW" 3600 600 86400 60)"
-	rr(dom, "SOA", "ns1."main". postmaster."main". "x, 86400)
+	if (dom == "@" || dom == "")
+		return env("ORIGIN")
+	return (dom ~ /\.$/) ? dom : dom"."env("ORIGIN")
 }
 
 BEGIN {
-	"date +%s" | getline NOW
+	if (!("SERIAL" in ENVIRON))
+		"date +%s" | getline ENVIRON["SERIAL"]
+	if (!("TTL" in ENVIRON))
+		ENVIRON["TTL"] = 3600
 }
 
-{ gsub("[ \t]+", " "); sub(";.*", ""); sub("^ ", ""); sub(" $", "") }
-/^$/ { next }
-{ debug(""); debug($0) }
-{ assert($2 == "IN", "second field is always \"IN\"") }
-
-$3 == "NET" {
-	NET[$1] = $5
-	split(tolower($1), net, "/")
-	if ($1 ~ /:/) {
-		$5 = ip6_rev(net[1])
-		skip = (128 - net[2]) / 4
-	} else {
-		$5 = ip4_rev(net[1])
-		skip = (32 - net[2]) / 8
-	}
-	sub("^([0-9a-f]+\\.){"skip"}", "", $5)
-	$3 = "ZONE"
-	$4 = ":NS:"
+"DEBUG" in ENVIRON {
+	print >"/dev/stderr"
 }
 
-$3 == "ZONE" {
-	FEATURES[$1] = $4
-	rr_soa($1, $5)
+/^[$]/ {
+	ENVIRON[toupper(substr($1, 2))] = $2
+}
+
+$1 == "$ORIGIN" {
+	assert(env("ORIGIN") ~ /\.$/, "invalid-origin 'env("ORIGIN")'")
+	OUT = env("ORIGIN")"zone"
+	print >OUT
 	next
 }
 
-$3 == "HOST" {
-	dom = $4"."ip_soa($1)
-	HOST[$4] = HOST[$4] (HOST[$4] ? " " : "") $1
+/^[$]/ || /^[ \t]*(;.*)?$/ {
+	print >>OUT
+	next
+}
 
-	if ($1 ~ /:/) {
-		rr(dom, "AAAA", $1)
-		rr(ip6_rev($1), "PTR", dom".")
-	} else {
-		rr(dom, "A", $1)
-		rr(ip4_rev($1), "PTR", dom".")
+{
+	FQDN = ($0 ~ /^[ \t]/) ? FQDN : fqdn($1)
+	TYPE = 1 + ($0 ~ /^[ \t]/)
+	for (TYPE = 2; toupper($TYPE) ~ /^[0-9]+|IN$/; TYPE++);
+	VAL = TYPE+1
+}
+
+$TYPE == "NET" {
+	dom = net_arpa($VAL)
+	assert(!(dom in SOA), "twice-soa '"dom"'")
+	SOA[dom]++
+	print "$ORIGIN "dom >(dom"zone")
+	val = "("env("SERIAL")" "env("TTL")" 600 86400 60)"
+	rr(dom, "SOA", "ns1."env("ORIGIN")" postmaster."env("ORIGIN")" "val)
+	next
+}
+
+$TYPE == "AAAA" {
+	IP[FQDN] = IP[FQDN]" "$VAL
+	rr(ip6_arpa($VAL), "PTR", FQDN)
+}
+
+$TYPE == "A" {
+	IP[FQDN] = IP[FQDN]" "$VAL
+	rr(inaddr_arpa($VAL), "PTR", FQDN)
+}
+
+$TYPE == "ALIAS" {
+	assert($VAL in IP, "unknown-host '"$NF"'")
+	for (i = split(IP[fqdn($VAL)], list, " "); i > 0; i--) {
+		printf "%s", substr($0, 1, index($0, $TYPE) - 1) >>OUT
+		print (list[i] ~ /:/ ? "AAAA" : "A")"\t"list[i] >>OUT
 	}
 	next
 }
 
 {
-	dom = $1
-	type = $3
-	sub("^([^ ]+ ){3}", "")
-	rr(dom, type, $0)
-}
-
-END {
-	for (soa in SOA)
-		printf "$ORIGIN %s.\n\n%s", soa, RR[soa] >(soa".zone")
+	print >>OUT
 }
