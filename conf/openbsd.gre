@@ -1,0 +1,3 @@
+inet6 fe80::{{me}}
+tunnel fe80::{{me}}%wg0 fe80::{{peer}}%wg0
+up

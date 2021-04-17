@@ -5,7 +5,7 @@ pack=$1
 pack_download() {
 	case $url in
 	(*.tgz|*.tar.gz)
-		curl "$url" | tar -xzf-
+		curl -L "$url" | tar -xzf-
 		;;
 	(git://*|*.git)
 		git clone --depth 1 --branch "$ver" "$url" "$pack-$ver"
@@ -14,8 +14,14 @@ pack_download() {
 	esac
 }
 
+pack_autogen() {
+	if [ -f autogen.sh -a ! -f configure ]; then
+		./autogen.sh
+	fi
+}
+
 pack_configure() {
-	if [ -f configure ]; then
+	if [ -f configure -a ! -f Makefile ]; then
 		./configure --prefix="$PREFIX"
 	fi
 }
@@ -46,6 +52,7 @@ trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
 
 if [ ! -d "$PREFIX" ]; then
 	mkdir -p -m 755  "build/$pack-$ver"
+	(cd "$SOURCE" && pack_autogen)
 	(cd "$SOURCE" && pack_configure)
 	(cd "$SOURCE" && pack_build)
 	(cd "$SOURCE" && pack_install)

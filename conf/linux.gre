@@ -1,0 +1,6 @@
+if=${0##*.}
+
+ip link del $if
+ip link add $if type ip6gre local fe80::{{me}} remote fe80::{{peer}} dev wg0 ttl 64
+ip address add dev $if fe80::{{me}}/64
+ip link set $if up

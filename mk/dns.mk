@@ -2,10 +2,11 @@ CONF = nsd/nsd.conf
 ZONES = z0.is z0.dn42 \
   josuah.net metairies.org
 
-mk/dns: ${CONF}
+dns: ${CONF}
 	exec rm -rf /var/nsd/zones
 	exec mkdir -p /var/nsd
 	exec cp -r zones /var/nsd
+	exec nsd-control reload
 
 zones: sshfp
 	exec mkdir -p zones
@@ -22,6 +23,7 @@ sign zsk ksk:
 mk/dns/clean:
 	exec rm -f zones/*
 
+mk/dns:
 mk/dns/sync:
 
 .PHONY: zones

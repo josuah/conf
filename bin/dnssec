@@ -25,9 +25,9 @@ case "$*" in
 	 | sort | xargs ssh-keyscan -D
 	;;
 ("info "*)
-	zsk=/etc/dnssec/$soa+zsk/$(tail -n 1 /etc/dnssec/$soa+zsk/log)
 	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
 	awk '{ print "tag="$4" algo="$5" type="$6" digest="$7 }' "$ksk.ds"
+	awk '{ print "key="$7 }' "$ksk.key"
 	;;
 (*)
 	echo "usage: ${0##*/} (ksk|zsk|sign) zonefile" >&2

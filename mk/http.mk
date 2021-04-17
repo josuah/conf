@@ -1,8 +1,7 @@
 CONF = httpd.conf
 
-http: ${CONF}
+mk/http: ${CONF}
 
-mk/http:
 mk/http/sync:
 mk/http/clean:
 

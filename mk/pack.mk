@@ -1,8 +1,6 @@
 mk/pack:
-	exec mkdir -p /dot/pack
-	exec rm -f recipe
-	exec ln -s "${PWD}/pack" recipe
-	exec mv recipe /dot/pack
+	exec mkdir -p /home/pack
+	exec ln -sf "${PWD}/recipe" /home/pack
 
 mk/pack/clean:
 mk/pack/sync:
