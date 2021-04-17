@@ -32,19 +32,23 @@ pack_install() {
 
 . "recipe/$pack.sh"
 
-export PREFIX="$PWD/build/$pack-$ver"
-trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
 
-if [ ! -d "source/$pack-$ver" ]; then
+export SOURCE="$PWD/source/$pack-$ver"
+trap 'rm -rf "$SOURCE"' INT TERM EXIT HUP
+
+if [ ! -d "$SOURCE" ]; then
 	mkdir -p -m 755 source
 	(cd source && pack_download)
 fi
 
-if [ ! -d "build/$pack-$ver" ]; then
+export PREFIX="$PWD/build/$pack-$ver"
+trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
+
+if [ ! -d "$PREFIX" ]; then
 	mkdir -p -m 755  "build/$pack-$ver"
-	(cd source/$pack-$ver && pack_configure)
-	(cd source/$pack-$ver && pack_build)
-	(cd source/$pack-$ver && pack_install)
+	(cd "$SOURCE" && pack_configure)
+	(cd "$SOURCE" && pack_build)
+	(cd "$SOURCE" && pack_install)
 fi
 
 exec echo "built $pack in $PWD/build/$pack-$ver"

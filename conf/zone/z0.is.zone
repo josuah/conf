@@ -9,9 +9,6 @@ _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 @				IN NET	46.23.94.12/32
 @				IN NET	45.77.61.129/32
 
-corax				IN AAAA	2a03:6000:6f66:602::3
-dis-sys-2			IN AAAA	2a03:6000:6f66:602::4
-pelios				IN AAAA	2a03:6000:6f66:602::5
 pelios				IN A	31.37.164.83
 shag				IN AAAA	2a03:6000:6f66:602::7
 shag				IN A	46.23.94.12
@@ -24,6 +21,3 @@ ns2				IN ALIAS shag.z0.is.
 git				IN ALIAS shag.z0.is.
 xen1				IN ALIAS shag.z0.is.
 p9auth				IN ALIAS felix.z0.is.
-log1				IN ALIAS corax.z0.is.
-log2				IN ALIAS felix.z0.is.
-log3				IN ALIAS pelios.z0.is.

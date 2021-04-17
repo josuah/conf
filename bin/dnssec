@@ -19,11 +19,15 @@ case "$*" in
 	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
 	salt=$(openssl rand -hex 64)
 	ldns-signzone -n -s "$salt" "$zone" "$ksk" "$zsk" >$zone.signed
-	echo "ksk=${ksk##*/}" "zsk=${zsk##*/}"
 	;;
 ("sshfp "*)
 	awk '/[ \t](A|AAAA)[ \t]/ && !uniq[$1]++ { print $1 }' "$zone" \
 	 | sort | xargs ssh-keyscan -D
+	;;
+("info "*)
+	zsk=/etc/dnssec/$soa+zsk/$(tail -n 1 /etc/dnssec/$soa+zsk/log)
+	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
+	awk '{ print "tag="$4" algo="$5" type="$6" digest="$7 }' "$ksk.ds"
 	;;
 (*)
 	echo "usage: ${0##*/} (ksk|zsk|sign) zonefile" >&2
