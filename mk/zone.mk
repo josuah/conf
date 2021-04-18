@@ -9,6 +9,9 @@ mk/zone/sync: sign
 	ssh ns1.z0.is make -C /etc/adm mk/dns
 	ssh ns2.z0.is make -C /etc/adm mk/dns
 
+mk/zone/clean:
+	exec rm -f zones/*
+
 sign zsk ksk: zone
 	for zones in zones/*.*.zone; do doas dnssec $@ "$$zones"; done
 
@@ -20,8 +23,3 @@ zone: sshfp
 
 sshfp:
 	dnssec sshfp conf/zone/z0.is.zone | sort -o $@
-
-mk/zone/clean:
-	exec rm -f zones/*
-
-.PHONY: zone

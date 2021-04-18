@@ -11,6 +11,9 @@ mk/dn42/sync: ${REPO}/.git
 	exec su -l dn42 -c 'exec git -C ${REPO} reset --hard origin/master'
 	exec make mk/dn42
 
+mk/dn42/clean:
+	exec rm -f ${RPKI}.tmp
+
 ${RPKI}: ${REPO}/.git
 	exec dn42-roa ${REPO}/data/route/* ${REPO}/data/route6/* >$@.tmp
 	exec mv ${RPKI}.tmp ${RPKI}
@@ -26,6 +29,3 @@ ${FILTER} ${REPO}/.git: /home/dn42
 
 /home/dn42:
 	exec useradd -m dn42
-
-mk/dn42/clean:
-	exec rm -f ${RPKI}.tmp

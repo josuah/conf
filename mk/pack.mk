@@ -1,4 +1,4 @@
-mk/pack: ${CONF}
+mk/pack:
 	exec mkdir -p /home/pack
 	exec ln -sf "${PWD}/recipe" /home/pack
 
