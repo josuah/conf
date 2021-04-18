@@ -1,4 +1,4 @@
-CONF = bgpd.conf bgpd/ibgp.conf
+CONF = bgpd.conf
 include mk/conf.inc
 
 mk/bgp: ${CONF}

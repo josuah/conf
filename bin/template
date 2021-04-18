@@ -25,7 +25,7 @@ NR == 1 {
 	if (sub(/^%% ?/, "")) {
 		if (enter("code")) shell("'\n")
 	} else {
-		gsub(/'/, "'\''")
+		gsub(/'/, "'\\''")
 		if (enter("text")) shell("echo -n '")
 	}
 	while (match($0, /\{\{[_0-9a-zA-Z]+\}\}/)) {
