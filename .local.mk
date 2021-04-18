@@ -1,1 +1,1 @@
-MOD = mk/base mk/home mk/zone
+MOD = mk/base mk/home mk/auth mk/zone

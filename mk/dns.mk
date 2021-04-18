@@ -7,5 +7,5 @@ mk/dns: ${CONF}
 	exec cp -r zones /var/nsd
 	exec nsd-control reload
 
-mk/dns:
 mk/dns/sync:
+mk/dns/clean:
