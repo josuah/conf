@@ -1,3 +1,3 @@
 ${CONF}:
 	exec mkdir -p /etc/${@D}
-	exec bin/template conf/$@ >/etc/$@
+	exec env ${ENV} bin/template conf/$@ >/etc/$@
