@@ -1,9 +1,6 @@
 CONF = monitower.conf
+include mk/conf.inc
 
-monit: ${CONF}
-
-mk/monit:
+mk/monit: ${CONF}
 mk/monit/sync:
 mk/monit/clean:
-
-include mk/conf.inc

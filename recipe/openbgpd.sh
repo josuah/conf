@@ -1,2 +1,2 @@
-ver=master
-url=https://github.com/openbgpd-portable/openbgpd-portable.git
+ver=6.8p1
+url=https://cdn.openbsd.org/pub/OpenBSD/OpenBGPD/openbgpd-$ver.tar.gz
