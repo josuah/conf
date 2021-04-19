@@ -2,25 +2,27 @@
 
 pack=$1
 
+pack_download_git() {
+	git clone --depth 1 --branch "$ver" "$url" "$SOURCE"
+	rm -rf "$SOURCE/.git"
+}
+
+pack_download_tar() {
+	curl -L "$url" | tar -xzf-
+}
+
 pack_download() {
 	case $url in
-	(*.tgz|*.tar.gz)
-		curl -L "$url" | tar -xzf-
-		;;
-	(git://*|*.git)
-		git clone --depth 1 --branch "$ver" "$url" "$pack-$ver"
-		rm -rf "$pack-$ver/.git"
-		;;
+	(*.tgz|*.tar.gz) pack_download_tar ;;
+	(git://*|*.git) pack_download_git ;;
+	(*) echo url error >&2; exit 1 ;;
 	esac
 }
 
-pack_autogen() {
+pack_configure() {
 	if [ -f autogen.sh -a ! -f configure ]; then
 		./autogen.sh
 	fi
-}
-
-pack_configure() {
 	if [ -f configure -a ! -f Makefile ]; then
 		./configure --prefix="$PREFIX"
 	fi
@@ -38,7 +40,6 @@ pack_install() {
 
 . "recipe/$pack.sh"
 
-
 export SOURCE="$PWD/source/$pack-$ver"
 trap 'rm -rf "$SOURCE"' INT TERM EXIT HUP
 
@@ -51,11 +52,10 @@ export PREFIX="$PWD/build/$pack-$ver"
 trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
 
 if [ ! -d "$PREFIX" ]; then
-	mkdir -p -m 755  "build/$pack-$ver"
-	(cd "$SOURCE" && pack_autogen)
-	(cd "$SOURCE" && pack_configure)
-	(cd "$SOURCE" && pack_build)
-	(cd "$SOURCE" && pack_install)
+	mkdir -p -m 755  "$PREFIX"
+	(set +u; cd "$SOURCE" && pack_configure)
+	(set +u; cd "$SOURCE" && pack_build)
+	(set +u; cd "$SOURCE" && pack_install)
 fi
 
-exec echo "built $pack in $PWD/build/$pack-$ver"
+exec echo "built $pack in $PREFIX"
