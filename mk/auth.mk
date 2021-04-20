@@ -1,6 +1,7 @@
-AUTH = shag pelios corax
+AUTH = shag pelios corax dis-sys-2
 HOM3 = root@shag root@corax josuah@corax root@pelios josuah@shag \
-  josuah@bitreich.org josuah@server10.openbsd.amsterdam
+  josuah@bitreich.org josuah@server10.openbsd.amsterdam jdemangeon@dis-sys-2 \
+  root@dis-sys-2
 
 mk/auth:
 mk/auth/sync: ${AUTH} ${HOM3}

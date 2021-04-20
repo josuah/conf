@@ -1,4 +1,4 @@
-CONF = hosts syslog.conf crontab profile relayd.conf
+CONF = hosts syslog.conf crontab profile relayd.conf newsyslog.conf
 include mk/conf.inc
 
 mk/base: ${CONF} /etc/ssl/hostname.crt /etc/ssl/private/hostname.key

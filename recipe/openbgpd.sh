@@ -5,6 +5,8 @@ pack_download() {
 	pack_download_git
 	cd "$SOURCE"
 
+# https://github.com/openbgpd-portable/openbgpd-portable/issues/20
+
 patch -p1 <<'__EOF__'
 --- old/src/bgpd/kroute-disabled.c
 +++ new/src/bgpd/kroute-disabled.c
@@ -20,7 +22,4 @@ patch -p1 <<'__EOF__'
  			m4 = (struct sockaddr_in *)ifa->ifa_netmask;
 __EOF__
 
-}
-pack_build() {
-	make
 }
