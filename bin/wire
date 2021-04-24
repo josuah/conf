@@ -1,8 +1,15 @@
 #!/bin/sh -eu
 
+# configure point-to-point wireguard tunnels for use with dynamic
+# routing protocols
+
+port=51820 # incremented by 1 for each extra interface
+
+hostid=$1; shift
+
 tpl_interface='[Interface]
 PrivateKey = %s
-ListenPort = 51820
+HostID = %s
 '
 
 tpl_peer='[Peer]
@@ -11,9 +18,13 @@ PublicKey = %s
 
 mkdir -p -m 700 /etc/wireguard
 
-sec=$(openssl rand -base64 32)
+get() {
+	val=$(awk -v x="$1" '{sub(" *= *"," ")} tolower($1)==x {print$2}' "$2")
+	export "$1=$val"
+}
+
 if [ -f /etc/wireguard/interface.conf ]; then
-	sec=$(awk '{sub(" *= *", " ")} tolower($1)=="privatekey" {print $2}' \
+	sec=$(awk '{sub(" *= *"," ")} tolower($1)=="privatekey" {print$2}' \
 	  /etc/wireguard/interface.conf)
 else
 	sec=$(openssl rand -base64 32)
@@ -25,17 +36,21 @@ case $(uname) in
 	pub=$(echo "$sec" | wg pubkey)
 	;;
 (OpenBSD)
-	trap 'ifconfig wg99999 destroy' INT TERM EXIT HUP
-	ifconfig wg99999 create wgport 51820 wgkey "$sec"
-	pub=$(ifconfig wg99999 | awk '$1 == "wgpubkey" { print $2 }')
+	trap 'ifconfig wg999999 destroy' INT TERM EXIT HUP
+	ifconfig wg999999 create wgport 51820 wgkey "$sec"
+	pub=$(ifconfig wg999999 | awk '$1=="wgpubkey" {print$2}')
 	;;
 esac
 
-cp /etc/wireguard/interface.conf /etc/wireguard/wg0.conf
-for peer in "$@"; do
-	[ "${peer##*/}" = "$(hostname -s)" ] && continue
-	echo
-	cat "$peer"
-done >>/etc/wireguard/wg0.conf
+rm -f /etc/wireguard/wg[0-9]*.conf
+for peer; do [ "${peer##*/}" = "$(hostname -s).conf" ] && continue
+	awk -F '[\t =]*' -v port="$port" '
+		tolower($1)=="hostid" {print"ListenPort = "(port + $2)}
+	' "$peer" | cat /etc/wireguard/interface.conf - "$peer" \
+
+	echo "$((port + peerid))" \
+	 |
+	 >/etc/wireguard/wg$i.conf
+done
 
 printf "$tpl_peer" "$pub"

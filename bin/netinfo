@@ -41,7 +41,7 @@ function ip6_comp(ip6,
 	return substr(beg, 2) (x ? ":" : "") end
 }
 
-function router_id(n,
+function int_ip4(n,
 	n1, n2, n3, n4)
 {
 	n1 = int(n/256/256/256 % 256)
@@ -58,7 +58,7 @@ function usage()
 	print "	netinfo ip6-hex db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo ip6-rev db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo ip6-comp db8:134d:85fe:2054::1302:42" >"/dev/stderr"
-	print "	netinfo router-id 65001" >"/dev/stderr"
+	print "	netinfo int-ip4 65001" >"/dev/stderr"
 	exit(1)
 }
 
@@ -68,6 +68,6 @@ BEGIN {
 	else if (ARGV[1] == "ip6-hex") print ip6_hex(ARGV[2])
 	else if (ARGV[1] == "ip6-rev") print ip6_rev(ARGV[2])
 	else if (ARGV[1] == "ip6-comp") print ip6_comp(ARGV[2])
-	else if (ARGV[1] == "router-id") print router_id(ARGV[2])
+	else if (ARGV[1] == "int-ip4") print int_ip4(ARGV[2])
 	else usage()
 }

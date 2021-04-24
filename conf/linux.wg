@@ -3,5 +3,5 @@ if=${0#*.}
 ip link del $if
 ip link add $if type wireguard
 wg setconf $if /etc/wireguard/$if.conf
-ip addr add dev $if fe80::{{me}}/64
+ip addr add dev $if fe80::{{hostid}}/64
 ip link set $if up

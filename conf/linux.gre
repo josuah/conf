@@ -1,8 +1,8 @@
 if=${0##*.}
 
 ip link del $if
-ip link add $if type ip6gre local fe80::{{me}} remote fe80::{{peer}} dev wg0 ttl 64
-ip address add dev $if fe80::{{me}}/64
+ip link add $if type ip6gre local fe80::{{hostid}} remote fe80::{{peer}} dev wg0 ttl 64
+ip address add dev $if fe80::{{hostid}}/64
 ip link set $if up
 
 ip route add dev $if fd42:10e3:10e8::{{peer}}/128

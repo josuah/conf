@@ -1,5 +1,5 @@
-inet6 fe80::{{me}}
-tunnel fe80::{{me}}%wg0 fe80::{{peer}}%wg0
+inet6 fe80::{{hostid}}
+tunnel fe80::{{hostid}}%wg0 fe80::{{peer}}%wg0
 up
 
 !route add fd42:10e3:10e8::{{peer}}/128 fe80::{{peer}}%'$if'
