@@ -1,3 +1,0 @@
-#!/bin/sh -eu
-export PASS="$(pass show unix/cirno/glenda)"
-exec drawterm -u glenda -h p9cpu.z0.is -a p9auth.z0.is -c "${@:-rc}" &

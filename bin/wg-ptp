@@ -1,0 +1,85 @@
+#!/usr/bin/awk -f
+
+# configure point-to-point wireguard tunnels
+
+function assert(expr, msg)
+{
+	if (!expr) {
+		print msg >"/dev/stderr"
+		EXIT = 1
+		exit(EXIT)
+	}
+}
+
+function Peer(key)
+{
+	assert(peer" "key in PEER, "could not find "key"= in [Peer]")
+	return PEER[peer" "key]
+}
+
+function Env(key)
+{
+	assert(key in ENVIRON, "could not find "key"= in ENVIRON")
+	return ENVIRON[key]
+}
+
+BEGIN {
+	baseport = 50000
+
+	# get and set system environment
+	"exec hostname -s" | getline hostname
+	"exec uname" | getline uname
+        system("exec mkdir -p -m 700 /etc/wireguard")
+        system("exec rm -f /etc/wireguard/wg[0-9]*.conf")
+
+	# get a private key
+	if (system("exec test -f /etc/wireguard/key") > 0)
+		system("exec openssl rand -base64 32 >/etc/wireguard/key")
+	getline priv <"/etc/wireguard/key"
+
+	# derive the public key
+	if (uname == "OpenBSD") {
+		system("exec ifconfig wg999999 create wgport 51820 wgkey "priv)
+		while (("exec ifconfig wg999999" | getline) > 0)
+			if ($1 == "wgpubkey")
+				pub = $2
+		system("exec ifconfig wg999999 destroy")
+	} else {
+		"exec wg pubkey </etc/wireguard/key" | getline pub
+	}
+}
+
+# the port number is derived from our hostid
+tolower($0) ~ /^endpoint/ {
+	$0 = $0":" (baseport + Env("hostid"))
+}
+
+# parse other peers config
+index(FILENAME, "/"hostname".conf") == 0 {
+	gsub("[\t ]+", "")
+	sub("=", " ")
+	PEER[FILENAME" "tolower($1)] = $2
+	FILES[FILENAME]++
+}
+
+END {
+	# generate peer config
+	split("PublicKey PresharedKey AllowedIPs Endpoint PersistentKeepalive", key)
+	for (peer in FILES) {
+		file = "/etc/wireguard/wg"Peer("hostid")".conf"
+		print "[Interface]"					>>file
+		print "PrivateKey = "priv				>>file
+		print "ListenPort = "(baseport + Peer("hostid"))	>>file
+		print ""						>>file
+		print "[Peer]"						>>file
+		for (i in key) if (peer" "tolower(key[i]) in PEER)
+			print key[i]" = "Peer(tolower(key[i]))		>>file
+	}
+
+	# print our own config
+	print "PublicKey = "pub
+	print "AllowedIPs = 0.0.0.0/0, ::/0"
+	print "HostID = "Env("hostid")
+
+	exit(EXIT)
+}

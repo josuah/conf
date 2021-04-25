@@ -6,10 +6,11 @@ smtp() {
 	sleep 0.3
 }
 
-for x in $(dig +short mx "$dom" | sed -r 's/^[0-9]+ +//; s/\.$//'); do
+n=0
+for x in $(dig +short mx "$dom" | sed -rn 's/\.$//; s/^[0-9]+ +//p'); do
 	n=$((n + 1))
 	out=$(smtp | openssl s_client -quiet -no_ign_eof -servername "$x" \
 	  -connect "$x:25" -starttls smtp -verify_return_error -verify_depth 3)
 	test "$(echo "$out" | tr -d '\r' | sed -n '$ s/ .*// p')" = 250
 done
-test "$n"
+test "$n" -gt 0

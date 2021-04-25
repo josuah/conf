@@ -2,7 +2,7 @@ REPO = /home/dn42/registry
 FILTER = ${REPO}/data/filter.txt ${REPO}/data/filter6.txt
 URL = git@git.dn42.dev:dn42/registry.git
 
-mk/dn42: conf/bgpd/roa.conf conf/bgpd/prefix-permit.conf conf/bgpd/prefix-deny.conf
+mk/dn42: conf/bgpd/roa.conf conf/bgpd/permit.conf conf/bgpd/deny.conf
 
 mk/dn42/sync: ${REPO}/.git
 	exec doas -u dn42 git -C ${REPO} fetch origin
@@ -16,10 +16,10 @@ conf/bgpd/roa.conf: ${REPO}/.git
 	exec dn42-roa ${REPO}/data/route/* ${REPO}/data/route6/* >$@.tmp
 	exec mv $@.tmp $@
 
-conf/bgpd/prefix-permit.conf: ${FILTER}
+conf/bgpd/permit.conf: ${FILTER}
 	exec dn42-filter permit ${FILTER} >$@
 
-conf/bgpd/prefix-deny.conf: ${FILTER}
+conf/bgpd/deny.conf: ${FILTER}
 	exec dn42-filter deny ${FILTER} >$@
 
 /home/dn42:

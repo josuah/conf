@@ -8,7 +8,7 @@ function ifprintf(fmt, array, field)
 
 BEGIN {
 	FS = "[ \t]*:[ \t]+"
-	system("exec date +'# generated at %Y-%m-%d'")
+	system("exec date +'# generated on %Y-%m-%d'")
 	print "roa-set {"
 }
 

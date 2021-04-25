@@ -1,9 +1,8 @@
 #!/bin/sh -eu
-# Read a single key=value file as input, run the $cmd and pipe the result to logger
+# read a key=value file as input, run the $cmd and pipe the result to logger
 
 while read line; do
 	[ -z "${line###*}" ] && continue
-	(export $line; "check-$check" </dev/null 1>&0 2>&0 \
+	(export $line; "/etc/monitower/check-$check" </dev/null 1>&0 2>&0 \
 	 || logger -cs -p "local0.${level:-alert}" -t monitower "$line")
-done <${1:-/etc/monitower.conf}
-wait
+done </etc/monitower.conf

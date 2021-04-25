@@ -1,5 +1,7 @@
-# josuah
-root:		me@josuah.net
+# deployed on {{date}}
+
+root:		josuah
+me:		josuah
 
 # RFC 2142: network operations mailbox names
 abuse:		root

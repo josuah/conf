@@ -1,5 +1,7 @@
 #!/bin/sh -eu
 
+# Jason Donfield's pass(1) alternative using age(1) as back-end
+
 key=$HOME/.ssh/id_ed25519
 
 mkdir -p "$HOME/.password-store"
@@ -35,8 +37,8 @@ case ${1:-} in
 	echo "${file##*/}" | tr -d '\n' | xsel -bi
 	;;
 (*)
-	exec >&2
-	echo "usage: ${0##*/} (set|get) resource/account-name"
-	echo "       ${0##*/}"
+	echo>&2 "usage:	${0##*/} (set|get) resource/account-name"
+	echo>&2 "	${0##*/}"
+	exit 1
 	;;
 esac

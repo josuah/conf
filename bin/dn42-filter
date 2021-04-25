@@ -6,6 +6,7 @@ BEGIN {
 		ARGV[i] = ARGV[i+1]
 	ARGC--
 
+	system("exec date +'# generated on %Y-%m-%d'")
 	print "prefix-set \""ACTION"\" {"
 }
 

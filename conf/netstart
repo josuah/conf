@@ -1,0 +1,12 @@
+#!/bin/sh -eu
+
+if [ $# = 0 ]; then
+	set -- $(ls /etc/hostname.* | sed 's/.*\.//')
+fi
+
+exit=0
+for iface; do
+	sh -eu "/etc/hostname.$iface" || exit=1
+done
+
+exit $exit

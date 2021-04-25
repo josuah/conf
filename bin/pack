@@ -1,5 +1,7 @@
 #!/bin/sh -eu
 
+# nimble source-based package manager for custom build recipes
+
 pack=$1
 
 pack_download_git() {

@@ -1,9 +1,8 @@
 #!/bin/sh -eu
-
-# general commands
+# common interface over each system's service manager
 
 case "$*" in
-("start "*|"stop "*|"restart "*|"enable "*|"disable "*|"status "*|"list")
+("start "*|"stop "*|"restart "*|"reload "*|"enable "*|"disable "*|"status "*|"list")
 	;;
 ("list "*)
 	shift 1
@@ -31,14 +30,11 @@ case "$*" in
 	}' "$@"
 	;;
 (*)
-	exec >&2
-	echo "usage: ${0##*/} (start|stop|enable|disable|status) daemon"
-	echo "       ${0##*/} list [host...]"
+	echo>&2 "usage:	${0##*/} (start|stop|enable|disable|status) daemon"
+	echo>&2 "	${0##*/} list [host...]"
 	exit 1
 	;;
 esac
-
-# each system's service management handler
 
 if command -v rcctl >/dev/null; then
 	case $1 in
@@ -66,6 +62,12 @@ elif command -v openrc-run >/dev/null; then
 	(list)
 		rc-status -f ini \
 		 | sed -n 's/ *= *started *$/ ok/p; s/ *=.*/ err/p'
+		;;
+	(enable)
+		rc-update add "$2"
+		;;
+	(disable)
+		rc-update del "$2"
 		;;
 	(*)
 		exec "/etc/init.d/$2" "$1"

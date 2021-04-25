@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# portable pstree implementation with POSIX ps(1) as back-end
 
 function pager(msg)
 {
@@ -31,12 +32,11 @@ function ps_read(ps,
 
 # Using the informations from the child pid in ps[], build the absolute
 # path from PID 1 to each pid:
-#
 #	[1:pid]=1, [1:info]="", [1:1]=NODE, [1:args]="",
 #	[2:pid]=4, [2:info]="", [2:1]=LINE, [2:2]=NODE, [2:args]="",
 #	[3:pid]=7, [3:info]="", [3:1]=LINE, [3:2]=LINE, [3:3]=NODE, [3:args]="",
 #	[4:pid]=9, [4:info]="", [4:1]=LINE, [4:2]=LINE, [4:3]=NODE, [4:args]="",
-#
+
 function tree_fill(tree, ps, pid, n, lv,
 	i, cpid)
 {
@@ -61,7 +61,7 @@ function tree_fill(tree, ps, pid, n, lv,
 # Transform tree[] into a tree by replacing some LINE by VOID when needed.
 # The tree is walked from the bottom to the top, and column by column
 # toward the right until an empty column is met.
-#
+
 function tree_format(tree, n,
 	i1, i2, stop, tail)
 {

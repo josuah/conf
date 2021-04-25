@@ -30,7 +30,7 @@ case "$*" in
 	awk '{ print "key="$7 }' "$ksk.key"
 	;;
 (*)
-	echo "usage: ${0##*/} (ksk|zsk|sign) zonefile" >&2
+	echo>&2 "usage:	${0##*/} (ksk|zsk|sign) zonefile" >&2
 	exit 1
 	;;
 esac

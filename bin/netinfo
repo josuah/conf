@@ -12,12 +12,12 @@ function ip6_fe80(mac)
 }
 
 function ip6_hex(ip6,
-	array, out)
+	ar, out)
 {
-	sub("::", substr("::::::::", split(ip6, array, ":") - 1), ip6)
-	split(ip6, array, ":")
+	sub("::", substr("::::::::", split(ip6, ar, ":") - 1), ip6)
+	split(ip6, ar, ":")
 	for (i = 1; i <= 8; i++)
-		out = out substr("0000" array[i], length(array[i]) + 1)
+		out = out substr("0000" ar[i], length(ar[i]) + 1)
 	return out
 }
 
@@ -41,14 +41,17 @@ function ip6_comp(ip6,
 	return substr(beg, 2) (x ? ":" : "") end
 }
 
-function int_ip4(n,
-	n1, n2, n3, n4)
+function int_ip4(n)
 {
-	n1 = int(n/256/256/256 % 256)
-	n2 = int(n/256/256 % 256)
-	n3 = int(n/256 % 256)
-	n4 = int(n % 256)
-	return n1"."n2"."n3"."n4
+	return (int(n/256^3) % 256)"."(int(n/256^2) % 256) \
+	  "."(int(n/256^1) % 256)"."(int(n/256^0) % 256)
+}
+
+function ip4_int(ip4,
+	ar, n)
+{
+	if (split(ip4, ar, ".") != 4) return
+	return ar[1]*256^3 + ar[2]*256^2 + ar[3]*256^1 + ar[4]*256^0
 }
 
 function usage()
@@ -59,6 +62,7 @@ function usage()
 	print "	netinfo ip6-rev db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo ip6-comp db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo int-ip4 65001" >"/dev/stderr"
+	print "	netinfo ip4-int 65001" >"/dev/stderr"
 	exit(1)
 }
 
@@ -69,5 +73,6 @@ BEGIN {
 	else if (ARGV[1] == "ip6-rev") print ip6_rev(ARGV[2])
 	else if (ARGV[1] == "ip6-comp") print ip6_comp(ARGV[2])
 	else if (ARGV[1] == "int-ip4") print int_ip4(ARGV[2])
+	else if (ARGV[1] == "ip4-int") print ip4_int(ARGV[2])
 	else usage()
 }

@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+: ${timeout:=3}
+
+exec dig +timeout="$timeout" -t "$type" "$dom" ${ns:+@ns}

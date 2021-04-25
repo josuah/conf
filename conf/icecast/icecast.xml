@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- by {{ path }} at {{ date }} -->
+<!-- deployed on {{date}} -->
 
 <icecast>
 	<location>@</location>
@@ -20,7 +20,7 @@
 		<source-password>hackme</source-password>
 		<relay-password>hackme</relay-password>
 		<admin-user>admin</admin-user>
-		<admin-password>{{ db/icecast-var:pass }}</admin-password>
+		<admin-password>{{pass}}</admin-password>
 	</authentication>
 
 	<hostname>cast.z0.is</hostname>

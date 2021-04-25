@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+
 # generate random strings
 
 n=${2:-1}

@@ -1,6 +1,5 @@
-# by {{file}} at {{date}}
+# deployed on {{date}}
 #Min	#Hour	#DoM	#Mon	#DoW	#User	#Command
-
 */10	*	*	*	*	root	newsyslog
 */5	*	*	*	*	root	rdate -s pool.ntp.org
 

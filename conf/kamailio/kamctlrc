@@ -1,8 +1,6 @@
-# The Kamailio configuration file for the control tools.
-# by {{ path }} at {{ date }}
-#define domain sip{{ db/dns-sip:# host=[host] }}.{{ db/dns-soa:soa }}
+# deployed on {{date}}
 
-SIP_DOMAIN={{ domain }}
-DBENGINE=DBTEXT
+SIP_DOMAIN="sip.z0.is"
+DBENGINE="DBTEXT"
 DBTEXT_PATH="/etc/kamailio/dbtext"
 MD5="sha256"

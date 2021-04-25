@@ -1,6 +1,6 @@
 %% zone=z0.is nsdom=z0.is template "$dirname/%head.zone"
 
-@				IN MX	1 mx1.z0.is
+@				IN MX	1 mx1.z0.is.
 @				IN TXT	v=spf1 mx -all
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
@@ -10,7 +10,7 @@ _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 @				IN NET	45.77.61.129/32
 
 pelios				IN A	31.37.164.83
-shag				IN AAAA	2a03:6000:6f66:602::7
+shag				IN AAAA	2a03:6000:6f66:602::6
 shag				IN A	46.23.94.12
 felix				IN A	45.77.61.129
 
