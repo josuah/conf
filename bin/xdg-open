@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+# wrapper over xdg-open using custom programs
 
 export DISPLAY="${DISPLAY:-:0}"
 

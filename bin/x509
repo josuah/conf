@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+# simple openssl(1) based certificate authority
 
 conf="
 

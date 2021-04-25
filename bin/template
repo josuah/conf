@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# simple yet powerful templating engine leveraging sh(1)
 
 function shell(cmd)
 {
@@ -15,8 +16,6 @@ function enter(to, was)
 
 NR == 1 {
 	enter("code")
-	shell("file='"FILENAME"'\n")
-	shell("dirname=$(dirname \"$file\")\n")
 	shell("date=$(date +%Y-%m-%d)\n")
 	shell("now=$(date +%s)\n")
 }

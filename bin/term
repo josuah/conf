@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# wrapper over terminal escape sequences
 
 getfg()  {
 	case "$1" in

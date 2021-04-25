@@ -1,5 +1,4 @@
 #!/usr/bin/awk -f
-
 # configure point-to-point wireguard tunnels
 
 function assert(expr, msg)

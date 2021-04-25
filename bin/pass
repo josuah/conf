@@ -1,5 +1,4 @@
 #!/bin/sh -eu
-
 # Jason Donfield's pass(1) alternative using age(1) as back-end
 
 key=$HOME/.ssh/id_ed25519

@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# utility to convert between various IP formats
 
 function ip6_fe80(mac)
 {

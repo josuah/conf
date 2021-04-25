@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# generate OpenBGPD prefix list from https://git.dn42.dev/dn42/registry/
 
 BEGIN {
 	ACTION = ARGV[1]

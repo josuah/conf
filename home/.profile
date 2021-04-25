@@ -3,9 +3,9 @@ export MAIL="$HOME/Maildir/"
 export ENV="$HOME/.profile"
 export LC_ALL="en_US.UTF-8"
 export EDITOR="mg"
-set -o emacs 2>"/dev/null"
 export PAGER="less -S"
 export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
 export PS1="$(hostname -s):\$PWD\\\$\${?#0} "
 export LC_ALL=en_US.UTF-8
+stty kerninfo

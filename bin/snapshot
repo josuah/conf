@@ -1,5 +1,6 @@
 #!/bin/sh -eu
-# non-posix dependencies: gzip rsync openssl
+# take a filesystem snapshot (without attributes) from a remote host
+# with all files compressed, adn renamed by their sha256 hash
 
 ssh='ssh -oControlMaster=auto -oControlPersist=3 -oControlPath=~/.ssh/master_%r_%h_%p'
 

@@ -1,5 +1,4 @@
 #!/bin/sh -eu
-
 # generate random strings
 
 n=${2:-1}
@@ -7,34 +6,24 @@ n=${2:-1}
 bird=https://www.birds.cornell.edu/clementschecklist/wp-content/uploads/2019/08/eBird_Taxonomy_v2019.csv
 
 case ${1:-help} in
-
-##  pass -- random password
 (pass)
 	openssl rand -base64 $((n * 48)) | tr '+/' 'az' | cut -c 1-24
 	;;
-
-##  mac -- random mac address
 (mac)
 	openssl rand -hex $((n * 6)) \
 	 | sed -r 's/(..)(..)(..)(..)(..)(..)/00:\2:\3:\4:\5:\6$/g' \
 	 | tr -d '\n' | tr '$' '\n'
 	;;
-
-##  ula -- random IPv6 Unique Local Address
 (ula)
 	openssl rand -hex $((n * 6)) \
 	 | sed -r 's/(....)(....)(....)/fd00:\1:\2:\3$/g' \
 	 | tr -d '\n' | tr '$' '\n'
 	;;
-
-##  suffix -- random IPv6 suffix
 (suffix)
 	openssl rand -hex $((n * 8)) \
 	 | sed -r 's/(....)(....)(....)(....)/\1:\2:\3:\4$/g' \
 	 | tr -d '\n' | tr '$' '\n'
 	;;
-
-##  bird -- random bird name
 (bird)
 	[ -f /var/tmp/bird.csv ] || curl "$bird" \
 	 | awk -F "," '
@@ -42,18 +31,17 @@ case ${1:-help} in
 		NR > 1 { gsub(/[[(].*[])]/, ""); sub(".* ", "", $f) }
 		length($f) > 3 && length($f) <= 6 && !F[$f]++ { print $f }
 	' >/var/tmp/bird.csv
-
 	awk -v r="$(openssl rand 2 | od -An -d)" -v n="$n" '
 		BEGIN { srand(r) } { bird[NR] = $0 }
 		END { while (n-- > 0) print bird[int(rand() * NR)] }
 	' /var/tmp/bird.csv
 	;;
-
-##  help -- this help message
 (*)
-	exec >&2
-	echo usage:
-	sed -n 's/^## //p' "$0"
+	echo>&2 "usage:	${0##} pass"
+	echo>&2 "	${0##} mac"
+	echo>&2 "	${0##} ula"
+	echo>&2 "	${0##} suffix"
+	echo>&2 "	${0##} bird"
 	exit 1
 	;;
 esac

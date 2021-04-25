@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# generate OpenBGPD ROA from https://git.dn42.dev/dn42/registry/
 
 function ifprintf(fmt, array, field)
 {

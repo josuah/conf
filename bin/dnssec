@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+# wrapper over ldns-keygen to automate DNSSEC deployment
 
 zone=$2
 soa=$(awk '$1 == "$ORIGIN" { sub(/\.$/,"", $2); print $2 }' "$zone")

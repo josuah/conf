@@ -1,5 +1,4 @@
 #!/usr/bin/awk -f
-
 # convert /etc/wireguard/wgX.conf to /etc/hostname.wgX
 
 BEGIN {
