@@ -1,4 +1,4 @@
-AUTH = shag pelios corax #dis-sys-2
+AUTH = shag pelios corax dis-sys-2
 HOM3 = \
   root@corax josuah@corax \
   root@pelios backup@pelios \

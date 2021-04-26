@@ -15,11 +15,11 @@ mk/zone/clean:
 sign zsk ksk: zone
 	for zones in zones/*.*.zone; do doas dnssec $@ "$$zones"; done
 
-zone: sshfp
+zone: zones/sshfp
 	exec mkdir -p zones
 	(cd conf/zone && template ${ZONE:=.zone}) | (cd zones && zone)
-	exec cat sshfp >>zones/z0.is.zone
-	exec cat sshfp >>zones/z0.dn42.zone
+	exec cat zones/sshfp >>zones/z0.is.zone
+	exec cat zones/sshfp >>zones/z0.dn42.zone
 
-sshfp:
+zones/sshfp:
 	dnssec sshfp conf/zone/z0.is.zone | sort -o $@
