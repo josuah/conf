@@ -1,8 +1,0 @@
-#!/bin/ksh
-
-daemon="/usr/local/bin/babeld"
-daemon_flags="-D"
-
-. /etc/rc.d/rc.subr
-
-rc_cmd $1
