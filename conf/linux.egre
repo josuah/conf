@@ -1,8 +1,0 @@
-if=${0##*.}
-
-ip link del $if
-ip link add $if type ip6gretap local fe80::{{hostid}} remote fe80::{{peer}} dev wg0 ttl 64
-ip address add dev $if {{net}}::{{hostid}}/64
-ip link set $if up
-
-ip route add dev $if ::/0 via {{prefix}}::1

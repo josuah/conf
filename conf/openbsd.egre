@@ -1,6 +1,0 @@
-inet6 fe80::{{hostid}}
-inet6 alias {{net}}::{{hostid}}/64
-tunnel fe80::{{hostid}}%wg0 fe80::{{peer}}%wg0
-up
-
-!route add ::/0 {{net}}::1
