@@ -24,7 +24,7 @@ pack_configure() {
 	if [ -f autogen.sh -a ! -f configure ]; then
 		./autogen.sh
 	fi
-	if [ -f configure -a ! -f Makefile ]; then
+	if [ -f configure ]; then
 		./configure --prefix="$PREFIX"
 	fi
 }
@@ -39,7 +39,7 @@ pack_install() {
 	make PREFIX="$PREFIX" install
 }
 
-. "recipe/$pack.sh"
+. "pack/$pack.sh"
 
 export SOURCE="$PWD/source/$pack-$ver"
 trap 'rm -rf "$SOURCE"' INT TERM EXIT HUP

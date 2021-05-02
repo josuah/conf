@@ -148,7 +148,7 @@ index c7e823f..6014004 100644
 -	yyconfig.cf_macros = malloc(sizeof(*yyconfig.cf_macros));
 -	if (yyconfig.cf_macros == NULL)
 -		err(1, NULL);
-acros, MACRO_CTX_DEFAULT);
+-	macros_init(yyconfig.cf_macros, MACRO_CTX_DEFAULT);
 +	yyconfig.cf_macros = macros;
  
  	TAILQ_INIT(&yyconfig.cf_list);

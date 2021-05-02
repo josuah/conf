@@ -13,10 +13,9 @@ case " $* " in
 
 	# get a list of all hashes on the remote
 	$ssh "$remote" "cd '$path' && exec find . -type f -exec openssl sha256 -r {} +" \
-	 | sed 's, \*\./,  ,' | LC_ALL=C sort -t " " -k 3,909 -o "tmp/$$/index"
-
-	# for each hash, check if we have it locally
-	sed -r 's,(..)(..),\1 \2 &,' "tmp/$$/index" \
+	 | sed -r 's, \*\./,  ,' \
+	 | tee "tmp/$$/index" \
+	 | sed -r 's,(..)(..),\1 \2 &,' \
 	 | while read h1 h2 hash file; do 
 		[ -f "file/$h1/$h2/$hash.gz" ] && continue
 		echo "$hash  $file"
@@ -26,6 +25,7 @@ case " $* " in
 	done
 
 	# add the revision to the index
+	LC_ALL=C sort -t " " -k 3,909 -o "tmp/$$/index" "tmp/$$/index"
 	hash=$(openssl sha256 -r "tmp/$$/index" | sed 's, .*,,')
 	mv "tmp/$$/index" "index/$hash"
 

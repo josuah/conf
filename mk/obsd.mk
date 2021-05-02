@@ -6,7 +6,6 @@ mk/obsd: ${CONF}
 	exec wg-obsd /etc/wireguard/wg*.conf
 	${ENV}; exec printf '\n%s\n' "inet6 fe80::$$hostid/64" "up" \
 	 | tee -a /etc/hostname.wg* >/dev/null
-	exec cp conf/rc.d/* /etc/rc.d
 
 mk/obsd/sync:
 mk/obsd/clean:
