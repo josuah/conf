@@ -1,7 +1,11 @@
 # deployed on {{date}}
 
+%% if [ "${mx:-}" ]; then
 root:		josuah
 me:		josuah
+%% else
+root:		me@josuah.net
+%% fi
 
 # RFC 2142: network operations mailbox names
 abuse:		root

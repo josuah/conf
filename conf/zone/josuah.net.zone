@@ -1,7 +1,7 @@
-%% zone=josuah.net nsdom=z0.is template "$dirname/%head.zone"
+%% zone=josuah.net nsdom=z0.is template %head.zone
 
 @				IN MX	1 mx1.z0.is.
-@				IN TXT	v=spf1 mx -all
+@				IN TXT	"v=spf1 mx -all"
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
 @				IN ALIAS shag.z0.is.

@@ -1,25 +1,25 @@
-ZONE = z0.is z0.dn42 \
-  josuah.net metairies.org
+ZONE = z0.is z0.dn42 josuah.net metairies.org
+NS = ns1.z0.is ns2.z0.is
 
 mk/zone:
-
-mk/zone/sync: sign
-	rsync -vrt --delete zones/ ns1.z0.is:/var/nsd/zones/
-	rsync -vrt --delete zones/ ns2.z0.is:/var/nsd/zones/
-	ssh ns1.z0.is make -C /etc/adm mk/dns
-	ssh ns2.z0.is make -C /etc/adm mk/dns
+mk/zone/sync: ${NS}
 
 mk/zone/clean:
-	exec rm -f zones/*
+	exec rm -f zone/*
+
+${NS}: sign
+	template conf/nsd/nsd.conf | ssh $@ 'exec cat >/var/nsd/etc/nsd.conf'
+	exec rsync -rt --delete zone/ $@:/var/nsd/zones/
+	exec ssh $@ exec nsd-control reload
 
 sign zsk ksk: zone
-	for zones in zones/*.*.zone; do doas dnssec $@ "$$zones"; done
+	for zone in zone/*.*.zone; do doas dnssec $@ "$$zone"; done
 
-zone: zones/sshfp
-	exec mkdir -p zones
-	(cd conf/zone && template ${ZONE:=.zone}) | (cd zones && zone)
-	exec cat zones/sshfp >>zones/z0.is.zone
-	exec cat zones/sshfp >>zones/z0.dn42.zone
+zone: zone/sshfp
+	exec mkdir -p zone
+	(cd conf/zone && template ${ZONE:=.zone}) | (cd zone && zone)
+	exec cat zone/sshfp >>zone/z0.is.zone
+	exec cat zone/sshfp >>zone/z0.dn42.zone
 
-zones/sshfp:
+zone/sshfp:
 	dnssec sshfp conf/zone/z0.is.zone | sort -o $@

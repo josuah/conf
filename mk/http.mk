@@ -1,5 +1,5 @@
 CONF = httpd.conf
-include mk/conf.inc
+include mk/conf.mk
 
 mk/http: ${CONF}
 mk/http/sync:

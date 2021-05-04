@@ -1,5 +1,5 @@
 CONF = login.conf newsyslog.conf relayd.conf
-include mk/conf.inc
+include mk/conf.mk
 
 mk/obsd: ${CONF}
 	exec tee /etc/hostname.wg* </dev/null

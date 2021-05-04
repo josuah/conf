@@ -1,6 +1,7 @@
-%% zone=z0.dn42 nsdom=z0.dn42 template "$dirname/%head.zone"
+%% zone=z0.dn42 nsdom=z0.dn42 template %head.zone
 
 @				IN MX	1 mx1.z0.dn42.
+@				IN TXT	"v=spf1 mx -all"
 
 @				IN NET	fd42:10e3:10e8::/48
 

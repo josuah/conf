@@ -1,5 +1,5 @@
 CONF = netstart
-include mk/conf.inc
+include mk/conf.mk
 
 mk/linux: ${CONF}
 	rm -f /etc/hostname.wg*
