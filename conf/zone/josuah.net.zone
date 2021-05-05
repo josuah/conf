@@ -1,4 +1,6 @@
-%% zone=josuah.net nsdom=z0.is template %head.zone
+$ORIGIN josuah.net
+
+%% nsdom=z0.is template %head.zone
 
 @				IN MX	1 mx1.z0.is.
 @				IN TXT	"v=spf1 mx -all"

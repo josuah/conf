@@ -1,4 +1,6 @@
-%% zone=metairies.org nsdom=z0.is template %head.zone
+$ORIGIN metairies.org
+
+%% nsdom=z0.is template %head.zone
 
 @				IN MX	1 spool.mail.gandi.net.
 @				IN MX	2 fb.mail.gandi.net.

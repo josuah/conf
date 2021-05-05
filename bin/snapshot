@@ -5,44 +5,41 @@
 ssh='ssh -oControlMaster=auto -oControlPersist=3 -oControlPath=~/.ssh/master_%r_%h_%p'
 
 case " $* " in
-(" take "*?" "*?" ")
-	remote=${2%%:*} path=${2#*:} repo=$3
+(" take "*" "*" ")
+	host=${2%%:*} dir=${2#*:} repo=$3
 
-	mkdir -p "tmp/$$" index repo
+	mkdir -p "tmp/$$" index repo file
 	trap 'rm -rf "tmp/$$"' INT EXIT TERM HUP
 
 	# get a list of all hashes on the remote
-	$ssh "$remote" "cd '$path' && exec find . -type f -exec openssl sha256 -r {} +" \
-	 | sed -r 's, \*\./,  ,' \
-	 | tee "tmp/$$/index" \
-	 | sed -r 's,(..)(..),\1 \2 &,' \
-	 | while read h1 h2 hash file; do 
-		[ -f "file/$h1/$h2/$hash.gz" ] && continue
+	$ssh "$host" "cd '$dir' && exec find . -type f -exec openssl sha256 -r {} +" \
+	 | sed 's, \*\./,  ,' | tee "tmp/$$/index" | sed 's,...,& &,' \
+	 | while read hhh hash file; do 
+		[ -f "file/$hhh/$hash.gz" ] && continue
 		echo "$hash  $file"
-		$ssh "$remote" "gzip -cf '$path/$file'" >tmp/$$/$hash.gz </dev/null
-		mkdir -p "file/$h1/$h2"
-		mv -f "tmp/$$/$hash.gz" "file/$h1/$h2/$hash.gz"
+		$ssh "$host" "gzip -cf '$dir/$file'" >tmp/$$/$hash.gz </dev/null
+		mkdir -p "file/$hhh"
+		mv -f "tmp/$$/$hash.gz" "file/$hhh/$hash.gz"
 	done
 
 	# add the revision to the index
-	LC_ALL=C sort -t " " -k 3,909 -o "tmp/$$/index" "tmp/$$/index"
+	LC_ALL=C sort -t " " -k 3,1000 -o "tmp/$$/index" "tmp/$$/index"
 	hash=$(openssl sha256 -r "tmp/$$/index" | sed 's, .*,,')
 	mv "tmp/$$/index" "index/$hash"
 
 	# append the date and the new index to the repo
 	date +"%Y-%m-%d-%H-%M-%S $hash" | tee -a "repo/$repo"
 	;;
-(" restore "*?" ")
+(" restore "*" "*" ")
 	hash=$2 dest=$3
-	sed -r 's,(..)(..),\1 \2 &,' "index/$hash" \
-	 | while read h1 h2 hash file; do
-		mkdir -p "$path/${file%/*}"
-		gzip -cd <file/$h1/$h2/$hash.gz >"$dest/$path/$file"
+	sed 's,...,& &,' "index/$hash" | while read hhh hash file; do
+		mkdir -p "$dest/$(dirname "$file")"
+		gzip -cd <file/$hhh/$hash.gz >"$dest/$file"
 	done
 	;;
-(" cat "*?" ")
+(" cat "*" ")
 	hash=$2
-	exec gzip -cd "file/$(echo "$hash" | sed -r 's,(..)(..).*,\1/\2/&,').gz"
+	exec gzip -cd "file/$(echo "$hash" | sed 's,...,&/&,').gz"
 	;;
 (*)
 	echo>&2 "usage:	${0##*/} take <user@host:/path> <repo>"

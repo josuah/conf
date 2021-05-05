@@ -1,5 +1,3 @@
-$ORIGIN {{zone}}.
-
 @			86400	IN SOA	ns1.{{nsdom}}. postmaster.{{nsdom}}. ({{now}} 3600 600 86400 60)
 
 @			86400	IN NS	ns1.{{nsdom}}.
