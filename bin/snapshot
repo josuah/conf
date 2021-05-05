@@ -27,8 +27,8 @@ case " $* " in
 	hash=$(openssl sha256 -r "tmp/$$/index" | sed 's, .*,,')
 	mv "tmp/$$/index" "index/$hash"
 
-	# append the date and the new index to the repo
-	date +"%Y-%m-%d-%H-%M-%S $hash" | tee -a "repo/$repo"
+	# append the new index to the repo
+	date +"%Y-%m-%d-%H-%M-%S $hash" >>repo/$repo
 	;;
 (" restore "*" "*" ")
 	hash=$2 dest=$3

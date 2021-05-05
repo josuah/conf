@@ -1,0 +1,9 @@
+# deployed on {{date}}
+
+AuthorizedKeysFile	.ssh/authorized_keys
+PasswordAuthentication	no
+
+Subsystem	sftp	/usr/libexec/sftp-server
+
+Match Group users
+  X11Forwarding		yes

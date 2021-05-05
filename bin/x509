@@ -71,14 +71,15 @@ case " $* " in
 	;;
 (" ca "*" revoke "*" ") ca=$2 file=$4
 	[ -f "$file" ] || file=/etc/ssl/$file.crt
-	mkdir -p "/etc/ssl/ca/$ca/revoked"
+	mkdir -p "/etc/ssl/ca/$ca/crl"
 	hash=$(openssl x509 -in "$file" -noout -fingerprint \
 	  | sed 's/.*=//; s/://g')
-	echo "$conf" | openssl ca -config /dev/stdin \
-	  -revoke "$file"
 	echo "$conf" | openssl ca -config /dev/stdin -gencrl \
-	  -in "${file%.crt}.csr" -out "/etc/ssl/ca/$ca/revoked/$hash.crl"
-	echo "/etc/ssl/ca/$ca/revoked/$hash.crl"
+	  -batch -in "${file%.crt}.csr" -out "/etc/ssl/ca/$ca/crl/$hash.crl"
+	echo "/etc/ssl/ca/$ca/crl/$hash.crl"
+	echo "$conf" | openssl ca -config /dev/stdin \
+	  -batch -revoke "$file"
+	echo "certificate $file revoked"
 	;;
 (" csr "*" ") cn=$2
 	mkdir -p /etc/ssl/private
