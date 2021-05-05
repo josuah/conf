@@ -55,6 +55,7 @@ case " $* " in
 	mkdir -m 700 private 
 	touch index.txt
 	echo 0000 >serial
+	echo 0000 >crlnumber
 	echo "$conf" | openssl req -config /dev/stdin -extensions ext_ca \
 	  -x509 -newkey rsa:4096 -nodes \
 	  -keyout private/ca.key -out ca.crt -subj "/CN=$ca"
@@ -65,7 +66,19 @@ case " $* " in
 (" ca "*" sign "*" ") ca=$2 file=$4
 	[ -f "$file" ] || file=/etc/ssl/$file.csr
 	echo "$conf" | openssl ca -config /dev/stdin -extensions ext_fqdn \
-	  -batch -in "$file"
+	  -batch -in "$file" >${file%.csr}.crt
+	echo "${file%.csr}.crt"
+	;;
+(" ca "*" revoke "*" ") ca=$2 file=$4
+	[ -f "$file" ] || file=/etc/ssl/$file.crt
+	mkdir -p "/etc/ssl/ca/$ca/revoked"
+	hash=$(openssl x509 -in "$file" -noout -fingerprint \
+	  | sed 's/.*=//; s/://g')
+	echo "$conf" | openssl ca -config /dev/stdin \
+	  -revoke "$file"
+	echo "$conf" | openssl ca -config /dev/stdin -gencrl \
+	  -in "${file%.crt}.csr" -out "/etc/ssl/ca/$ca/revoked/$hash.crl"
+	echo "/etc/ssl/ca/$ca/revoked/$hash.crl"
 	;;
 (" csr "*" ") cn=$2
 	mkdir -p /etc/ssl/private
@@ -84,6 +97,7 @@ case " $* " in
 	echo>&2	"usage:	${0##*/} ca <name> create"
 	echo>&2	"	${0##*/} ca <name> delete"
 	echo>&2	"	${0##*/} ca <name> sign <csr>"
+	echo>&2	"	${0##*/} ca <name> revoke <crt>"
 	echo>&2	"	${0##*/} csr <name>"
 	echo>&2	"	${0##*/} dhparam"
 	;;
