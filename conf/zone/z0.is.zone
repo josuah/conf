@@ -1,4 +1,4 @@
-$ORIGIN {{zone}}.
+$ORIGIN z0.is.
 
 %% nsdom=z0.is template %head.zone
 
@@ -6,14 +6,13 @@ $ORIGIN {{zone}}.
 @				IN TXT	"v=spf1 mx -all"
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
-2a03:6000:6f66:602::/64		IN SOA	ns1 postmaster ({{now}} 3600 600 86400 60)
-2a03:6000:6f66:602::/64		IN NS	ns1
-2a03:6000:6f66:602::/64		IN NS	ns2
+@				IN NET	31.37.164.83/32
+@				IN NET	2a03:6000:6f66:602::/64
+@				IN NET	46.23.94.12/32
 
 pelios				IN A	31.37.164.83
 shag				IN AAAA	2a03:6000:6f66:602::6
 shag				IN A	46.23.94.12
-felix				IN A	45.77.61.129
 
 mx1				IN ALIAS shag.z0.is.
 ns1				IN ALIAS shag.z0.is.
@@ -21,4 +20,3 @@ ns2				IN ALIAS shag.z0.is.
 @				IN ALIAS shag.z0.is.
 git				IN ALIAS shag.z0.is.
 xen1				IN ALIAS shag.z0.is.
-p9auth				IN ALIAS felix.z0.is.

@@ -6,7 +6,7 @@ export MAIL="${MAIL:-$HOME/Maildir}"
 
 mseq -S </dev/null
 mdirs "$MAIL" | sort | grep -Fvx "${MAIL%/}/Trash" | while read mdir; do
-	mpick -t 'flagged || !seen' "$mdir" | msort -d | tail -n 10 \
+	mpick -t 'flagged || !seen' "$mdir" | msort -d \
 	 | mseq -A >/dev/null
 done
 exec mview

@@ -1,7 +1,5 @@
 #!/bin/sh -eu
-# Jason Donfield's pass(1) alternative using age(1) as back-end
-
-key=$HOME/.ssh/id_ed25519
+# Jason Donfield's pass(1) alternative
 
 mkdir -p "$HOME/.password-store"
 cd "$HOME/.password-store"
@@ -13,12 +11,12 @@ err() {
 
 case ${1:-} in
 (get)
-	exec age -d -i "$key" "$2"
+	exec gpg -ad "$2"
 	;;
 (set)
 	[ -e "$2" ] && err "password $2 already exist"
 	mkdir -p "${2%/*}"
-	exec age -a -r "$(cat "$key.pub")" >$2
+	exec gpg -ae -r "$EMAIL" >$2
 	;;
 (export)
 	for x in */*; do

@@ -23,3 +23,5 @@ zone: zone/sshfp
 
 zone/sshfp:
 	dnssec sshfp conf/zone/z0.is.zone | sort -o $@
+
+.PHONY: zone
