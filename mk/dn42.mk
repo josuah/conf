@@ -9,9 +9,6 @@ mk/dn42/sync: ${REPO}/.git
 	exec doas -u dn42 git -C ${REPO} reset --hard origin/master
 	exec make mk/dn42
 
-mk/dn42/clean:
-	exec rm -f conf/bgpd/roa.conf.tmp
-
 conf/bgpd/roa.conf: ${REPO}/.git
 	exec dn42-roa ${REPO}/data/route/* ${REPO}/data/route6/* >$@.tmp
 	exec mv $@.tmp $@

@@ -10,13 +10,13 @@ function assert(expr, msg)
 	}
 }
 
-function Peer(key)
+function peer(file, key)
 {
-	assert(peer" "key in PEER, "could not find "key"= in [Peer]")
-	return PEER[peer" "key]
+	assert(file" "key in PEER, "could not find "key"= in [Peer]")
+	return PEER[file" "key]
 }
 
-function Env(key)
+function env(key)
 {
 	assert(key in ENVIRON, "could not find "key"= in ENVIRON")
 	return ENVIRON[key]
@@ -48,37 +48,38 @@ BEGIN {
 	}
 }
 
-# the port number is derived from our hostid
-tolower($0) ~ /^endpoint/ {
-	$0 = $0":" (baseport + Env("hostid"))
-}
-
 # parse other peers config
 index(FILENAME, "/"hostname".conf") == 0 {
 	gsub("[\t ]+", "")
 	sub("=", " ")
 	PEER[FILENAME" "tolower($1)] = $2
+	print FILENAME, tolower($1), "=", $2 >"/dev/stderr"
 	FILES[FILENAME]++
+}
+
+# the port number is derived from our hostid
+tolower($0) ~ /^endpoint/ {
+	$0 = $0":" (baseport + env("hostid"))
 }
 
 END {
 	# generate peer config
 	split("PublicKey PresharedKey AllowedIPs Endpoint PersistentKeepalive", key)
-	for (peer in FILES) {
-		file = "/etc/wireguard/wg"Peer("hostid")".conf"
-		print "[Interface]"					>>file
-		print "PrivateKey = "priv				>>file
-		print "ListenPort = "(baseport + Peer("hostid"))	>>file
-		print ""						>>file
-		print "[Peer]"						>>file
-		for (i in key) if (peer" "tolower(key[i]) in PEER)
-			print key[i]" = "Peer(tolower(key[i]))		>>file
+	for (file in FILES) {
+		out = "/etc/wireguard/wg"peer(file, "hostid")".conf"
+		print "[Interface]"					>>out
+		print "PrivateKey = "priv				>>out
+		print "ListenPort = "(baseport + peer(file, "hostid"))	>>out
+		print ""						>>out
+		print "[Peer]"						>>out
+		for (i in key) if (file" "tolower(key[i]) in PEER)
+			print key[i]" = "peer(file, tolower(key[i]))	>>out
 	}
 
 	# print our own config
+	print "HostID = "env("hostid")
 	print "PublicKey = "pub
 	print "AllowedIPs = 0.0.0.0/0, ::/0"
-	print "HostID = "Env("hostid")
 
 	exit(EXIT)
 }

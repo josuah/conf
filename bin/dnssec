@@ -1,23 +1,23 @@
 #!/bin/sh -eu
 # wrapper over ldns-keygen to automate DNSSEC deployment
 
-zone=$2
-soa=$(awk '$1 == "$ORIGIN" { sub(/\.$/,"", $2); print $2 }' "$zone")
+zone=${2:-}
+origin=$(awk '$1 == "$ORIGIN" { print $2 }' "$zone")
 
 case "$*" in
 ("zsk "*)
-	mkdir -p -m 700 "/etc/dnssec/$soa+zsk"
-	cd "/etc/dnssec/$soa+zsk"
-	ldns-keygen -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
+	mkdir -p -m 700 "/etc/dnssec/$origin+zsk"
+	cd "/etc/dnssec/$origin+zsk"
+	ldns-keygen -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$origin" >>log
 	;;
 ("ksk "*)
-	mkdir -p -m 700 "/etc/dnssec/$soa+ksk"
-	cd "/etc/dnssec/$soa+ksk"
-	ldns-keygen -k -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$soa" >>log
+	mkdir -p -m 700 "/etc/dnssec/$origin+ksk"
+	cd "/etc/dnssec/$origin+ksk"
+	ldns-keygen -k -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$origin" >>log
 	;;
 ("sign "*)
-	zsk=/etc/dnssec/$soa+zsk/$(tail -n 1 /etc/dnssec/$soa+zsk/log)
-	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
+	zsk=/etc/dnssec/$origin+zsk/$(tail -n 1 /etc/dnssec/$origin+zsk/log)
+	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 /etc/dnssec/$origin+ksk/log)
 	salt=$(openssl rand -hex 64)
 	ldns-signzone -n -s "$salt" "$zone" "$ksk" "$zsk" >$zone.signed
 	;;
@@ -26,7 +26,7 @@ case "$*" in
 	 | sort | xargs ssh-keyscan -D
 	;;
 ("info "*)
-	ksk=/etc/dnssec/$soa+ksk/$(tail -n 1 /etc/dnssec/$soa+ksk/log)
+	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 /etc/dnssec/$origin+ksk/log)
 	awk '{ print "tag="$4" algo="$5" type="$6" digest="$7 }' "$ksk.ds"
 	awk '{ print "key="$7 }' "$ksk.key"
 	;;

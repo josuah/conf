@@ -1,14 +1,13 @@
-AUTH = shag pelios corax dis-sys-2
+AUTH = nlams1 frlil1 term1 dis-sys-2
 HOM3 = \
-  root@corax josuah@corax \
-  root@pelios backup@pelios \
-  root@shag josuah@shag \
+  root@term1 josuah@term1 \
+  root@frlil1 backup@frlil1 \
+  root@nlams1 josuah@nlams1 \
   josuah@bitreich.org josuah@server10.openbsd.amsterdam git@git.z0.is \
   root@dis-sys-2 jdemangeon@dis-sys-2
 
 mk/auth:
 mk/auth/sync: ${AUTH} ${HOM3}
-mk/auth/clean:
 
 ${AUTH}:
 	exec rsync -vrt --delete ${PWD}/* $@:${PWD}

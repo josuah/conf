@@ -1,6 +1,5 @@
 CONF = httpd.conf
 include mk/conf.mk
 
-mk/http: ${CONF}
+mk/http:
 mk/http/sync:
-mk/http/clean:

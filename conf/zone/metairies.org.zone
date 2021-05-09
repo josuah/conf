@@ -6,9 +6,9 @@ $ORIGIN metairies.org.
 @				IN MX	2 fb.mail.gandi.net.
 @				IN TXT	"v=spf1 mx -all"
 
-@				IN ALIAS shag.z0.is.
-www				IN ALIAS shag.z0.is.
-atelier				IN ALIAS shag.z0.is.
-ikebana				IN ALIAS shag.z0.is.
-kyudo				IN ALIAS shag.z0.is.
-miki				IN ALIAS shag.z0.is.
+@				IN ALIAS nlams1.z0.is.
+www				IN ALIAS nlams1.z0.is.
+atelier				IN ALIAS nlams1.z0.is.
+ikebana				IN ALIAS nlams1.z0.is.
+kyudo				IN ALIAS nlams1.z0.is.
+miki				IN ALIAS nlams1.z0.is.

@@ -3,13 +3,12 @@ CONF = hosts syslog.conf crontab profile macros.conf \
   mail/smtpd.conf mail/aliases mail/domains
 include mk/conf.mk
 
-mk/base: ${CONF} ${PREFIX}/bin /home/pack/pack \
+mk/base: ${PREFIX}/bin /home/pack/pack \
 /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
 	exec ln -sf ${PWD}/bin/* ${PREFIX}/bin
 	exec env ${ENV} wg-ptp wire/*
 
 mk/base/sync:
-mk/base/clean:
 
 ${PREFIX}/bin:
 	exec mkdir -p ${PREFIX}/bin

@@ -5,17 +5,20 @@ $ORIGIN z0.dn42.
 @				IN MX	1 mx1.z0.dn42.
 @				IN TXT	"v=spf1 mx -all"
 
-loopback			IN NET	fd42:10e3:10e8::/64
+lo				IN NET	fd42:10e3:10e8::/64
 
-ns.loopback			IN NET	fd42:10e3:10e8::53:0/112
+ns				IN NET	fd42:10e3:10e8::53:0/112
 ns1				IN AAAA	fd42:10e3:10e8::53:1
 ns2				IN AAAA	fd42:10e3:10e8::53:2
 
-mx.loopback			IN NET	fd42:10e3:10e8::25:0/112
+dot				IN NET fd42:10e3:10e8::853:0/112
+dot1				IN AAAA fd42:10e3:10e8::853:1
+
+mx				IN NET	fd42:10e3:10e8::25:0/112
 mx1				IN AAAA	fd42:10e3:10e8::25:1
 
-pelios				IN AAAA	fd42:10e3:10e8::5
-corax				IN AAAA	fd42:10e3:10e8::3
-shag				IN AAAA	fd42:10e3:10e8::7
+frlil1				IN AAAA	fd42:10e3:10e8::5
+term1				IN AAAA	fd42:10e3:10e8::3
+nlams1				IN AAAA	fd42:10e3:10e8::7
 
-@				IN ALIAS pelios.z0.dn42.
+@				IN ALIAS frlil1.z0.dn42.
