@@ -6,7 +6,7 @@ include mk/conf.mk
 mk/base: ${PREFIX}/bin /home/pack/pack \
 /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
 	exec ln -sf ${PWD}/bin/* ${PREFIX}/bin
-	exec env ${ENV} wg-ptp wire/*
+	exec env ${ENV} wg-ptp conf/wireguard/peer/*
 
 mk/base/sync:
 

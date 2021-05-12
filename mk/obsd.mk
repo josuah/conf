@@ -1,10 +1,10 @@
-CONF = login.conf newsyslog.conf relayd.conf
+CONF = login.conf newsyslog.conf relayd.conf relayd/tls.conf \
+  wireguard/hostname.if
 include mk/conf.mk
 
-mk/obsd:
-	exec tee /etc/hostname.wg* </dev/null
-	exec wg-obsd /etc/wireguard/wg*.conf
-	${ENV}; exec printf '\n%s\n' "inet6 fe80::$$hostid/64" "up" \
-	 | tee -a /etc/hostname.wg* >/dev/null
-
+mk/obsd: ${WGPEERS}
 mk/obsd/sync:
+
+${WGPEERS}: wireguard/hostname.if
+	exec wg-obsd /etc/wireguard/$@.conf >/etc/hostname.$@
+	exec cat /etc/wireguard/hostname.if >>/etc/hostname.$@

@@ -1,13 +1,14 @@
 ZONE = z0.is z0.dn42 josuah.net metairies.org
-NS = ns1.z0.is ns2.z0.is
+NS = ns1 ns2
 
 mk/zone: sign
 mk/zone/sync: ${NS}
 
 ${NS}:
-	template conf/nsd.conf | ssh $@ 'exec cat >/etc/nsd.conf'
-	exec rsync -rt --delete zone/ $@:/var/nsd/zones/
-	exec ssh $@ exec nsd-control reload
+	ns=$$(echo $@ | tr -cd 0-9) template conf/nsd.conf \
+	 | ssh $@.z0.is 'exec cat >/var/nsd/etc/nsd.conf'
+	exec rsync -rt --delete zone/ $@.z0.is:/var/nsd/zones/
+	exec ssh $@.z0.is exec nsd-control reload
 
 sign zsk ksk: zone
 	for zone in zone/*.*.zone; do doas dnssec $@ "$$zone"; done

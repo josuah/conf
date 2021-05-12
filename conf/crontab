@@ -6,5 +6,3 @@ MAILTO=me@josuah.net
 */10	*	*	*	*	root	newsyslog
 */5	*	*	*	*	root	rdate -s pool.ntp.org
 */5	*	*	*	*	root	rcctl ls failed
-
-%% [ -f /etc/crontab.local ] && cat /etc/crontab.local

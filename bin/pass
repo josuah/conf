@@ -1,41 +1,44 @@
 #!/bin/sh -eu
 # Jason Donfield's pass(1) alternative
 
+key=$HOME/.ssh/id_ed25519
+
 mkdir -p "$HOME/.password-store"
 cd "$HOME/.password-store"
 
-err() {
-	echo "error: $1" >&2
-	exit 2
-}
-
 case ${1:-} in
-(get)
-	exec gpg -ad "$2"
+(show)
+	exec gpg2 -qad "$2"
 	;;
-(set)
-	[ -e "$2" ] && err "password $2 already exist"
+(insert)
+	if [ -e "$2" ]; then
+		echo>&2 "password $2 already exist"
+		exit 2
+	fi
 	mkdir -p "${2%/*}"
-	exec gpg -ae -r "$EMAIL" >$2
+	exec gpg2 -qae -r "$EMAIL" >$2
 	;;
 (export)
 	for x in */*; do
-		"$0" get "$x" | awk -v id="$x" '{ print id, $0 }'
+		"$0" show "$x" | awk -v id="$x" '{ print id, $0 }'
 	done
 	;;
 (import)
 	while read id pass; do
-		echo "$pass" | "$0" set "$id"
+		echo "$pass" | "$0" insert "$id"
 	done
 	;;
 ("")
 	file=$(find * -type f | dmenu -fn terminus:pixelsize=16 -p pass)
-	"$0" get "$file" | tr -d '\n' | xsel -i
+	"$0" show "$file" | tr -d '\n' | xsel -i
 	echo "${file##*/}" | tr -d '\n' | xsel -bi
 	;;
-(*)
-	echo>&2 "usage:	${0##*/} (set|get) resource/account-name"
-	echo>&2 "	${0##*/}"
+(-*)
+	echo>&2 "usage:	${0##*/} [show|insert] resource/account-name"
+	echo>&2 "	${0##*/} [import|export]"
 	exit 1
+	;;
+(*)
+	exec "$0" show "$@"
 	;;
 esac

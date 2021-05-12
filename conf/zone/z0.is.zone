@@ -10,12 +10,13 @@ _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 @				IN NET	31.37.164.83/32
 @				IN NET	46.23.94.12/32
 
-frlil1				IN A	31.37.164.83
-nlams1				IN AAAA	2a03:6000:6f66:602::6
-nlams1				IN A	46.23.94.12
+lil1				IN A	31.37.164.83
+ams1				IN AAAA	2a03:6000:6f66:602::6
+ams1				IN A	46.23.94.12
 
-mx1				IN ALIAS nlams1.z0.is.
-ns1				IN ALIAS nlams1.z0.is.
-ns2				IN ALIAS frlil1.z0.is.
-@				IN ALIAS nlams1.z0.is.
-git				IN ALIAS nlams1.z0.is.
+mx1				IN ALIAS ams1.z0.is.
+ns1				IN ALIAS ams1.z0.is.
+ns2				IN ALIAS lil1.z0.is.
+dns1				IN ALIAS ams1.z0.is.
+@				IN ALIAS ams1.z0.is.
+git				IN ALIAS ams1.z0.is.

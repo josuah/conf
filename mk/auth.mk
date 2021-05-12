@@ -1,8 +1,8 @@
-AUTH = nlams1 frlil1 term1 dis-sys-2
+AUTH = ams1 lil1 term1 dis-sys-2
 HOM3 = \
   root@term1 josuah@term1 \
-  root@frlil1 backup@frlil1 \
-  root@nlams1 josuah@nlams1 \
+  root@lil1 backup@lil1 \
+  root@ams1 josuah@ams1 \
   josuah@bitreich.org josuah@server10.openbsd.amsterdam git@git.z0.is \
   root@dis-sys-2 jdemangeon@dis-sys-2
 
