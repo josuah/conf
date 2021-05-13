@@ -1,10 +1,10 @@
 ZONE = z0.is z0.dn42 josuah.net metairies.org
-NS = ns1 ns2
+ZONE_NS = ns1 ns2
 
-mk/zone: sign
-mk/zone/sync: ${NS}
+conf: sign
+sync: ${ZONE_NS}
 
-${NS}:
+${ZONE_NS}:
 	ns=$$(echo $@ | tr -cd 0-9) template conf/nsd.conf \
 	 | ssh $@.z0.is 'exec cat >/var/nsd/etc/nsd.conf'
 	exec rsync -rt --delete zone/ $@.z0.is:/var/nsd/zones/

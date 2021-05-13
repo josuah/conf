@@ -1,8 +1,8 @@
 CONF = bgpd.conf bgpd/roa.conf bgpd/permit.conf bgpd/deny.conf ospf6d.conf
+
 include mk/conf.mk
 
-mk/router: /home/bgplgsh
-mk/router/sync:
+conf: /home/bgplgsh
 
 /home/bgplgsh:
 	exec useradd -m -k /var/empty bgplgsh

@@ -1,85 +1,51 @@
 #!/usr/bin/awk -f
 # configure point-to-point wireguard tunnels
 
-function assert(expr, msg)
-{
+function assert(expr, msg) {
 	if (!expr) {
-		print msg >"/dev/stderr"
-		EXIT = 1
-		exit(EXIT)
+		print "error: "msg >"/dev/stderr"
+		exit(1)
 	}
 }
 
-function peer(file, key)
-{
-	assert(file" "key in PEER, "could not find "key"= in [Peer]")
-	return PEER[file" "key]
-}
-
-function env(key)
-{
-	assert(key in ENVIRON, "could not find "key"= in ENVIRON")
-	return ENVIRON[key]
+function hex2dec(x, d) {
+	x = toupper(ENVIRON["hostid"])
+	for (i = 1; i <= length(x); i++)
+		d = d * 16 + index("0123456789ABCDEF", substr(x, i, 1)) - 1
+	return d
 }
 
 BEGIN {
-	baseport = 50000
+	BASEPORT = 50000
 
-	# get and set system environment
-	"exec hostname -s" | getline hostname
-	"exec uname" | getline uname
-        system("exec mkdir -p -m 700 /etc/wireguard")
-        system("exec rm -f /etc/wireguard/wg[0-9]*.conf")
+	getline KEY <"/etc/wireguard/key"
 
-	# get a private key
-	if (system("exec test -f /etc/wireguard/key") > 0)
-		system("exec openssl rand -base64 32 >/etc/wireguard/key")
-	getline priv <"/etc/wireguard/key"
+	assert("hostid" in ENVIRON, "could not find hostid= in ENVIRON")
+	PEERPORT = BASEPORT + hex2dec(ENVIRON["HOSTID"])
 
-	# derive the public key
-	if (uname == "OpenBSD") {
-		system("exec ifconfig wg999999 create wgport 51820 wgkey "priv)
-		while (("exec ifconfig wg999999" | getline) > 0)
-			if ($1 == "wgpubkey")
-				pub = $2
-		system("exec ifconfig wg999999 destroy")
-	} else {
-		"exec wg pubkey </etc/wireguard/key" | getline pub
-	}
+	FIELDS["publickey"]++
+	FIELDS["presharedkey"]++
+	FIELDS["allowedips"]++
+	FIELDS["endpoint"]++
+	FIELDS["persistentkeepalive"]++
 }
 
-# parse other peers config
-index(FILENAME, "/"hostname".conf") == 0 {
+FNR == 1 {
+	peerid = FILENAME
+	gsub("[^0-9]*", "", peerid)
+
+	print "[Interface]"
+	print "PrivateKey = "KEY
+	print "ListenPort = "(BASEPORT + peerid)
+	print ""
+	print "[Peer]"
+}
+
+tolower($1) in FIELDS {
 	gsub("[\t ]+", "")
 	sub("=", " ")
-	PEER[FILENAME" "tolower($1)] = $2
-	print FILENAME, tolower($1), "=", $2 >"/dev/stderr"
-	FILES[FILENAME]++
-}
 
-# the port number is derived from our hostid
-tolower($0) ~ /^endpoint/ {
-	$0 = $0":" (baseport + env("hostid"))
-}
-
-END {
-	# generate peer config
-	split("PublicKey PresharedKey AllowedIPs Endpoint PersistentKeepalive", key)
-	for (file in FILES) {
-		out = "/etc/wireguard/wg"peer(file, "hostid")".conf"
-		print "[Interface]"					>>out
-		print "PrivateKey = "priv				>>out
-		print "ListenPort = "(baseport + peer(file, "hostid"))	>>out
-		print ""						>>out
-		print "[Peer]"						>>out
-		for (i in key) if (file" "tolower(key[i]) in PEER)
-			print key[i]" = "peer(file, tolower(key[i]))	>>out
-	}
-
-	# print our own config
-	print "HostID = "env("hostid")
-	print "PublicKey = "pub
-	print "AllowedIPs = 0.0.0.0/0, ::/0"
-
-	exit(EXIT)
+	if (tolower($1) == "endpoint")
+		$2 = $2":"PEERPORT
+	print $1" = "$2
 }

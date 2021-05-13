@@ -1,7 +1,8 @@
 #!/usr/bin/awk -f
 # build a table out of rcctl output
 
-function table() {
+function table()
+{
 	while (("exec rcctl ls started" | getline) > 0)
 		sv[$0]++
 	ignore["pf"] = ignore["check_quotas"] = ignore["library_aslr"] = 1
@@ -11,24 +12,36 @@ function table() {
 	}
 }
 
+function getstate(states, services, ns, host, arg, name)
+{
+	cmd = "exec ssh '"host"' exec rcctl ls "arg
+	while ((cmd | getline) > 0) {
+		states[host" "$1] = name
+		if (!UNIQ[$1]++) services[ns++] = $1
+	}
+	return ns
+}
+
 BEGIN {
 	printf("%-20s", "host")
-	for (i = 1; i in ARGV; i++) {
-		gsub("[^-@._A-Za-z0-9]", "", ARGV[i])
-		cmd = "exec ssh "ARGV[i]" exec sh /dev/stdin list <"self
-		while ((cmd | getline) > 0) {
-			stat[ARGV[i]" "$1] = $2;
-			if (!uniq[$1]++) sv[ns++] = $1
-		}
-		printf "%-"length(ARGV[i])"s ", ARGV[i]
+
+	for (i1 = 1; i1 in ARGV; i1++) {
+		host = ARGV[i1]
+		printf "%-"length(host)"s ", host
+		gsub("[^-@._A-Za-z0-9]", "", host)
+		ns = getstate(states, services, ns, host, "on", "ok")
+		ns = getstate(states, services, ns, host, "failed", "err")
 	}
 	printf "\n"
 
-	for (is = 0; is < ns; is++) {
-		printf "%-20s", sv[is]
-		for (i = 1; i in ARGV; i++) {
-			s = stat[ARGV[i]" "sv[is]]
-			printf " %-"length(ARGV[i])"s", s ? s : "-"
+	for (i1 = 0; i1 < ns; i1++) {
+		serv = services[i1]
+		printf "%-20s", serv
+
+		for (i2 = 1; i2 in ARGV; i2++) {
+			host = ARGV[i2]
+			stat = states[host" "serv]
+			printf " %-"length(host)"s", stat ? stat : "-"
 		}
 		printf "\n"
 	}

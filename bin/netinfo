@@ -55,6 +55,20 @@ function ip4_int(ip4,
 	return ar[1]*256^3 + ar[2]*256^2 + ar[3]*256^1 + ar[4]*256^0
 }
 
+function int_hex(n)
+{
+	return sprintf("%x", n)
+}
+
+function hex_int(x,
+	i, n)
+{
+	x = toupper(x)
+	for (i = 1; i <= length(x); i++)
+		n = n * 16 + index("0123456789ABCDEF", substr(x, i, 1)) - 1
+	return n
+}
+
 function usage()
 {
 	print "usage:" >"/dev/stderr"
@@ -63,7 +77,9 @@ function usage()
 	print "	netinfo ip6-rev db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo ip6-comp db8:134d:85fe:2054::1302:42" >"/dev/stderr"
 	print "	netinfo int-ip4 65001" >"/dev/stderr"
-	print "	netinfo ip4-int 65001" >"/dev/stderr"
+	print "	netinfo ip4-int 0.0.253.233" >"/dev/stderr"	
+	print "	netinfo hex-ip4 fde9" >"/dev/stderr"
+	print "	netinfo ip4-hex 0.0.253.233" >"/dev/stderr"
 	exit(1)
 }
 
@@ -75,5 +91,7 @@ BEGIN {
 	else if (ARGV[1] == "ip6-comp") print ip6_comp(ARGV[2])
 	else if (ARGV[1] == "int-ip4") print int_ip4(ARGV[2])
 	else if (ARGV[1] == "ip4-int") print ip4_int(ARGV[2])
+	else if (ARGV[1] == "hex-ip4") print int_ip4(hex_int(ARGV[2]))
+	else if (ARGV[1] == "ip4-hex") print int_hex(ip4_int(ARGV[2]))
 	else usage()
 }

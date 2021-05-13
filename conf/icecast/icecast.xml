@@ -3,7 +3,7 @@
 
 <icecast>
 	<location>@</location>
-	<admin>admin@cast.z0.is</admin>
+	<admin>root@z0.is</admin>
 
 	<limits>
 		<clients>100</clients>
@@ -23,15 +23,11 @@
 		<admin-password>{{pass}}</admin-password>
 	</authentication>
 
-	<hostname>cast.z0.is</hostname>
+	<hostname>icecast.z0.is</hostname>
 
 	<listen-socket>
 		<port>8000</port>
 	</listen-socket>
-
-	<http-headers>
-		<header name="Access-Control-Allow-Origin" value="*" />
-	</http-headers>
 
 	<fileserve>1</fileserve>
 

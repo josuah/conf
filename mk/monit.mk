@@ -1,7 +1,8 @@
 CONF = monitower.conf
+
 include mk/conf.mk
 
-mk/monit:
-	exec cp -r conf/monitower /etc
+conf: monit
 
-mk/monit/sync:
+monit:
+	exec cp -r conf/monitower /etc
