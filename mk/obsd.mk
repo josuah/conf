@@ -1,5 +1,5 @@
 CONF = login.conf newsyslog.conf relayd.conf relayd/tls.conf \
-  wireguard/hostname.if
+  pf.conf wireguard/hostname.if
 
 include mk/conf.mk
 
