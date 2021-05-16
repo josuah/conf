@@ -1,8 +1,8 @@
 PREFIX = /usr/local
 
-CONF = hosts syslog.conf crontab profile macros.conf \
-  ssh/sshd_config ssh/ssh_config \
-  mail/smtpd.conf mail/aliases mail/domains
+CONF = mail/smtpd.conf mail/aliases mail/domains hosts syslog.conf \
+ crontab profile macros.conf ssh/sshd_config ssh/ssh_config \
+ resolv.conf.tail
 
 include mk/conf.mk
 
