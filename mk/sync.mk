@@ -1,10 +1,8 @@
-SYNC_CONF = ams1 lil1 term1 #dis-sys-2
-SYNC_HOME = \
-  root@term1 josuah@term1 \
-  root@lil1 backup@lil1 \
-  root@ams1 josuah@ams1 \
-  josuah@bitreich.org josuah@server10.openbsd.amsterdam git@git.z0.is \
-  #root@dis-sys-2 jdemangeon@dis-sys-2
+SYNC_CONF = lil1 term1 # dis-sys-2 ams1
+SYNC_HOME = root@term1 backup@term1 josuah@term1 root@lil1 josuah@lil1 \
+ backup@lil1 git@lil1 josuah@bitreich.org
+# josuah@server10.openbsd.amsterdam root@ams1 josuah@ams1
+# root@dis-sys-2 jdemangeon@dis-sys-2
 
 sync: ${SYNC_CONF} ${SYNC_HOME}
 

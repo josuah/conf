@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 # acme-client without the need of a configuration file
 
-exec acme-client -f /dev/stdin "$1" <<EOF
+exec acme-client -v -f /dev/stdin "$1" <<EOF
 
 authority letsencrypt {
 	api url "https://acme-v02.api.letsencrypt.org/directory"

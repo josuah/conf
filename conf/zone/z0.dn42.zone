@@ -5,7 +5,9 @@ $ORIGIN z0.dn42.
 @				IN MX	1 mx1.z0.dn42.
 @				IN TXT	"v=spf1 mx -all"
 
-lo				IN NET	fd42:10e3:10e8::/64
+hyaku-oku			IN NET	fd42:10e3:10e8::/48
+
+loopback			IN NET	fd42:10e3:10e8::/64
 
 web				IN NET	fd42:10e3:10e8::80:0/112
 web1				IN AAAA	fd42:10e3:10e8::80:1
@@ -22,6 +24,6 @@ mx1				IN AAAA	fd42:10e3:10e8::25:1
 
 lil1				IN AAAA	fd42:10e3:10e8::5
 term1				IN AAAA	fd42:10e3:10e8::3
-ams1				IN AAAA	fd42:10e3:10e8::7
+lil1				IN AAAA	fd42:10e3:10e8::7
 
 @				IN ALIAS lil1.z0.dn42.

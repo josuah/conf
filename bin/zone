@@ -64,13 +64,14 @@ function arpa(dom, type, val,
 {
 	if (type == "SOA")
 		SOA[dom]++
-	if (!ARPA++)
-		print "$ORIGIN arpa." >"arpa.zone"
 	for (soa = dom; !(soa in SOA); soa = substr(soa, i + 1)) {
 		i = index(soa, ".")
 		assert(i > 0, "no-soa "dom)
 	}
-	print dom" IN "type" "val >>"arpa.zone"
+	file = substr(soa, 1, length(soa) - 1)
+	if (!ARPA[soa]++)
+		print "; generated on "env("SERIAL") >file
+	printf("%s %s IN %s %s\n", dom, ttl, type, val) >>file
 }
 
 function fqdn(dom)

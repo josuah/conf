@@ -33,6 +33,7 @@ case " $* " in
 (" restore "*" "*" ")
 	hash=$2 dest=$3
 	sed 's,...,& &,' "index/$hash" | while read hhh hash file; do
+		echo "$hash  $file"
 		mkdir -p "$dest/$(dirname "$file")"
 		gzip -cd <file/$hhh/$hash.gz >"$dest/$file"
 	done

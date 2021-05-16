@@ -31,7 +31,7 @@ case "$(echo "$url" | tr A-Z a-z)" in
 	exec ffplay "$url"
 	;;
 (*.txt|*.md|*.sh|*.c)
-	[ -f "$url" ] && file=$url || curl -Lo "$file"
+	[ -f "$url" ] && file=$url || curl -Lo "$file" "$url"
 	exec x-terminal-emulator less "$file"
 	;;
 (magnet:*|*.torrent)
