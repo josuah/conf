@@ -10,4 +10,4 @@ ${SYNC_CONF}:
 	exec rsync -vrt --delete ${PWD}/[a-z]* $@:${PWD}
 
 ${SYNC_HOME}:
-	exec rsync -vrt home/ $@:
+	exec rsync -vrt conf/home/ $@:

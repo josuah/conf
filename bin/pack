@@ -1,8 +1,6 @@
 #!/bin/sh -eu
 # nimble source-based package manager for custom build recipes
 
-pack=$1
-
 pack_download_git() {
 	git clone --depth 1 --branch "$ver" "$url" "$SOURCE"
 	rm -rf "$SOURCE/.git"
@@ -39,9 +37,11 @@ pack_install() {
 	make PREFIX="$PREFIX" install
 }
 
-. "pack/$pack.sh"
+pack=$1
 
-export SOURCE="$PWD/source/$pack-$ver"
+. "/etc/pack/$pack.sh"
+
+export SOURCE="$PWD/$pack-$ver"
 trap 'rm -rf "$SOURCE"' INT TERM EXIT HUP
 
 if [ ! -d "$SOURCE" ]; then
