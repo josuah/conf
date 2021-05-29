@@ -1,43 +1,6 @@
 #!/usr/bin/awk -f
 # totp password store using pass(1) like https://pypi.org/project/totp/
 
-function rshift_(x, n) {
-	return int(x / 2^n)
-}
-
-#  byte0       byte1       byte2      byte3       byte4
-#  |.....|...  ..|.....|.  ....|....  .|.....|..  ...|.....|
-#  b0    b1      b2    b3      b4      b5    b6      b7
-
-function b32encode(bin,
-	n, i)
-{
-	for (i = 0; i < length(bin); n = 0) {
-		do n = n * 256 + ASCII[substr(bin, i + 1, 1)]
-		while (++i % 5)
-
-		b32 = b32 \
-		 B32ENCODE[rshift_(n, 35) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 30) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 25) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 20) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 15) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 10) % 32 + 1] \
-		 B32ENCODE[rshift_(n, 5) % 32 + 1] \
-		 B32ENCODE[n % 32 + 1]
-	}
-	i = length(bin) % 5
-	if (i == 1) sub(/......$/, "======", b32)
-	if (i == 2) sub(/....$/, "====", b32)
-	if (i == 3) sub(/...$/, "===", b32)
-	if (i == 4) sub(/.$/, "=", b32)
-	return b32
-}
-
-#  b0     b1     b2    b3     b4     b5    b6     b7
-#  |..... ...|.. ..... .|.... ....|. ..... ..|... .....|
-#  byte0     byte1      byte2     byte3      byte4
-
 function b32hex(b32,
 	n, x)
 {
@@ -85,12 +48,17 @@ function usage()
 BEGIN {
 	for (i = 0; i < 256; i++) ASCII[sprintf("%c", i)] = i
 	split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 2 3 4 5 6 7", x)
-	for (i in x) B32ENCODE[i - 1] = x[i]
 	for (i in x) B32DECODE[x[i]] = i - 1
 
 	if (ARGV[1] == "add" && ARGC == 3) {
-		printf "Enter shared key: " >"/dev/stderr"
+		if (system("exec test -t 0") == 0)
+			printf "Enter shared key: " >"/dev/stderr"
 		exit(system("exec pass insert '2fa/"ARGV[2]"/code'"))
+	} else if (ARGV[1] == "keygen" && ARGC == 2) {
+		"exec openssl rand -base64 48" | getline
+		$0 = toupper($0)
+		gsub(/[^2-7A-Z]/, "")
+		print substr($0, 1, 16)
 	} else if (ARGC == 2) {
 		"exec pass show '2fa/"ARGV[1]"/code'" | getline b32
 		if (b32 == "") exit(1)
