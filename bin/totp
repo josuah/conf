@@ -1,83 +1,87 @@
 #!/usr/bin/awk -f
 
-function lshift_(x, n) {
-	return x * 2 ^ n
-}
-
 function rshift_(x, n) {
-	return int(x / 2 ^ n)
-}
-
-function x1f(n)
-{
-	return (n%32>=16)*16 + (n%16>=8)*8 + (n%8>=4)*4 + (n%4>=2)*2 + (n%2)
+	return int(x / 2^n)
 }
 
 #  byte0       byte1       byte2      byte3       byte4
 #  |.....|...  ..|.....|.  ....|....  .|.....|..  ...|.....|
 #  b0    b1      b2    b3      b4      b5    b6      b7
 
-function _(byte, i, n, b1, b2, b3, b4, b5, b6, b7) {
-	printf("byte=%d s[%d]=%02x b0=%02x b1=%02x b2=%02x b3=%02x b4=%02x b5=%02x b6=%02x b7=%02x\n",
-	 byte, i, n, b0, b1, b2, b3, b4, b5, b6, b7)
+function b32encode(bin,
+	n, i)
+{
+	for (i = 0; i < length(bin); n = 0) {
+		do n = n * 256 + ASCII[substr(bin, i + 1, 1)]
+		while (++i % 5)
+
+		b32 = b32 \
+		 B32ENCODE[rshift_(n, 35) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 30) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 25) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 20) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 15) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 10) % 32 + 1] \
+		 B32ENCODE[rshift_(n, 5) % 32 + 1] \
+		 B32ENCODE[n % 32 + 1]
+	}
+	i = length(bin) % 5
+	if (i == 1) sub(/......$/, "======", b32)
+	if (i == 2) sub(/....$/, "====", b32)
+	if (i == 3) sub(/...$/, "===", b32)
+	if (i == 4) sub(/.$/, "=", b32)
+	return b32
 }
 
-function b32enc(s,
-	b32, n, byte, i, b1, b2, b3, b4, b5, b6, b7)
+#  b0     b1     b2    b3     b4     b5    b6     b7
+#  |..... ...|.. ..... .|.... ....|. ..... ..|... .....|
+#  byte0     byte1      byte2     byte3      byte4
+
+function b32hex(b32,
+	n, x)
 {
-	for (i = 0; i < length(s); i += 5) {
-		for (n = b = 0; b < 5; b++)
-			n = n * 256 + ASCII[substr(s, i + b, )]
-		printf("'%s': 0x%02x\n", substr(s, i, 1), n)
+	for (i = 0; i < length(b32); n = 0) {
+		do n = n * 32 + B32DECODE[substr(b32, i + 1, 1)] - 1
+		while (++i % 8)
+
+		x = x sprintf("%08x", n)
 	}
+	return x
 }
 
-function disabled()
+function hex(x,
+	i, n)
 {
-	for (i = 0; i == 0; i++) {
-		if (byte == 0) {
-			b0 = rshift_(n, 3)
-			b1 = x1f(lshift_(n, 2))
-			_(byte, i, n, b1, b2, b3, b4, b5, b6, b7)
-			byte = 1
-		} else
-		if (byte == 1) {
-			b1 += rshift_(n, 6)
-			b2 = x1f(rshift_(n, 1))
-			b3 = x1f(lshift_(n, 4))
-			_(byte, i, n, b1, b2, b3, b4, b5, b6, b7)
-			byte = 2
-		} else
-		if (byte == 2) {
-			b3 += rshift_(n, 4)
-			b4 = x1f(lshift_(n, 1))
-			_(byte, i, n, b1, b2, b3, b4, b5, b6, b7)
-			byte = 3
-		} else
-		if (byte == 3) {
-			b4 += rshift_(n, 7)
-			b5 = x1f(rshift_(n, 2))
-			b6 = x1f(lshift_(n, 3))
-			_(byte, i, n, b1, b2, b3, b4, b5, b6, b7)
-			byte = 4
-		} else
-		if (byte == 4) {
-			b6 += rshift(n, 5)
-			b7 = x1f(n)
-			_(byte, i, n, b1, b2, b3, b4, b5, b6, b7)
-			byte = 0
-			b32 = b32 B[b0] B[b1] B[b2] B[b3] B[b4] B[b5] B[b6] B[b7]
-		}
-	}
-	if (byte == 0) return b32
-	if (byte == 1) return b32 B[b0] B[b1]
-	if (byte == 2) return b32 B[b0] B[b1] B[b2] B[b3]
-	if (byte == 3) return b32 B[b0] B[b1] B[b2] B[b3] B[b4]
-	if (byte == 4) return b32 B[b0] B[b1] B[b2] B[b3] B[b4] B[b5] B[b6]
+	for (i = 1; i <= length(x); i++)
+		n = n * 16 + index("0123456789abcdef", substr(x, i, 1)) - 1
+	return n
+}
+
+function totp(k,
+	t)
+{
+	# convert the key from base32 to hex
+	print b32hex("MZXG64TE")
+
+	# time/30 encoded as '\x00\x00\x00\x00\x00\x00'
+	"exec date +%s" | getline NOW
+	t = sprintf("%016x", int(NOW / 30))
+	gsub(/../, "\\x&", t)
+
+	# hmac the time with the key
+	"printf '"t"' | openssl dgst -sha1 -mac HMAC -macopt hexkey:"k | getline
+	k = substr($2, hex(substr($2, 40, 1)) * 2 + 1, 8)
+
+	# extract an integer from the digest
+	k = sprintf("%x%s", hex(substr(k, 1, 1)) % 8, substr(k, 2))
+	return sprintf("%06d", hex(k) % 1000000)
 }
 
 BEGIN {
 	for (i = 0; i < 256; i++) ASCII[sprintf("%c", i)] = i
-	split("A B C D E F G H J K L M N O P Q R S T U V W X Y Z 2 3 4 5 6 7", B)
-	print(b32enc(ARGV[1]))
+	split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 2 3 4 5 6 7", x)
+	for (i in x) B32ENCODE[i - 1] = x[i]
+	for (i in x) B32DECODE[x[i]] = i - 1
+
+	print totp("666e6f7264")
 }
