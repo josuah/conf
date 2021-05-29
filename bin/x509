@@ -56,29 +56,27 @@ case " $* " in
 	touch index.txt
 	echo 0000 >serial
 	echo 0000 >crlnumber
-	echo "$conf" | openssl req -config /dev/stdin -extensions ext_ca \
-	  -x509 -newkey rsa:4096 -nodes \
-	  -keyout private/ca.key -out ca.crt -subj "/CN=$ca"
+	echo "$conf" | openssl req -config /dev/stdin -extensions ext_ca -x509 \
+	 -newkey rsa:4096 -nodes -keyout private/ca.key -subj "/CN=$ca" >ca.crt
 	;;
 (" ca "*" delete ") ca=$2
 	rm -r "/etc/ssl/ca/$ca/"
 	;;
 (" ca "*" sign "*" ") ca=$2 file=$4
 	[ -f "$file" ] || file=/etc/ssl/$file.csr
-	echo "$conf" | openssl ca -config /dev/stdin -extensions ext_fqdn \
-	  -batch -in "$file" >${file%.csr}.crt
-	echo "${file%.csr}.crt"
+	cp "/etc/ssl/ca/$ca/ca.crt" "${file%csr}crt"
+	echo "$conf" | openssl ca -config /dev/stdin -extensions ext_fqdn -batch \
+	 -in "$file" >>${file%csr}crt
+	echo "${file%csr}crt"
 	;;
 (" ca "*" revoke "*" ") ca=$2 file=$4
 	[ -f "$file" ] || file=/etc/ssl/$file.crt
 	mkdir -p "/etc/ssl/ca/$ca/crl"
-	hash=$(openssl x509 -in "$file" -noout -fingerprint \
-	  | sed 's/.*=//; s/://g')
-	echo "$conf" | openssl ca -config /dev/stdin -gencrl \
-	  -batch -in "${file%.crt}.csr" -out "/etc/ssl/ca/$ca/crl/$hash.crl"
+	hash=$(openssl x509 -noout -fingerprint <$file | sed 's/.*=//; s/://g')
+	echo "$conf" | openssl ca -config /dev/stdin -gencrl -batch \
+	 -in "${file%crt}csr" -out "/etc/ssl/ca/$ca/crl/$hash.crl"
 	echo "/etc/ssl/ca/$ca/crl/$hash.crl"
-	echo "$conf" | openssl ca -config /dev/stdin \
-	  -batch -revoke "$file"
+	echo "$conf" | openssl ca -config /dev/stdin -batch -revoke "$file"
 	echo "certificate $file revoked"
 	;;
 (" csr "*" ") cn=$2
@@ -86,8 +84,8 @@ case " $* " in
 	cd /etc/ssl
 	chmod 500 private
 	echo "$conf" | openssl req -config /dev/stdin -extensions ext_fqdn \
-	  -newkey rsa:4096 -nodes \
-	  -keyout "private/$cn.key" -out "$cn.csr" -subj "/CN=$cn"
+	 -newkey rsa:4096 -nodes \
+	 -keyout "private/$cn.key" -out "$cn.csr" -subj "/CN=$cn"
 	;;
 (" dhparam ")
 	if [ ! -f "dhparam.pem" ]; then

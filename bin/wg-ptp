@@ -8,20 +8,13 @@ function assert(expr, msg) {
 	}
 }
 
-function hex2dec(x, d) {
-	x = toupper(ENVIRON["hostid"])
-	for (i = 1; i <= length(x); i++)
-		d = d * 16 + index("0123456789ABCDEF", substr(x, i, 1)) - 1
-	return d
-}
-
 BEGIN {
 	BASEPORT = 50000
 
 	getline KEY <"/etc/wireguard/key"
 
 	assert("hostid" in ENVIRON, "could not find hostid= in ENVIRON")
-	PEERPORT = BASEPORT + hex2dec(ENVIRON["HOSTID"])
+	PEERPORT = BASEPORT + ENVIRON["HOSTID"]
 
 	FIELDS["publickey"]++
 	FIELDS["presharedkey"]++

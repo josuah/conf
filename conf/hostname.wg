@@ -1,3 +1,5 @@
 
+group ospf
+
 inet6 fe80::{{hostid}}/64
 up
