@@ -1,4 +1,4 @@
-# deployed on {{date}}
+# deployed on {{NOW}}
 
 AuthorizedKeysFile	.ssh/authorized_keys
 PasswordAuthentication	no

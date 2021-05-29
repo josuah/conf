@@ -13,7 +13,7 @@ BEGIN {
 
 	getline KEY <"/etc/wireguard/key"
 
-	assert("hostid" in ENVIRON, "could not find hostid= in ENVIRON")
+	assert("HOSTID" in ENVIRON, "could not find $HOSTID in ENVIRON")
 	PEERPORT = BASEPORT + ENVIRON["HOSTID"]
 
 	FIELDS["publickey"]++

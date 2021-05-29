@@ -1,4 +1,4 @@
-# deployed on {{date}}
+# deployed on {{NOW}}
 
 root:		me@josuah.net
 

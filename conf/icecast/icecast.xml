@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- deployed on {{date}} -->
+<!-- deployed on {{NOW}} -->
 
 <icecast>
 	<location>@</location>

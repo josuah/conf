@@ -22,3 +22,7 @@ base/bin:
 
 /etc/ssl/private/hostname.key:
 	exec ln -sf /etc/ssl/private/$$(hostname).key $@
+
+conf: macros.env.conf
+macros.env.conf: macros.conf
+	echo '${ENV}' | tr ' ' '\n' >>/etc/macros.conf

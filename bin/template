@@ -16,9 +16,7 @@ function enter(to, was)
 
 NR == 1 {
 	enter("code")
-	shell("date=$(date +%Y-%m-%d)\n")
-	shell("now=$(date +%s)\n")
-	shell("dirname=$(dirname '"FILENAME"')\n")
+	shell("NOW=$(date +%Y-%m-%d)\n")
 }
 
 {

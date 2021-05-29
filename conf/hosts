@@ -1,4 +1,4 @@
-# deployed on {{date}}
+# deployed on {{NOW}}
 %% me=$(hostname -s)
 
 # global
