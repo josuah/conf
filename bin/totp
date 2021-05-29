@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# totp password store using pass(1) like https://pypi.org/project/totp/
 
 function rshift_(x, n) {
 	return int(x / 2^n)
@@ -41,11 +42,12 @@ function b32hex(b32,
 	n, x)
 {
 	for (i = 0; i < length(b32); n = 0) {
-		do n = n * 32 + B32DECODE[substr(b32, i + 1, 1)] - 1
+		do n = n * 32 + B32DECODE[substr(b32, i + 1, 1)]
 		while (++i % 8)
-
 		x = x sprintf("%08x", n)
 	}
+	while(sub(/=$/, "", b32))
+		sub(/..$/, "", x)
 	return x
 }
 
@@ -57,24 +59,27 @@ function hex(x,
 	return n
 }
 
-function totp(k,
+function totp(key,
 	t)
 {
-	# convert the key from base32 to hex
-	print b32hex("MZXG64TE")
-
 	# time/30 encoded as '\x00\x00\x00\x00\x00\x00'
 	"exec date +%s" | getline NOW
 	t = sprintf("%016x", int(NOW / 30))
 	gsub(/../, "\\x&", t)
 
 	# hmac the time with the key
-	"printf '"t"' | openssl dgst -sha1 -mac HMAC -macopt hexkey:"k | getline
-	k = substr($2, hex(substr($2, 40, 1)) * 2 + 1, 8)
+	"printf '"t"' | openssl sha1 -mac HMAC -macopt hexkey:"key | getline
+	key = substr($2, hex(substr($2, 40, 1)) * 2 + 1, 8)
 
 	# extract an integer from the digest
-	k = sprintf("%x%s", hex(substr(k, 1, 1)) % 8, substr(k, 2))
-	return sprintf("%06d", hex(k) % 1000000)
+	key = sprintf("%x%s", hex(substr(key, 1, 1)) % 8, substr(key, 2))
+	return sprintf("%06d", hex(key) % 1000000)
+}
+
+function usage()
+{
+	print"usage: totp [add] service" >"/dev/stderr"
+	exit(1)
 }
 
 BEGIN {
@@ -83,5 +88,14 @@ BEGIN {
 	for (i in x) B32ENCODE[i - 1] = x[i]
 	for (i in x) B32DECODE[x[i]] = i - 1
 
-	print totp("666e6f7264")
+	if (ARGV[1] == "add" && ARGC == 3) {
+		printf "Enter shared key: " >"/dev/stderr"
+		exit(system("exec pass insert '2fa/"ARGV[2]"/code'"))
+	} else if (ARGC == 2) {
+		"exec pass show '2fa/"ARGV[1]"/code'" | getline b32
+		if (b32 == "") exit(1)
+		print totp(b32hex(b32))
+	} else {
+		usage()
+	}
 }
