@@ -1,8 +1,119 @@
-#!/bin/sh -eu
-# read a key=value file as input, run the $cmd and pipe the result to logger
+#!/usr/bin/awk -f
+# read/write to a ring-buffer time series database using dd(1) and date(1)
+#
+#  addr value                 comment
+#  0x00 000001622370781\n     date of last write
+#  0x10 000000000000060\n     size of 
+#  0x20 000000000000300\n     number of values
+#  0x30 011120211[...]11101   database content
 
-while read line; do
-	[ -z "${line###*}" ] && continue
-	(export $line; "/etc/monitower/check-$check" </dev/null 1>&0 2>&0 \
-	 || logger -cs -p "local0.${level:-alert}" -t monitower "$line")
-done </etc/monitower.conf
+function assert(expr, message)
+{
+	if (!expr) {
+		print "assert: "message >"/dev/stderr"
+		exit(EXIT = 1)
+	}
+}
+
+function db_open(db, path,
+	e, cmd)
+{
+	assert(index(path, "'") == 0, "single quote in path '"path"'")
+	DB_HEADER_SIZE = 16 + 16 + 16
+	if ("size" in db) return 0
+	e += (getline db["time"] <path) <= 0
+	e += (getline db["step"] <path) <= 0
+	e += (getline db["size"] <path) <= 0
+	db["size"] -= DB_HEADER_SIZE
+	db["path"] = path
+	assert(e == 0, "error reading database header")
+}
+
+function db_close(db,
+	path)
+{
+	path = db["path"]
+	split("", db)
+	close(db["path"] = path)
+}
+
+function db_init(path, step, size,
+	i, time)
+{
+	assert(index(path, "'") == 0, "single quote in path '"path"'")
+	time = 0
+	printf "%015d\n%015d\n%015d\n", time, step, size >path
+	for (i = 0; i < size; i++) printf "0" >>path
+	fflush(path)
+}
+
+function db_time(db, time,
+	cmd)
+{
+	db["time"] = time
+	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=16 count=1 2>/dev/null"
+	printf("%015d\n", time) | cmd
+	print cmd
+	close(cmd)
+}
+
+function db_write(db, val, pos, len)
+{
+	seek = DB_HEADER_SIZE + pos
+	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=1 seek="seek" 2>/dev/null"
+	while (len-- > 0)
+		printf("%s", val) | cmd
+	close(cmd)
+}
+
+function db_set(db, val, beg, end,
+	len)
+{
+	if (beg >= end) return
+
+	len = end - beg
+	beg = beg % db["size"]
+	end = end % db["size"]
+
+	if (len > db["size"]) {
+		db_write(db, val, 0, db["size"])
+	} else if (beg < end) {
+		db_write(db, val, beg, end - beg)
+	} else if (end < beg) {
+		db_write(db, val, beg, db["size"] - beg)
+		db_write(db, val, 0, end)
+	}
+}
+
+function db_add(db, val,
+	pos, time)
+{
+	"exec date +%s" | getline time
+	close("exec date +%s")
+
+	old = int(db["time"] / db["step"])
+	new = int(time / db["step"])
+
+	assert(old < new, "writing data in the past: old="old" new="new)
+	assert(length(val) == 1, "invalid value '"val"' for "db["path"])
+
+	db_set(db, "0", old + 1, new)
+	db_set(db, val, new, new + 1)
+	db_time(db, time)
+}
+
+BEGIN {
+	DB_PATH = "/tmp/test.db"
+	if (system("exec test -f '"DB_PATH"'") != 0)
+		db_init(DB_PATH, 1, 100)
+	db_open(db, DB_PATH)
+}
+
+{
+	db_add(db, $1)
+}
+
+END {
+	if (EXIT) exit(EXIT)
+	db_close(path)
+}
