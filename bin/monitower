@@ -16,17 +16,18 @@ function assert(expr, message)
 }
 
 function db_open(db, path,
-	e, cmd)
+	e, cmd, a)
 {
 	assert(index(path, "'") == 0, "single quote in path '"path"'")
-	DB_HEADER_SIZE = 16 + 16 + 16
 	if ("size" in db) return 0
-	e += (getline db["time"] <path) <= 0
-	e += (getline db["step"] <path) <= 0
-	e += (getline db["size"] <path) <= 0
-	db["size"] -= DB_HEADER_SIZE
+	e = (getline <path)
+	split($0, a, " ")
+	db["time"] = int(a[1])
+	db["step"] = int(a[2])
+	db["size"] = int(a[3])
+	db["skip"] = length($0) + 1
 	db["path"] = path
-	assert(e == 0, "error reading database header")
+	assert(e > 0, "error reading database header for "path)
 }
 
 function db_close(db,
@@ -42,8 +43,9 @@ function db_init(path, step, size,
 {
 	assert(index(path, "'") == 0, "single quote in path '"path"'")
 	time = 0
-	printf "%015d\n%015d\n%015d\n", time, step, size >path
+	printf "%015d %015d %015d\n", time, step, size >path
 	for (i = 0; i < size; i++) printf "0" >>path
+	printf "\n" >>path
 	fflush(path)
 }
 
@@ -51,15 +53,14 @@ function db_time(db, time,
 	cmd)
 {
 	db["time"] = time
-	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=16 count=1 2>/dev/null"
-	printf("%015d\n", time) | cmd
-	print cmd
+	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=15 count=1 2>/dev/null"
+	printf("%015d", time) | cmd
 	close(cmd)
 }
 
 function db_write(db, val, pos, len)
 {
-	seek = DB_HEADER_SIZE + pos
+	seek = db["skip"] + pos
 	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=1 seek="seek" 2>/dev/null"
 	while (len-- > 0)
 		printf("%s", val) | cmd
@@ -94,7 +95,7 @@ function db_add(db, val,
 	old = int(db["time"] / db["step"])
 	new = int(time / db["step"])
 
-	assert(old < new, "writing data in the past: old="old" new="new)
+	assert(old <= new, "writing data in the past: old="old" new="new)
 	assert(length(val) == 1, "invalid value '"val"' for "db["path"])
 
 	db_set(db, "0", old + 1, new)
