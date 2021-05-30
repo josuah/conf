@@ -7,27 +7,27 @@
 #  0x20 000000000000300\n     number of values
 #  0x30 011120211[...]11101   database content
 
-function assert(expr, message)
+function die(message)
 {
-	if (!expr) {
-		print "assert: "message >"/dev/stderr"
-		exit(EXIT = 1)
-	}
+	print "error: "message >"/dev/stderr"
+	exit(1)
 }
 
 function db_open(db, path,
-	e, cmd, a)
+	cmd, a)
 {
-	assert(index(path, "'") == 0, "single quote in path '"path"'")
-	if ("size" in db) return 0
-	e = (getline <path)
+	if (index(path, "'") != 0)
+		die("path: single quote char")
+	if ("size" in db)
+		return 0
+	if (getline <path)
+		die("error reading database header for "path)
 	split($0, a, " ")
 	db["time"] = int(a[1])
 	db["step"] = int(a[2])
 	db["size"] = int(a[3])
 	db["skip"] = length($0) + 1
 	db["path"] = path
-	assert(e > 0, "error reading database header for "path)
 }
 
 function db_close(db,
@@ -39,12 +39,20 @@ function db_close(db,
 }
 
 function db_init(path, step, size,
-	i, time)
+	i, dir, time)
 {
-	assert(index(path, "'") == 0, "single quote in path '"path"'")
+	if (index(path, "'") != 0)
+		die("single quote in path '"path"'")
+
+	dir = path
+	sub(/[^/]*$/, "", dir)
+	if (system("exec mkdir -p '"dir"'") != 0)
+		die("could not create '"dir"'")
+
 	time = 0
 	printf "%015d %015d %015d\n", time, step, size >path
-	for (i = 0; i < size; i++) printf "0" >>path
+	for (i = 0; i < size; i++)
+		printf "0" >>path
 	printf "\n" >>path
 	fflush(path)
 }
@@ -70,7 +78,8 @@ function db_write(db, val, pos, len)
 function db_set(db, val, beg, end,
 	len)
 {
-	if (beg >= end) return
+	if (beg >= end)
+		return
 
 	len = end - beg
 	beg = beg % db["size"]
@@ -95,26 +104,145 @@ function db_add(db, val,
 	old = int(db["time"] / db["step"])
 	new = int(time / db["step"])
 
-	assert(old <= new, "writing data in the past: old="old" new="new)
-	assert(length(val) == 1, "invalid value '"val"' for "db["path"])
+	if (old <= new)
+		die("writing data in the past: old="old" new="new)
+	if (length(val) != 1)
+		die("invalid value '"val"' for "db["path"])
 
 	db_set(db, "0", old + 1, new)
 	db_set(db, val, new, new + 1)
 	db_time(db, time)
 }
 
-BEGIN {
-	DB_PATH = "/tmp/test.db"
-	if (system("exec test -f '"DB_PATH"'") != 0)
-		db_init(DB_PATH, 1, 100)
-	db_open(db, DB_PATH)
-}
-
+function line(file)
 {
-	db_add(db, $1)
+	while ((getline <file) > 0) {
+		sub(/#.*/, "")
+		if ($0 ~ /'/) die(file": single quote char")
+		if ($0 ~ /[^ \t]/) return 1
+	}
+	return 0
 }
 
-END {
-	if (EXIT) exit(EXIT)
-	db_close(path)
+function expect(file, got, wanted)
+{
+	if (got != wanted)
+		die(file"#"type": expected '"wanted"' got '"got"'")
+}
+
+function expand(var,
+	str, res, key, val)
+{
+	for (key in var) {
+		val = var[key]
+		str = str (str ? " " : "") key"='"val"'"
+	}
+	while (i = match(str, /[$][A-Z_a-z_0-9]+/)) {
+		key = substr(str, RSTART + 1, RLENGTH - 1)
+		if (!(key in var))
+			die("undefined variable $"key" in '"str"'")
+		res = res substr(str, 1, RSTART - 1) var[key]
+		str = substr(str, RSTART + RLENGTH)
+	}
+	return res str
+}
+
+function yield(result, r, token, t, var1, rec,
+	var2, i, key, val, str, n)
+{
+	# end recursion and yield expanded result
+	if (!(t in token)) {
+		for (i = 1; i in token; i++)
+			str = str (i==1 ? "" : " ") token[i]
+		result[r] = expand(var1)
+		return r + 1
+	}
+
+	# extract the key and value
+	key = val = token[t]
+	if (!sub(/=.*/, "", key) || !sub(/^[A-Z_a-z_0-9]+=/, "", val))
+		die("invalid key=value declaration: '"token[t]"'")
+
+	# browse an extra branch for each duplicate key
+	if (key in var1) {
+		# do not recurse twice on same key
+		if (!rec[key]) {
+			for (i in var1) var2[i] = var1[i]
+			var2[key] = val
+
+			rec[key] = 1
+			r = yield(result, r, token, t+1, var2, rec)
+			delete rec[key]
+		}
+	} else {
+		var1[key] = val
+	}
+	r = yield(result, r, token, t+1, var1, rec)
+	return r
+}
+
+function parse_entry(file, check, conf,
+	vars, i, res)
+{
+	if (!($1 0 in check))
+		die(file": type '"$1"' not declared or type empty")
+
+	# accumulate variables into a single string
+	vars = $1"="$2
+	for (i = 3; i <= NF; i++)
+		vars = vars" "$i
+
+	# check[] comes from parse_type called earlier
+	for (i = 0; ($1 i) in check; i++) {
+		split(vars" "check[$1 i], token, " ")
+		n = yield(conf, n, token, 1)
+	}
+}
+
+function parse_type(file, type, check,
+	n, i)
+{
+	for (n = 0; line(file) && ($1 != "}"); n++) {
+		expect(file, $1, "check")
+		check[type n] = "check="$2
+		for (i = 3; i <= NF; i++)
+			check[type n] = check[type n]" "$i
+	}
+}
+
+function parse(file, conf,
+	type, check)
+{
+	while (line(file)) {
+		if ($1 == "type") {
+			expect(file, $3, "{")
+			parse_type(file, $2, check)
+		} else {
+			parse_entry(file, check, conf)
+		}
+	}
+}
+
+function usage()
+{
+	print "usage: monitower init /var/db/monitower/host/check.db"
+	exit(1)
+}
+
+BEGIN {
+	if (ARGV[1] == "show" && ARGV[2] == "conf" && ARGC == 3) {
+		parse("/etc/monitower.conf", conf)
+		for (i = 1; i in conf; i++)
+			print conf[i]
+
+	} else if (ARGV[1] == "init" && ARGC == 5) {
+		db_init(ARGV[4], ARGV[2], ARGV[3])
+
+	} else if (ARGV[1] == "add" && ARGC == 4) {
+		db_open(db, ARGV[2])
+		db_add(db, ARGV[3])
+		db_close(db)
+	} else {
+		usage()
+	}
 }
