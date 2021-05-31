@@ -27,6 +27,9 @@ function db_open(db, path,
 	db["step"] = int(a[2])
 	db["size"] = int(a[3])
 	db["skip"] = length($0) + 1
+	db["beg"] = int(db["time"] / db["step"])
+	db["beg"] = db["beg"] - db["beg"] % db["size"]
+	db["end"] = db["beg"] + db["size"]
 	db["path"] = path
 }
 
@@ -59,8 +62,18 @@ function db_time(db, time,
 {
 	db["time"] = time
 	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=15 count=1 2>/dev/null"
-	printf("%015d", time) | cmd
+	printf "%015d", time | cmd
 	close(cmd)
+}
+
+function db_read(db, pos, len,
+	val)
+{
+	skip = db["skip"] + pos
+	cmd = "exec dd if='"db["path"]"' bs=1 skip="skip" count="len" 2>/dev/null"
+	cmd | getline val
+	close(cmd)
+	return val
 }
 
 function db_write(db, val, pos, len)
@@ -68,8 +81,30 @@ function db_write(db, val, pos, len)
 	seek = db["skip"] + pos
 	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=1 seek="seek" 2>/dev/null"
 	while (len-- > 0)
-		printf("%s", val) | cmd
+		printf "%s", val | cmd
 	close(cmd)
+}
+
+function db_get(db, beg, end,
+	i, head, tail)
+{
+	if (beg >= end)
+		return
+
+	for (i = beg; i < db["beg"]; i++)
+		head = head " "
+	for (i = end; i < db["end"]; i++)
+		tail = tail " "
+	beg = beg % db["size"]
+	end = end % db["size"]
+
+	if (beg < end) {
+		head = head db_read(db, beg, end - beg)
+	} else if (end < beg) {
+		head = head db_read(db, beg, db["size"] - beg)
+		head = head db_read(db, 0, end)
+	}
+	return head tail
 }
 
 function db_set(db, val, beg, end,
@@ -115,8 +150,10 @@ function line(file)
 {
 	while ((getline <file) > 0) {
 		sub(/#.*/, "")
-		if ($0 ~ /'/) die(file": single quote char")
-		if ($0 ~ /[^ \t]/) return 1
+		if ($0 ~ /'/)
+			die(file": single quote char")
+		if ($0 ~ /[^ \t]/)
+			return 1
 	}
 	return 0
 }
@@ -211,10 +248,38 @@ function show_conf(conf, name,
 	print "step="conf["step"], "size="conf["size"]
 	for (i = 1; i in conf; i++) {
 		if (last != name[i])
-			printf("\n[%s]\n", name[i])
+			printf "\n[%s]\n", name[i]
 		print conf[i]
 		last = name[i]
 	}
+}
+
+function show_data(name,
+	i, last)
+{
+	for (i = 0; ++i in name; last = name[i]) {
+		if (last == name[i])
+			continue
+		printf "\n[%s]\n", name[i]
+		while ((getline <(DBDIR"/"name[i]".db")) > 0)
+			print
+		close(DBDIR"/"name[i]".db")
+	}
+	printf "\n"
+}
+
+function show_graph(name, beg, end,
+	i, last)
+{
+	for (i = 0; ++i in name; last = name[i]) {
+		if (last == name[i])
+			continue
+		printf "\n[%s]\n", name[i]
+		db_open(db, DBDIR"/"name[i]".db")
+		plot(db, beg, end)
+		db_close(db)
+	}
+	printf "\n"
 }
 
 function init(conf, name,
@@ -251,6 +316,8 @@ function usage()
 {
 	print "usage: monitower init"
 	print "       monitower show conf"
+	print "       monitower show data"
+	print "       monitower show graph"
 	print "       monitower run"
 	print "       monitower add <file> <value>"
 	exit(1)
@@ -269,13 +336,21 @@ BEGIN {
 		parse("/etc/monitower.conf", conf, name)
 		show_conf(conf, name)
 
+	} else if (ARGV[1] == "show" && ARGV[2] == "data" && ARGC == 3) {
+		parse("/etc/monitower.conf", conf, name)
+		show_data(name)
+
+	} else if (ARGV[1] == "show" && ARGV[2] == "graph" && ARGC == 3) {
+		parse("/etc/monitower.conf", conf, name)
+		show_graph(name)
+
 	} else if (ARGV[1] == "run" && ARGC == 2) {
 		parse("/etc/monitower.conf", conf, name)
 		run(conf, name)
 
 	} else if (ARGV[1] == "add" && ARGC == 4) {
-		db_open(db, path)
-		db_add(db, val)
+		db_open(db, ARGV[2])
+		db_add(db, ARGV[3])
 		db_close(db)
 
 	} else {

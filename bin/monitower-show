@@ -1,0 +1,125 @@
+#!/usr/bin/awk -f
+
+function swap(array, a, b,
+	tmp)
+{
+	tmp = array[a]
+	array[a] = array[b]
+	array[b] = tmp
+}
+
+function qsort(array, beg, end)
+{
+	if (beg >= end)					# end recursion
+		return
+
+	a = beg + 1					# 1st is the pivot
+	b = end
+	while (a < b) {
+		while (a < b && array[a] <= array[beg])	# beg: skip lesser
+			a++
+		while (a < b && array[b] > array[beg])	# end: skip greater
+			b--
+		swap(array, a, b)			# found 2 misplaced
+	}
+
+	if (array[beg] > array[a])			# put the pivot back
+		swap(array, beg, a)
+
+	qsort(array, beg, a - 1)			# sort top half
+	qsort(array, a, end)				# sort bottom half
+}
+
+function flush_values(id, progress, sum, num, out,
+	color)
+{
+	color = 32 - (sum[id] < num[id])
+	out[id] = out[id] sprintf("\033[%d;1m|\033[m", color)
+	delete sum[id]
+	delete num[id]
+	progress[id] += STEP
+}
+
+function add_value(time, value, id, progress, sum, num, out)
+{
+	if (!(id in progress))
+		progress[id] = START
+
+	if (time > progress[id] && num[id] > 0)
+		flush_values(id, progress, sum, num, out)
+
+	# catch up with time by filling the gaps with spaces
+	while (progress[id] < time) {
+		out[id] = out[id] " "
+		progress[id] += STEP
+	}
+
+	# accumulate the sum and num of entries now that we are at the tip
+	sum[id] += (value == "ok")
+	num[id] += (1)
+}
+
+function id_short(id,
+	vars)
+{
+	id = var_split(id, vars)
+	id = vars["name"]
+	if ("port" in vars)
+		id = id ":" vars["port"]
+	return id
+}
+
+function id_full(fields, n, vars,
+	id)
+{
+	# to make sure we have stable IDs
+	qsort(fields, 1, n)
+	for (i = 1; i <= n; i++)
+		id = id (i > 1 ? " " : "") fields[i]
+	return id
+}
+
+function var_split(input, vars,
+	key, fields, n)
+{
+	n = split(input, fields, " ")
+	for (i in fields) {
+		key = substr(fields[i], 1, index(fields[i], "=") - 1)
+		vars[key] = substr(fields[i], index(fields[i], "=") + 1)
+	}
+	return id_full(fields, n, vars)
+}
+
+BEGIN {
+	cmd = "date +%s"
+	cmd | getline now
+	close(cmd)
+
+	STEP = ENVIRON["STEP"] ? ENVIRON["STEP"] : 600
+	COUNT = ENVIRON["COUNT"] ? ENVIRON["COUNT"] : 80
+	START = now - STEP * COUNT
+	START = START - START % STEP + STEP
+	now = now - now % STEP + STEP
+}
+
+START <= $1 {
+	time = $1
+	value = $2
+	sub("[^ ]+ [^ ]+ ", "", $0)
+
+	id = var_split($0, vars)
+	add_value(time, value, id, progress, sum, num, out)
+
+	for (i in var)
+		delete var[i]
+}
+
+END {
+	for (id in out) {
+		add_value(now, "err", id, progress, num, sum, out)
+		printf("  %-15s |%s|\n", id_short(id), out[id])
+	}
+	printf("   %15s^", START)
+	printf("%" COUNT "s^", now)
+	printf("\n")
+}

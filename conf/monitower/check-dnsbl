@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+
+rev=$(echo "$ip" | awk '{ split($0, a, "."); print a[4]"."a[3]"."a[2]"."a[1] }')
+! dig +short "$rev.$dom" | grep .
