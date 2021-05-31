@@ -19,8 +19,8 @@ function db_open(db, path,
 	if (index(path, "'") != 0)
 		die("path: single quote char")
 	if ("size" in db)
-		return 0
-	if (getline <path)
+		return
+	if ((getline <path) <= 0)
 		die("error reading database header for "path)
 	split($0, a, " ")
 	db["time"] = int(a[1])
@@ -33,28 +33,25 @@ function db_open(db, path,
 function db_close(db,
 	path)
 {
+	if (!("path" in db))
+		return
 	path = db["path"]
 	split("", db)
 	close(db["path"] = path)
 }
 
 function db_init(path, step, size,
-	i, dir, time)
+	i, time)
 {
 	if (index(path, "'") != 0)
 		die("single quote in path '"path"'")
-
-	dir = path
-	sub(/[^/]*$/, "", dir)
-	if (system("exec mkdir -p '"dir"'") != 0)
-		die("could not create '"dir"'")
 
 	time = 0
 	printf "%015d %015d %015d\n", time, step, size >path
 	for (i = 0; i < size; i++)
 		printf "0" >>path
 	printf "\n" >>path
-	fflush(path)
+	close(path)
 }
 
 function db_time(db, time,
@@ -104,7 +101,7 @@ function db_add(db, val,
 	old = int(db["time"] / db["step"])
 	new = int(time / db["step"])
 
-	if (old <= new)
+	if (old > new)
 		die("writing data in the past: old="old" new="new)
 	if (length(val) != 1)
 		die("invalid value '"val"' for "db["path"])
@@ -124,20 +121,10 @@ function line(file)
 	return 0
 }
 
-function expect(file, got, wanted)
+function expand(str, var,
+	key, val, res)
 {
-	if (got != wanted)
-		die(file"#"type": expected '"wanted"' got '"got"'")
-}
-
-function expand(var,
-	str, res, key, val)
-{
-	for (key in var) {
-		val = var[key]
-		str = str (str ? " " : "") key"='"val"'"
-	}
-	while (i = match(str, /[$][A-Z_a-z_0-9]+/)) {
+	while (match(str, /[$][A-Z_a-z_0-9]+/)) {
 		key = substr(str, RSTART + 1, RLENGTH - 1)
 		if (!(key in var))
 			die("undefined variable $"key" in '"str"'")
@@ -147,56 +134,47 @@ function expand(var,
 	return res str
 }
 
-function yield(result, r, token, t, var1, rec,
-	var2, i, key, val, str, n)
+function parse_variables(str, var,
+	tok, i, key, val)
 {
-	# end recursion and yield expanded result
-	if (!(t in token)) {
-		for (i = 1; i in token; i++)
-			str = str (i==1 ? "" : " ") token[i]
-		result[r] = expand(var1)
-		return r + 1
+	split(str, tok, " ")
+	str = ""
+	for (i = 1; i in tok; i++) {
+		key = val = tok[i]
+		if (!sub(/=.*/, "", key) || !sub(/^[A-Z_a-z_0-9]+=/, "", val))
+			die("invalid key=value declaration: '"tok[t]"'")
+		var[key] = val
+		str = str (str ? " " : "") key"='"val"'"
 	}
-
-	# extract the key and value
-	key = val = token[t]
-	if (!sub(/=.*/, "", key) || !sub(/^[A-Z_a-z_0-9]+=/, "", val))
-		die("invalid key=value declaration: '"token[t]"'")
-
-	# browse an extra branch for each duplicate key
-	if (key in var1) {
-		# do not recurse twice on same key
-		if (!rec[key]) {
-			for (i in var1) var2[i] = var1[i]
-			var2[key] = val
-
-			rec[key] = 1
-			r = yield(result, r, token, t+1, var2, rec)
-			delete rec[key]
-		}
-	} else {
-		var1[key] = val
-	}
-	r = yield(result, r, token, t+1, var1, rec)
-	return r
+	return str
 }
 
-function parse_entry(file, check, conf,
-	vars, i, res)
+function parse_entry(file, check, conf, name,
+	loc, var, i, n, exec)
 {
 	if (!($1 0 in check))
 		die(file": type '"$1"' not declared or type empty")
 
 	# accumulate variables into a single string
-	vars = $1"="$2
+	loc = $1"="$2
 	for (i = 3; i <= NF; i++)
-		vars = vars" "$i
+		loc = loc" "$i
 
 	# check[] comes from parse_type called earlier
-	for (i = 0; ($1 i) in check; i++) {
-		split(vars" "check[$1 i], token, " ")
-		n = yield(conf, n, token, 1)
+	for (i = 0; $1i in check; i++) {
+		n = conf[""]++
+		s = parse_variables(loc" "check[$1i], var)
+		conf[n] = expand(s, var)" exec '"CHECK"/check-"var["check"]"'"
+		name[n] = tolower($1"-"$2)
+		gsub(/[^a-z0-9]+/, "-", name[n])
+		sub(/-$/, "", name[n])
 	}
+}
+
+function expect(file, got, wanted)
+{
+	if (got != wanted)
+		die(file"#"type": expected '"wanted"' got '"got"'")
 }
 
 function parse_type(file, type, check,
@@ -210,38 +188,96 @@ function parse_type(file, type, check,
 	}
 }
 
-function parse(file, conf,
+function parse(file, conf, name,
 	type, check)
 {
 	while (line(file)) {
-		if ($1 == "type") {
+		if ($1 == "set") {
+			conf[$2] = $3
+		} else if ($1 == "type") {
 			expect(file, $3, "{")
 			parse_type(file, $2, check)
 		} else {
-			parse_entry(file, check, conf)
+			parse_entry(file, check, conf, name)
+		}
+	}
+	if (!("step" in conf) || !("size" in conf))
+		die("missing default 'step' or 'size' variables")
+}
+
+function show_conf(conf, name,
+	i, last)
+{
+	print "step="conf["step"], "size="conf["size"]
+	for (i = 1; i in conf; i++) {
+		if (last != name[i])
+			printf("\n[%s]\n", name[i])
+		print conf[i]
+		last = name[i]
+	}
+}
+
+function init(conf, name,
+	i)
+{
+	for (i = 0; i in conf; i++)
+		db_init(DBDIR"/"name[i]".db", conf["step"], conf["size"])
+}
+
+function run(conf, name,
+	i, e, val, path)
+{
+	for (i = 0; i in conf; i++) {
+		if (name[i] != name[i-1])
+			val[name[i]] = SUCCESS
+
+		if (system(conf[i]" >/dev/null 2>&1") != 0) {
+			print conf[i]
+			val[name[i]] = FAILURE
+		}
+
+		if (name[i] != name[i+1]) {
+			path = DBDIR"/"name[i]".db"
+			if (system("exec test -f '"path"'") != 0)
+				db_init(path, conf["step"], conf["size"])
+			db_open(db, path)
+			db_add(db, val[name[i]])
+			db_close(db)
 		}
 	}
 }
 
 function usage()
 {
-	print "usage: monitower init /var/db/monitower/host/check.db"
+	print "usage: monitower init"
+	print "       monitower show conf"
+	print "       monitower run"
+	print "       monitower add <file> <value>"
 	exit(1)
 }
 
 BEGIN {
-	if (ARGV[1] == "show" && ARGV[2] == "conf" && ARGC == 3) {
-		parse("/etc/monitower.conf", conf)
-		for (i = 1; i in conf; i++)
-			print conf[i]
+	CHECK = ENVIRON["CHECK"] ? ENVIRON["CHECK"] : "/etc/monitower"
+	DBDIR = ENVIRON["DBDIR"] ? ENVIRON["DBDIR"] : "/var/db/monitower"
+	SUCCESS = 1; FAILURE = 2
 
-	} else if (ARGV[1] == "init" && ARGC == 5) {
-		db_init(ARGV[4], ARGV[2], ARGV[3])
+	if (ARGV[1] == "init" && ARGC == 2) {
+		parse("/etc/monitower.conf", conf, name)
+		init(conf, name)
+
+	} else if (ARGV[1] == "show" && ARGV[2] == "conf" && ARGC == 3) {
+		parse("/etc/monitower.conf", conf, name)
+		show_conf(conf, name)
+
+	} else if (ARGV[1] == "run" && ARGC == 2) {
+		parse("/etc/monitower.conf", conf, name)
+		run(conf, name)
 
 	} else if (ARGV[1] == "add" && ARGC == 4) {
-		db_open(db, ARGV[2])
-		db_add(db, ARGV[3])
+		db_open(db, path)
+		db_add(db, val)
 		db_close(db)
+
 	} else {
 		usage()
 	}

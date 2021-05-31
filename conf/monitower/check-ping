@@ -1,3 +1,4 @@
 #!/bin/sh -eu
+: ${timeout:=1}
 
-exec ping -c 1 -t 1 "$ip"
+exec ping -c 1 -w "$timeout" "$ip"
