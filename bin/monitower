@@ -161,13 +161,15 @@ function db_add(db, val,
 
 function line(file)
 {
-	while ((getline <file) > 0) {
+	while ((e = getline <file) > 0) {
 		sub(/#.*/, "")
 		if ($0 ~ /'/)
 			die(file": single quote char")
 		if ($0 ~ /[^ \t]/)
 			return 1
 	}
+	if (e < 0)
+		die("error reading from '"file"'")
 	return 0
 }
 
@@ -202,20 +204,20 @@ function parse_variables(str, var,
 function parse_entry(file, check, conf, name,
 	loc, var, i, n, exec)
 {
-	if (!($1 0 in check))
-		die(file": type '"$1"' not declared or type empty")
+	if (!($2 0 in check))
+		die(file": type '"$2"' not declared or type empty")
 
 	# accumulate variables into a single string
-	loc = $1"="$2
-	for (i = 3; i <= NF; i++)
+	loc = $2"="$3
+	for (i = 4; i <= NF; i++)
 		loc = loc" "$i
 
 	# check[] comes from parse_type called earlier
-	for (i = 0; $1i in check; i++) {
+	for (i = 0; $2i in check; i++) {
 		n = conf[""]++
-		s = parse_variables(loc" "check[$1i], var)
+		s = parse_variables(loc" "check[$2i], var)
 		conf[n] = expand(s, var)" exec '"CHECK"/check-"var["check"]"'"
-		name[n] = tolower($1"-"$2)
+		name[n] = tolower($2"-"$3)
 		gsub(/[^a-z0-9]+/, "-", name[n])
 		sub(/-$/, "", name[n])
 	}
@@ -247,15 +249,17 @@ function parse(file, conf, name,
 		} else if ($1 == "type") {
 			expect(file, $3, "{")
 			parse_type(file, $2, check)
-		} else {
+		} else if ($1 == "monitor") {
 			parse_entry(file, check, conf, name)
+		} else {
+			die("unknown keyword '"$1"' in line '"$0"'")
 		}
 	}
-	if (!("step" in conf) || !("size" in conf))
-		die("missing default 'step' or 'size' variables")
+	if (!("step" in conf) || !("size" in conf) || !("home" in conf))
+		die("missing default 'step'/'size'/'home' variables")
 }
 
-function show_conf(conf, name,
+function cmd_conf(conf, name,
 	i, last)
 {
 	print "step="conf["step"], "size="conf["size"]
@@ -267,33 +271,31 @@ function show_conf(conf, name,
 	}
 }
 
-function show_graph(name, len,
+function cmd_graph(conf, name, len,
 	i, s, last, time, end)
 {
 	time = now()
-
 	for (i = 0; ++i in name; last = name[i]) {
 		if (last == name[i])
 			continue
+		db_open(db, conf["home"]"/"name[i]".db")
 		printf "\n[%s]\n", name[i]
-		db_open(db, DBDIR"/"name[i]".db")
 		end = int(time / db["step"])
 		s = db_get(db, end - len, end)
 		gsub(/0/, " ", s); gsub(/1/, ":", s); gsub(/2/, "X", s)
 		print s
 		db_close(db)
 	}
-	printf "\n"
 }
 
-function init(conf, name,
+function cmd_init(conf, name,
 	i)
 {
 	for (i = 0; i in conf; i++)
-		db_init(DBDIR"/"name[i]".db", conf["step"], conf["size"])
+		db_init(conf["home"]"/"name[i]".db", conf["step"], conf["size"])
 }
 
-function run(conf, name,
+function cmd_run(conf, name,
 	i, e, val, path)
 {
 	for (i = 0; i in conf; i++) {
@@ -306,7 +308,7 @@ function run(conf, name,
 		}
 
 		if (name[i] != name[i+1]) {
-			path = DBDIR"/"name[i]".db"
+			path = conf["home"]"/"name[i]".db"
 			if (system("exec test -f '"path"'") != 0)
 				db_init(path, conf["step"], conf["size"])
 			db_open(db, path)
@@ -318,40 +320,33 @@ function run(conf, name,
 
 function usage()
 {
-	print "usage: monitower init"
-	print "       monitower show conf"
-	print "       monitower show graph"
-	print "       monitower run"
-	print "       monitower add <file> <value>"
+	print "usage: monitower init [-f file]"
+	print "       monitower graph [-f file] [len]"
+	print "       monitower conf [-f file]"
+	print "       monitower run [-f file]"
 	exit(1)
 }
 
 BEGIN {
 	CHECK = ENVIRON["CHECK"] ? ENVIRON["CHECK"] : "/etc/monitower"
-	DBDIR = ENVIRON["DBDIR"] ? ENVIRON["DBDIR"] : "/var/db/monitower"
 	SUCCESS = 1; FAILURE = 2
 
+	file = "/etc/monitower.conf"
+	for (i = o = 0; o < ARGC; ARGV[++i] = ARGV[++o])
+		if (ARGV[i] == "-f" && i--)
+			file = ARGV[++o]
+	ARGC = i
+
+	parse(file, conf, name)
+
 	if (ARGV[1] == "init" && ARGC == 2) {
-		parse("/etc/monitower.conf", conf, name)
-		init(conf, name)
-
-	} else if (ARGV[1] == "show" && ARGV[2] == "conf" && ARGC == 3) {
-		parse("/etc/monitower.conf", conf, name)
-		show_conf(conf, name)
-
-	} else if (ARGV[1] == "show" && ARGV[2] == "graph" && ARGC == 3) {
-		parse("/etc/monitower.conf", conf, name)
-		show_graph(name, 80)
-
+		cmd_init(conf, name)
+	} else if (ARGV[1] == "conf" && ARGC == 2) {
+		cmd_conf(conf, name)
+	} else if (ARGV[1] == "graph" && ARGC >= 2 && ARGC <= 3) {
+		cmd_graph(conf, name, ARGV[2] ? ARGV[2] : 80)
 	} else if (ARGV[1] == "run" && ARGC == 2) {
-		parse("/etc/monitower.conf", conf, name)
-		run(conf, name)
-
-	} else if (ARGV[1] == "add" && ARGC == 4) {
-		db_open(db, ARGV[2])
-		db_add(db, ARGV[3])
-		db_close(db)
-
+		cmd_run(conf, name)
 	} else {
 		usage()
 	}
