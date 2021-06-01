@@ -66,7 +66,7 @@ function db_init(path, step, size,
 		die("single quote in path '"path"'")
 
 	time = 0
-	printf "%15d %15d %15d\n", time, step, size >path
+	printf "%15d %d %d\n", time, step, size >path
 	for (i = 0; i < size; i++)
 		printf "0" >>path
 	printf "\n" >>path
@@ -173,60 +173,33 @@ function line(file)
 	return 0
 }
 
-function expand(str, var,
-	key, val, res)
-{
-	while (match(str, /[$][A-Z_a-z_0-9]+/)) {
-		key = substr(str, RSTART + 1, RLENGTH - 1)
-		if (!(key in var))
-			die("undefined variable $"key" in '"str"'")
-		res = res substr(str, 1, RSTART - 1) var[key]
-		str = substr(str, RSTART + RLENGTH)
-	}
-	return res str
-}
-
-function parse_variables(str, var,
-	tok, i, key, val)
-{
-	split(str, tok, " ")
-	str = ""
-	for (i = 1; i in tok; i++) {
-		key = val = tok[i]
-		if (!sub(/=.*/, "", key) || !sub(/^[A-Z_a-z_0-9]+=/, "", val))
-			die("invalid key=value declaration: '"tok[t]"'")
-		var[key] = val
-		str = (str ? str " " : str) key"='"val"'"
-	}
-	return str
-}
-
-function parse_entry(file, check, conf, name,
-	loc, var, i, n, exec)
-{
-	if (!($2 0 in check))
-		die(file": type '"$2"' not declared or type empty")
-
-	# accumulate variables into a single string
-	loc = $2"="$3
-	for (i = 4; i <= NF; i++)
-		loc = loc" "$i
-
-	# check[] comes from parse_type called earlier
-	for (i = 0; $2i in check; i++) {
-		n = conf[""]++
-		s = parse_variables(loc" "check[$2i], var)
-		conf[n] = expand(s, var)" exec '"CHECK"/check-"var["check"]"'"
-		name[n] = tolower($2"-"$3)
-		gsub(/[^a-z0-9]+/, "-", name[n])
-		sub(/-$/, "", name[n])
-	}
-}
-
 function expect(file, got, wanted)
 {
 	if (got != wanted)
 		die(file"#"type": expected '"wanted"' got '"got"'")
+}
+
+function expand(s, at)
+{
+	gsub(/&/, "\\&", at)
+	gsub(/\$@/, at, s)
+	return s
+}
+
+function parse_entry(file, conf, name, check,
+	 i, n)
+{
+	if (!($2"0" in check))
+		die(file": type '"$2"' not declared or type empty")
+
+	# check[] comes from parse_type called earlier
+	for (i = 0; $2i in check; i++) {
+		n = conf[""]++
+		conf[n] = expand(check[$2i], $3)
+		name[n] = $2"-"$3
+		gsub(/[^a-z0-9]+/, "-", name[n])
+		sub(/-$/, "", name[n])
+	}
 }
 
 function parse_type(file, type, check,
@@ -234,9 +207,12 @@ function parse_type(file, type, check,
 {
 	for (n = 0; line(file) && ($1 != "}"); n++) {
 		expect(file, $1, "check")
-		check[type n] = "check="$2
-		for (i = 3; i <= NF; i++)
-			check[type n] = check[type n]" "$i
+		for (i = 3; i <= NF; i++) {
+			if (!sub(/^[a-z_A-Z][a-z_A-Z_0-9]*=/, "&'", $i))
+				die("invalid variable name in "$i)
+			check[type n] = check[type n]" "$i"'"
+		}
+		check[type n] = check[type n] " exec '"CHECK"/check-"$2"'"
 	}
 }
 
@@ -250,7 +226,7 @@ function parse(file, conf, name,
 			expect(file, $3, "{")
 			parse_type(file, $2, check)
 		} else if ($1 == "monitor") {
-			parse_entry(file, check, conf, name)
+			parse_entry(file, conf, name, check)
 		} else {
 			die("unknown keyword '"$1"' in line '"$0"'")
 		}
