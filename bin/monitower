@@ -1,16 +1,33 @@
 #!/usr/bin/awk -f
-# read/write to a ring-buffer time series database using dd(1) and date(1)
-#
-#  addr value                 comment
-#  0x00 000001622370781\n     date of last write
-#  0x10 000000000000060\n     size of 
-#  0x20 000000000000300\n     number of values
-#  0x30 011120211[...]11101   database content
+# read/write to a ring-buffer time series database of up/down events
 
 function die(message)
 {
 	print "error: "message >"/dev/stderr"
 	exit(1)
+}
+
+function assert(expr, fn)
+{
+	if (!expr)
+		die("assertion failed at "fn"()")
+}
+
+function max(a, b)
+{
+	return a > b ? a : b
+}
+
+function min(a, b)
+{
+	return a < b ? a : b
+}
+
+function now(time)
+{
+	"exec date +%s" | getline time
+	close("exec date +%s")
+	return time
 }
 
 function db_open(db, path,
@@ -27,9 +44,8 @@ function db_open(db, path,
 	db["step"] = int(a[2])
 	db["size"] = int(a[3])
 	db["skip"] = length($0) + 1
-	db["beg"] = int(db["time"] / db["step"])
-	db["beg"] = db["beg"] - db["beg"] % db["size"]
-	db["end"] = db["beg"] + db["size"]
+	db["end"] = int(db["time"] / db["step"])
+	db["beg"] = db["end"] - db["size"]
 	db["path"] = path
 }
 
@@ -88,30 +104,28 @@ function db_write(db, val, pos, len)
 function db_get(db, beg, end,
 	i, head, tail)
 {
-	if (beg >= end)
-		return
+	assert(beg <= end, "db_get")
 
-	for (i = beg; i < db["beg"]; i++)
-		head = head " "
-	for (i = end; i < db["end"]; i++)
-		tail = tail " "
-	beg = beg % db["size"]
-	end = end % db["size"]
+	for (i = min(db["beg"], end); i > beg; i--)
+		head = head "?"
+	for (i = max(db["end"], beg); i < end; i++)
+		tail = tail "?"
 
-	if (beg < end) {
-		head = head db_read(db, beg, end - beg)
-	} else if (end < beg) {
-		head = head db_read(db, beg, db["size"] - beg)
-		head = head db_read(db, 0, end)
-	}
-	return head tail
+	if (beg > db["end"] || end < db["beg"])
+		return head tail
+
+	beg = max(db["beg"], beg) % db["size"]
+	end = min(db["end"], end) % db["size"]
+
+	return (beg <= end) \
+	 ? head db_read(db, beg, end - beg) tail \
+	 : head db_read(db, beg, db["size"] - beg) db_read(db, 0, end) tail
 }
 
 function db_set(db, val, beg, end,
 	len)
 {
-	if (beg >= end)
-		return
+	assert(beg <= end, "db_set")
 
 	len = end - beg
 	beg = beg % db["size"]
@@ -130,8 +144,7 @@ function db_set(db, val, beg, end,
 function db_add(db, val,
 	pos, time)
 {
-	"exec date +%s" | getline time
-	close("exec date +%s")
+	time = now()
 
 	old = int(db["time"] / db["step"])
 	new = int(time / db["step"])
@@ -141,8 +154,8 @@ function db_add(db, val,
 	if (length(val) != 1)
 		die("invalid value '"val"' for "db["path"])
 
-	db_set(db, "0", old + 1, new)
-	db_set(db, val, new, new + 1)
+	db_set(db, "0", old, new)
+	db_set(db, val, new - 1, new)
 	db_time(db, time)
 }
 
@@ -254,29 +267,20 @@ function show_conf(conf, name,
 	}
 }
 
-function show_data(name,
-	i, last)
+function show_graph(name, len,
+	i, s, last, time, end)
 {
-	for (i = 0; ++i in name; last = name[i]) {
-		if (last == name[i])
-			continue
-		printf "\n[%s]\n", name[i]
-		while ((getline <(DBDIR"/"name[i]".db")) > 0)
-			print
-		close(DBDIR"/"name[i]".db")
-	}
-	printf "\n"
-}
+	time = now()
 
-function show_graph(name, beg, end,
-	i, last)
-{
 	for (i = 0; ++i in name; last = name[i]) {
 		if (last == name[i])
 			continue
 		printf "\n[%s]\n", name[i]
 		db_open(db, DBDIR"/"name[i]".db")
-		plot(db, beg, end)
+		end = int(time / db["step"])
+		s = db_get(db, end - len, end)
+		gsub(/0/, " ", s); gsub(/1/, ":", s); gsub(/2/, "X", s)
+		print s
 		db_close(db)
 	}
 	printf "\n"
@@ -316,7 +320,6 @@ function usage()
 {
 	print "usage: monitower init"
 	print "       monitower show conf"
-	print "       monitower show data"
 	print "       monitower show graph"
 	print "       monitower run"
 	print "       monitower add <file> <value>"
@@ -336,13 +339,9 @@ BEGIN {
 		parse("/etc/monitower.conf", conf, name)
 		show_conf(conf, name)
 
-	} else if (ARGV[1] == "show" && ARGV[2] == "data" && ARGC == 3) {
-		parse("/etc/monitower.conf", conf, name)
-		show_data(name)
-
 	} else if (ARGV[1] == "show" && ARGV[2] == "graph" && ARGC == 3) {
 		parse("/etc/monitower.conf", conf, name)
-		show_graph(name)
+		show_graph(name, 80)
 
 	} else if (ARGV[1] == "run" && ARGC == 2) {
 		parse("/etc/monitower.conf", conf, name)
