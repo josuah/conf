@@ -288,13 +288,6 @@ function cmd_show(conf, name, len,
 	}
 }
 
-function cmd_init(conf, name,
-	i)
-{
-	for (i = 0; i in conf; i++)
-		db_init(conf["home"]"/"name[i]".db", conf["step"], conf["size"])
-}
-
 function cmd_run(conf, name,
 	i, e, val, path)
 {
@@ -320,8 +313,7 @@ function cmd_run(conf, name,
 
 function usage()
 {
-	print "usage: monitower init [-f file]"
-	print "       monitower show [-f file] [len]"
+	print "usage: monitower show [-f file] [len]"
 	print "       monitower conf [-f file]"
 	print "       monitower run [-f file]"
 	exit(1)
@@ -339,9 +331,7 @@ BEGIN {
 
 	parse(file, conf, name)
 
-	if (ARGV[1] == "init" && ARGC == 2) {
-		cmd_init(conf, name)
-	} else if (ARGV[1] == "conf" && ARGC == 2) {
+	if (ARGV[1] == "conf" && ARGC == 2) {
 		cmd_conf(conf, name)
 	} else if (ARGV[1] == "show" && ARGC >= 2 && ARGC <= 3) {
 		cmd_show(conf, name, ARGV[2] ? ARGV[2] : 80)
