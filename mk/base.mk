@@ -9,7 +9,7 @@ include mk/conf.mk
 conf: base/bin /etc/pack /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
 
 base/bin:
-	exec ln -sf ${PWD}/bin/* ${PREFIX}/bin
+	exec ln -sf $$PWD/bin/* ${PREFIX}/bin
 
 /home/pack:
 	exec useradd -m pack

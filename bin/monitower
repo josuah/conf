@@ -40,10 +40,10 @@ function db_open(db, path,
 	if ((getline <path) <= 0)
 		die("error reading database header for "path)
 	split($0, a, " ")
+	db["skip"] = length($0) + 1
 	db["time"] = int(a[1])
 	db["step"] = int(a[2])
 	db["size"] = int(a[3])
-	db["skip"] = length($0) + 1
 	db["end"] = int(db["time"] / db["step"])
 	db["beg"] = db["end"] - db["size"]
 	db["path"] = path
@@ -66,7 +66,7 @@ function db_init(path, step, size,
 		die("single quote in path '"path"'")
 
 	time = 0
-	printf "%015d %015d %015d\n", time, step, size >path
+	printf "%15d %15d %15d\n", time, step, size >path
 	for (i = 0; i < size; i++)
 		printf "0" >>path
 	printf "\n" >>path
@@ -78,7 +78,7 @@ function db_time(db, time,
 {
 	db["time"] = time
 	cmd = "exec dd of='"db["path"]"' conv=notrunc bs=15 count=1 2>/dev/null"
-	printf "%015d", time | cmd
+	printf "%15d", time | cmd
 	close(cmd)
 }
 
@@ -196,7 +196,7 @@ function parse_variables(str, var,
 		if (!sub(/=.*/, "", key) || !sub(/^[A-Z_a-z_0-9]+=/, "", val))
 			die("invalid key=value declaration: '"tok[t]"'")
 		var[key] = val
-		str = str (str ? " " : "") key"='"val"'"
+		str = (str ? str " " : str) key"='"val"'"
 	}
 	return str
 }
@@ -271,7 +271,7 @@ function cmd_conf(conf, name,
 	}
 }
 
-function cmd_graph(conf, name, len,
+function cmd_show(conf, name, len,
 	i, s, last, time, end)
 {
 	time = now()
@@ -321,7 +321,7 @@ function cmd_run(conf, name,
 function usage()
 {
 	print "usage: monitower init [-f file]"
-	print "       monitower graph [-f file] [len]"
+	print "       monitower show [-f file] [len]"
 	print "       monitower conf [-f file]"
 	print "       monitower run [-f file]"
 	exit(1)
@@ -343,8 +343,8 @@ BEGIN {
 		cmd_init(conf, name)
 	} else if (ARGV[1] == "conf" && ARGC == 2) {
 		cmd_conf(conf, name)
-	} else if (ARGV[1] == "graph" && ARGC >= 2 && ARGC <= 3) {
-		cmd_graph(conf, name, ARGV[2] ? ARGV[2] : 80)
+	} else if (ARGV[1] == "show" && ARGC >= 2 && ARGC <= 3) {
+		cmd_show(conf, name, ARGV[2] ? ARGV[2] : 80)
 	} else if (ARGV[1] == "run" && ARGC == 2) {
 		cmd_run(conf, name)
 	} else {
