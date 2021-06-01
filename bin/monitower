@@ -107,9 +107,9 @@ function db_get(db, beg, end,
 	assert(beg <= end, "db_get")
 
 	for (i = min(db["beg"], end); i > beg; i--)
-		head = head "?"
+		head = head "0"
 	for (i = max(db["end"], beg); i < end; i++)
-		tail = tail "?"
+		tail = tail "0"
 
 	if (beg > db["end"] || end < db["beg"])
 		return head tail
