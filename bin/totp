@@ -41,7 +41,8 @@ function totp(key,
 
 function usage()
 {
-	print"usage: totp [add] service" >"/dev/stderr"
+	print"usage: totp [show] service" >"/dev/stderr"
+	print"usage: totp add service" >"/dev/stderr"
 	exit(1)
 }
 
