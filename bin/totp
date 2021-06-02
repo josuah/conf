@@ -59,8 +59,9 @@ BEGIN {
 		$0 = toupper($0)
 		gsub(/[^2-7A-Z]/, "")
 		print substr($0, 1, 16)
-	} else if (ARGC == 2) {
-		"exec pass show '2fa/"ARGV[1]"/code'" | getline b32
+	} else if ((ARGV[1] == "show" && ARGC == 3) || ARGC == 2) {
+		i = 1 + (ARGC == 3)
+		"exec pass show '2fa/"ARGV[i]"/code'" | getline b32
 		if (b32 == "") exit(1)
 		print totp(b32hex(b32))
 	} else {

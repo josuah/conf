@@ -7,7 +7,7 @@ bird=https://www.birds.cornell.edu/clementschecklist/wp-content/uploads/2019/08/
 
 case ${1:-help} in
 (pass)
-	openssl rand -base64 $((n * 48)) | tr '+/' 'az' | cut -c 1-24
+	openssl rand -base64 $((n * 48)) | tr '+/' 'az' | cut -c 1-20
 	;;
 (mac)
 	openssl rand -hex $((n * 6)) \
