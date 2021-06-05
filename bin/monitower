@@ -1,27 +1,9 @@
 #!/usr/bin/awk -f
 # read/write to a ring-buffer time series database of up/down events
 
-function die(message)
-{
-	print "error: "message >"/dev/stderr"
-	exit(1)
-}
-
-function assert(expr, fn)
-{
-	if (!expr)
-		die("assertion failed at "fn"()")
-}
-
-function max(a, b)
-{
-	return a > b ? a : b
-}
-
-function min(a, b)
-{
-	return a < b ? a : b
-}
+function die(message) { print "error: "message >"/dev/stderr"; exit(1) }
+function max(x1, x2) { return a > b ? a : b }
+function min(x1, x2) { return a < b ? a : b }
 
 function now(time)
 {
@@ -104,8 +86,6 @@ function db_write(db, val, pos, len)
 function db_get(db, beg, end,
 	i, head, tail)
 {
-	assert(beg <= end, "db_get")
-
 	for (i = min(db["beg"], end); i > beg; i--)
 		head = head "0"
 	for (i = max(db["end"], beg); i < end; i++)
@@ -125,8 +105,6 @@ function db_get(db, beg, end,
 function db_set(db, val, beg, end,
 	len)
 {
-	assert(beg <= end, "db_set")
-
 	len = end - beg
 	beg = beg % db["size"]
 	end = end % db["size"]
