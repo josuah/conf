@@ -1,6 +1,24 @@
 #!/bin/sh -eu
 
-openssl s_client -starttls smtp </dev/null \
-  -servername "$dom" -connect "$dom:$port" -verify_return_error -verify_depth 3
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' INT TERM EXIT HUP
+mkfifo "$tmp/fifo"
 
-dig +short -t mx 
+expect() {
+	line=$(echo $line | tr -d '\r')
+	echo "expect(/$1/ ~ '$line')" >&2
+	case "$line" in ($1) return ;; (*) exit 1 ;; esac
+}
+
+for x in $(dig +short mx "$dom" | sed -rn 's/\.$//; s/^[0-9]+ +//p'); do
+	openssl s_client -verify_return_error -verify_depth 3 -starttls smtp \
+	 -servername "$x" -connect "$x:25" -quiet -no_ign_eof <$tmp/fifo \
+	| {
+		echo "EHLO $(hostname)"
+		while read line; do
+			case "$line" in ("250 "*) break ;; esac
+			expect "250-[0-9a-zA-Z]*"
+		done
+		expect "250 *"
+	} >$tmp/fifo
+done

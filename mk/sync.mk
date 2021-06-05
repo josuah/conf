@@ -10,5 +10,10 @@ sync: ${SYNC_CONF} ${SYNC_HOME}
 ${SYNC_CONF}:
 	exec rsync -vrt --delete ${SYNC} $@:${PWD}
 
+${SYNC_CONF:=+}: $*
+	exec ssh $* make -C /etc
+
 ${SYNC_HOME}:
 	exec rsync -vrt conf/home/ $@:
+
+.SUFFIXES: +

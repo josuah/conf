@@ -2,8 +2,8 @@
 # read/write to a ring-buffer time series database of up/down events
 
 function die(message) { print "error: "message >"/dev/stderr"; exit(1) }
-function max(x1, x2) { return a > b ? a : b }
-function min(x1, x2) { return a < b ? a : b }
+function max(a, b) { return a > b ? a : b }
+function min(a, b) { return a < b ? a : b }
 
 function now(time)
 {
