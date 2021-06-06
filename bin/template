@@ -14,8 +14,25 @@ function enter(to, was)
 	return to != old
 }
 
-NR == 1 {
+function envfile(file)
+{
+	while ((getline <file) > 0) {
+		gsub(/["']/, "")
+		if (!sub(/ *= */, "='")) continue
+		if (!sub(/^[A-Z_a-z_0-9]+=.*$/, "&'")) continue
+		shell($0"\n")
+	}
+}
+
+BEGIN {
 	enter("code")
+
+	n = ARGC
+	for (ARGC = i = 1; i <= n; i++) {
+		if (sub("^env=", "", ARGV[i])) envfile(ARGV[i])
+		else ARGV[ARGC++] = ARGV[i]
+	}
+
 	shell("NOW=$(date +%Y-%m-%d)\n")
 }
 
