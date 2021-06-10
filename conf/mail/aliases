@@ -3,7 +3,7 @@
 root:		me@josuah.net
 
 # user aliases
-%% if [ "${mx:-}" ]; then
+%% if [ "${MX:-}" ]; then
 me:		josuah
 %% fi
 

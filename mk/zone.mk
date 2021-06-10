@@ -1,5 +1,5 @@
 ZONE = z0.is z0.dn42 josuah.net metairies.org
-ZONE_NS = ns1 # ns2
+ZONE_NS = ns1 ns2
 
 conf: sign
 sync: ${ZONE_NS}

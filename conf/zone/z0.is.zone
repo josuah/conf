@@ -18,8 +18,8 @@ ams1				IN A	46.23.94.12
 
 02-34-19			IN ALIAS lil1.z0.is.
 
-mx1				IN ALIAS lil1.z0.is.
+mx1				IN ALIAS ams1.z0.is.
 ns1				IN ALIAS lil1.z0.is.
-ns2				IN ALIAS lil1.z0.is.
+ns2				IN ALIAS ams1.z0.is.
 @				IN ALIAS lil1.z0.is.
 git				IN ALIAS lil1.z0.is.
