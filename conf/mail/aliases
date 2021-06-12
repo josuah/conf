@@ -3,9 +3,7 @@
 root:		me@josuah.net
 
 # user aliases
-%% if [ "${MX:-}" ]; then
 me:		josuah
-%% fi
 
 # RFC 2142: network operations mailbox names
 abuse:		root
