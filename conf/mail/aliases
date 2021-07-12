@@ -4,6 +4,7 @@ root:		me@josuah.net
 
 # user aliases
 me:		josuah
+mail:		josuah
 
 # RFC 2142: network operations mailbox names
 abuse:		root

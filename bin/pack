@@ -1,20 +1,22 @@
 #!/bin/sh -eu
 # nimble source-based package manager for custom build recipes
 
-pack_download_git() {
-	git clone --depth 1 --branch "$ver" "$url" "$SOURCE"
-	rm -rf "$SOURCE/.git"
-}
-
-pack_download_tar() {
-	curl -L "$url" | tar -xzf-
-}
-
 pack_download() {
 	case $url in
-	(*.tgz|*.tar.gz) pack_download_tar ;;
-	(git://*|*.git) pack_download_git ;;
-	(*) echo url error >&2; exit 1 ;;
+	(*.txg|*.tar.gz)
+		curl -L "$url" | gzip -cd | tar -xf-
+		;;
+	(*.txz|*.tar.xz)
+		curl -L "$url" | xz -cd | tar -xf-
+		;;
+	(git://*|*.git)
+		git clone --depth 1 --branch "$ver" "$url" "$SOURCE"
+		rm -rf "$SOURCE/.git"
+		;;
+	(*)
+		echo error: unknown url type >&2
+		exit 1
+		;;
 	esac
 }
 
