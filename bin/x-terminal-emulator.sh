@@ -1,3 +1,0 @@
-#!/bin/sh -e
-
-exec st -f terminus:pixelsize=16 "$@"
