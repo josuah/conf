@@ -1,4 +1,4 @@
-export PATH="/bin:/sbin:/usr/bin:/usr/sbin$(printf :%s /usr/*/sbin /usr/*/bin)"
+export PATH="$(printf %s: /usr/*/sbin /usr/*/bin)/bin:/sbin:/usr/bin:/usr/sbin"
 export PATH="$PATH:$HOME/bin"
 export MAIL="$HOME/Maildir"
 export EMAIL="me@josuah.net"
