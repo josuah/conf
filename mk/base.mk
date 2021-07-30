@@ -4,7 +4,7 @@ CONF = mail/smtpd.conf mail/aliases mail/domains hosts syslog.conf \
  crontab profile macros.conf ssh/sshd_config ssh/ssh_config \
  resolv.conf.tail
 
-include mk/conf.mk
+include conf/mk/conf.mk
 
 conf: base/bin /etc/pack /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
 

@@ -1,7 +1,7 @@
 CONF = login.conf newsyslog.conf relayd.conf relayd/tls.conf \
   pf.conf usermgmt.conf
 
-include mk/conf.mk
+include conf/mk/conf.mk
 
 conf: ${WIREGUARD:=obsd}
 

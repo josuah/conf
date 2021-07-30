@@ -1,3 +1,3 @@
 CONF = httpd.conf
 
-include mk/conf.mk
+include conf/mk/conf.mk

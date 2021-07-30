@@ -1,6 +1,6 @@
 CONF = bgpd.conf bgpd/roa.conf bgpd/permit.conf bgpd/deny.conf ospf6d.conf
 
-include mk/conf.mk
+include conf/mk/conf.mk
 
 conf: /home/bgplgsh /etc/ospf6d/local.conf
 

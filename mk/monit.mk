@@ -1,6 +1,6 @@
 CONF = monitower.conf
 
-include mk/conf.mk
+include conf/mk/conf.mk
 
 conf: monit
 

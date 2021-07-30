@@ -1,4 +1,3 @@
-SYNC = mk bin conf
 SYNC_CONF = lil1 ams1 term1 # dis-sys-2
 SYNC_HOME = root@term1 backup@term1 josuah@term1 root@lil1 josuah@lil1 \
  backup@lil1 git@lil1 josuah@bitreich.org josuah@server10.openbsd.amsterdam \
@@ -8,7 +7,7 @@ SYNC_HOME = root@term1 backup@term1 josuah@term1 root@lil1 josuah@lil1 \
 sync: ${SYNC_CONF} ${SYNC_HOME}
 
 ${SYNC_CONF}:
-	exec rsync -vrt --delete ${SYNC} $@:${PWD}
+	exec rsync -vrt --delete conf/* $@:${PWD}/conf/
 
 ${SYNC_CONF:=+}: $*
 	exec ssh $* make -C /etc
