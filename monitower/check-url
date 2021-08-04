@@ -1,0 +1,3 @@
+#!/bin/sh -eu
+
+exec curl -Lfvs "$url" >/dev/null

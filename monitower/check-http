@@ -1,4 +1,0 @@
-#!/bin/sh -eu
-: ${method:=GET}
-
-exec curl -Lvs -X "$method" "$url" >/dev/null
