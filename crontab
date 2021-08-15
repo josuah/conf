@@ -7,3 +7,6 @@ MAILTO=me@josuah.net
 */5	*	*	*	*	root	rdate -s pool.ntp.org
 */5	*	*	*	*	root	rcctl ls failed
 *	*	*	*	*	_monitower monitower run
+
+@reboot					root	pkg_add -u
+0~30	4	*	*	*	root	pkg_add -u
