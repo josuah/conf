@@ -6,17 +6,23 @@ $ORIGIN z0.is.
 @				IN TXT	"v=spf1 mx -all"
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
-vm2.s10.as3265			IN NET	46.23.94.12/32
-vm2.s10.as3265			IN NET	2a03:6000:6f66:602::/64
 e019ada6.as5410			IN NET	31.37.164.83/32
 t597256.as6939			IN NET	2001:470:1f12:769::/64
 
+vm2.s10.as3265			IN NET	46.23.94.12/32
+vm2.s10.as3265			IN NET	2a03:6000:6f66:602::/64
+
+net1.ip4.as20473		IN NET	167.179.110.0/24
+net1.ip6.as20473		IN NET	2001:19f0:7001:2860::/64
+
 lil1				IN A	31.37.164.83
 lil1				IN AAAA	2001:470:1f12:769::2
-ams1				IN AAAA	2a03:6000:6f66:602::6
-ams1				IN A	46.23.94.12
 
-02-34-19			IN ALIAS lil1.z0.is.
+ams1				IN A	46.23.94.12
+ams1				IN AAAA	2a03:6000:6f66:602::6
+
+tyo1				IN A	167.179.110.61
+tyo1				IN AAAA	2001:19f0:7001:2860::7
 
 mx1				IN ALIAS ams1.z0.is.
 ns1				IN ALIAS lil1.z0.is.

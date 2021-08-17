@@ -8,5 +8,8 @@ MAILTO=me@josuah.net
 */5	*	*	*	*	root	rcctl ls failed
 *	*	*	*	*	_monitower monitower run
 
+@reboot					root	syspatch
+0~30	4	*	*	*	root	syspatch
+
 @reboot					root	pkg_add -u
 0~30	4	*	*	*	root	pkg_add -u
