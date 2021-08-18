@@ -6,10 +6,7 @@ CONF = mail/smtpd.conf mail/aliases mail/domains hosts syslog.conf \
 
 include conf/mk/conf.mk
 
-conf: base/bin /etc/pack /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
-
-base/bin:
-	exec ln -sf $$PWD/bin/* ${PREFIX}/bin
+conf: /etc/pack /etc/ssl/hostname.crt /etc/ssl/private/hostname.key
 
 /home/pack:
 	exec useradd -m pack

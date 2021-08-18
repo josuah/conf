@@ -1,6 +1,0 @@
-%% id4=$(printf %x "$HOSTID")
-
-group ospf
-
-inet6 fe80::{{id4}}/64
-up

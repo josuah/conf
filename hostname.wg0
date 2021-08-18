@@ -1,0 +1,7 @@
+# generated on {{NOW}}
+%% id4=$(printf %x "$HOSTID")
+
+%% wg-obsd /etc/wireguard/wg0.conf
+
+inet6 fd42:10e3:10e8::{{id4}}/64
+up

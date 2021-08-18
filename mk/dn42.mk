@@ -4,6 +4,7 @@ DN42_DATA = ${DN42_DIR}/data
 DN42_FILTER = ${DN42_DATA}/filter.txt ${DN42_DATA}/filter6.txt
 
 conf: conf/bgpd/roa.conf conf/bgpd/permit.conf conf/bgpd/deny.conf
+
 sync: dn42/sync
 
 dn42/sync: ${DN42_DIR}

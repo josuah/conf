@@ -2,7 +2,7 @@ CONF = monitower.conf
 
 include conf/mk/conf.mk
 
-conf: monit
+conf: monitower
 
-monit:
-	exec cp -r conf/monitower /etc
+monitower:
+	exec ln -sf conf/monitower /etc

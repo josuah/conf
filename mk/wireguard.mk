@@ -1,8 +1,10 @@
-conf: ${WIREGUARD}
+CONF = hostname.wg0 wireguard/wg0.conf
 
-${WIREGUARD}: /etc/wireguard/key
-	exec env HOSTID=${HOSTID} wg-ptp conf/wireguard/$@.conf >/etc/wireguard/$@.conf
+include conf/mk/conf.mk
+
+hostname.wg0: wireguard/wg0.conf
+
+wireguard/wg0.conf: /etc/wireguard/key
 
 /etc/wireguard/key:
-	exec mkdir -p -m 700 ${@D}
-	exec openssl rand -base64 32 >$@
+	openssl rand -base64 32 >$@
