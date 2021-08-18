@@ -4,4 +4,5 @@
 %% wg-obsd /etc/wireguard/wg0.conf
 
 inet6 fd42:10e3:10e8::{{id4}}/64
+inet 10.103.108.{{HOSTID}}/24
 up
