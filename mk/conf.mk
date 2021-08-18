@@ -1,6 +1,6 @@
 conf: ${CONF}
 
-${CONF}: /etc/${@D}/
-	exec template env=Makefile conf/$@ >/etc/$@
+${CONF}: ${@D}
+	exec template env=Makefile conf/$@ >$@
 
 .PHONY: conf ${CONF}

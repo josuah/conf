@@ -5,4 +5,4 @@ include conf/mk/conf.mk
 conf: monitower
 
 monitower:
-	exec ln -sf conf/monitower /etc
+	exec ln -sf conf/monitower .

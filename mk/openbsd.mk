@@ -3,8 +3,8 @@ CONF = login.conf newsyslog.conf relayd.conf relayd/tls.conf pf.conf \
 
 include conf/mk/conf.mk
 
-conf: /etc/pf/whitelist /etc/pf/blacklist /etc/pf/local.conf
+conf: pf/whitelist pf/blacklist pf/local.conf
 
-/etc/pf/whitelist /etc/pf/blacklist /etc/pf/local.conf:
+pf/whitelist pf/blacklist pf/local.conf:
 	exec mkdir -p ${@D}
 	exec touch $@
