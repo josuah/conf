@@ -20,7 +20,7 @@
 		<source-password>hackme</source-password>
 		<relay-password>hackme</relay-password>
 		<admin-user>admin</admin-user>
-		<admin-password>{{pass}}</admin-password>
+		<admin-password>{{ICECAST_PASS}}</admin-password>
 	</authentication>
 
 	<hostname>icecast.z0.is</hostname>
