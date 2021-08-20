@@ -6,5 +6,5 @@ $ORIGIN josuah.net.
 @				IN TXT	"v=spf1 mx -all"
 _sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
-@				IN ALIAS lil1.z0.is.
-www				IN ALIAS lil1.z0.is.
+@				IN ALIAS ams1.z0.is.
+www				IN ALIAS ams1.z0.is.

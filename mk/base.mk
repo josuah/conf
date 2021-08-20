@@ -2,7 +2,7 @@ PREFIX = /usr/local
 
 CONF = mail/smtpd.conf mail/aliases mail/domains hosts syslog.conf \
  crontab profile macros.conf ssh/sshd_config ssh/ssh_config \
- resolv.conf.tail
+ resolv.conf.tail inetd.conf
 
 include conf/mk/conf.mk
 
