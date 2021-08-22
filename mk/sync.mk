@@ -7,12 +7,12 @@ SYNC_HOME = root@term1 backup@term1 josuah@term1 root@lil1 josuah@lil1 \
 sync: ${SYNC_CONF} ${SYNC_HOME}
 
 ${SYNC_CONF}:
-	exec rsync -vrt --delete conf/* $@:${PWD}/conf/
+	rsync -vrt --delete conf/* $@:${PWD}/conf/
 
 ${SYNC_CONF:=+}: $*
-	exec ssh $* make -C /etc
+	ssh $* make -C /etc
 
 ${SYNC_HOME}:
-	exec rsync -vrt conf/home/ $@:
+	rsync -vrt conf/home/ $@:
 
 .SUFFIXES: +

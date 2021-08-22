@@ -6,10 +6,10 @@ include conf/mk/conf.mk
 conf: pf/whitelist pf/blacklist pf/local.conf
 
 pf/whitelist pf/blacklist pf/local.conf: pf
-	exec touch $@
+	touch $@
 
 relayd pf:
-	exec mkdir -p $@
+	mkdir -p $@
 
 relayd/local.conf: relayd
-	exec touch $@
+	touch $@

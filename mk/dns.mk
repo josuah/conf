@@ -5,5 +5,5 @@ include conf/mk/conf.mk
 nsd.conf: /var/nsd/etc/nsd.conf
 
 /var/nsd/etc/nsd.conf:
-	exec touch $@
-	exec ln -sf $@ nsd.conf
+	touch $@
+	ln -sf $@ nsd.conf

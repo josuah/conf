@@ -13,3 +13,5 @@ fd42:10e3:10e8::3	term1
 fd42:10e3:10e8::5	lil1
 fd42:10e3:10e8::6	ams1
 fd42:10e3:10e8::7	tyo1
+
+%%! cat /etc/hosts.local 2>/dev/null

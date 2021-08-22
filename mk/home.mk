@@ -1,4 +1,4 @@
 conf: home
 
 home:
-	exec cp -r conf/home/.??* ${HOME}
+	cp -r conf/home/.??* ${HOME}
