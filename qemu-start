@@ -1,0 +1,18 @@
+#!/bin/sh -eu
+
+ls /var/vm/$1.qcow >/dev/null
+
+mkdir -p /var/run/vnc /var/log/qemu
+chgrp vnc /var/run/vnc
+chmod g+s /var/run/vnc
+
+umask 007
+xargs -t "qemu-system-${ARCH:-x86_64}" \
+  -netdev tap,id=n0 \
+  -device virtio-net,netdev=n0 \
+  -vnc unix:"/var/run/vnc/$1.sock" \
+  </etc/qemu/$1.conf \
+  >/var/log/qemu/$1.log 2>&1 \
+&
+echo tail -f "/var/log/qemu/$1.log"
+echo vncviewer "/var/run/vnc/$1.sock"

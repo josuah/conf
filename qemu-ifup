@@ -1,0 +1,3 @@
+#! /bin/sh -eux
+ifconfig "$1" group qemu up
+ifconfig veb0 add "$1"

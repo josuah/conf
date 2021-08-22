@@ -1,0 +1,2 @@
+#! /bin/sh -eux
+ifconfig veb0 del "$1"
