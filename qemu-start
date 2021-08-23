@@ -1,5 +1,7 @@
 #!/bin/sh -eu
 
+mac=$(awk -v name="$1" '$1 == name { print $2 }' /etc/vmtab)
+
 ls /var/vm/$1.qcow >/dev/null
 
 mkdir -p /var/run/vnc /var/log/qemu
@@ -9,10 +11,11 @@ chmod g+s /var/run/vnc
 umask 007
 xargs -t "qemu-system-${ARCH:-x86_64}" \
   -netdev tap,id=n0 \
-  -device virtio-net,netdev=n0 \
+  -device virtio-net,netdev=n0,mac="$mac" \
   -vnc unix:"/var/run/vnc/$1.sock" \
   </etc/qemu/$1.conf \
   >/var/log/qemu/$1.log 2>&1 \
 &
+
 echo tail -f "/var/log/qemu/$1.log"
 echo vncviewer "/var/run/vnc/$1.sock"
