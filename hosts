@@ -9,9 +9,9 @@ ff02::1			ip6-allnodes
 ff02::2			ip6-allrouters
 
 # servers
-fd42:10e3:10e8::3	term1
-fd42:10e3:10e8::5	lil1
-fd42:10e3:10e8::6	ams1
-fd42:10e3:10e8::7	tyo1
+fe80::3%wg0		term1
+fe80::5%wg0		lil1
+fe80::6%wg0		ams1
+fe80::7%wg0		tyo1
 
 %%! cat /etc/hosts.local 2>/dev/null
