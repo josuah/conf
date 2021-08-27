@@ -13,5 +13,6 @@ fe80::3%wg0		term1
 fe80::5%wg0		lil1
 fe80::6%wg0		ams1
 fe80::7%wg0		tyo1
+10.0.3.1		term1vm1
 
 %%! cat /etc/hosts.local 2>/dev/null

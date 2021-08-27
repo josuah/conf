@@ -1,2 +1,2 @@
-inet 10.0.{{HOSTID}}.1/24
+inet 10.0.{{HOSTID}}.254/24
 up

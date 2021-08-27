@@ -9,12 +9,12 @@ chgrp vnc /var/run/vnc
 chmod g+s /var/run/vnc
 
 umask 007
-xargs -t "qemu-system-${ARCH:-x86_64}" \
+sed 's/#.*//' /etc/qemu/$1.conf \
+| xargs -t "qemu-system-${ARCH:-x86_64}" \
   -netdev tap,id=n0 \
   -device virtio-net,netdev=n0,mac="$mac" \
   -vnc unix:"/var/run/vnc/$1.sock" \
   -drive file="/var/vm/$1.qcow",media=disk \
-  </etc/qemu/$1.conf \
   >/var/log/qemu/$1.log 2>&1 \
 &
 
