@@ -8,6 +8,9 @@ include conf/mk/conf.mk
 
 conf: pack ssl/hostname.crt ssl/private/hostname.key
 
+bin:
+	make -C /etc/conf/bin
+
 /home/pack:
 	useradd -m pack
 
