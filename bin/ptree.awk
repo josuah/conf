@@ -9,19 +9,20 @@ function pager(msg)
 function ps_read(ps,
 	i, pid, cmd)
 {
-	cmd = "exec ps ax -o pid,ppid,stat,user,args"
+	cmd = "exec ps ax -o pid,ppid,pgid,stat,user,args"
 	cmd | getline
 	while ((cmd | getline) > 0) {
 		pid = $1
 
-		ps[$2":cpid"] = ps[$2":cpid"] "," pid
+		ps[$2":cpid"] = ps[$2":cpid"] "," $1
+		ps[pid":pgid"] = $3
 
-		sub("^( *[^ ]+ +)( *[^ ]+ +)", "")
+		sub("^( *[^ ]+ +){3}", "")
 		ps[pid":info"] = $0
 
 		len = length($0)
 
-		sub("^( *[^ ]+ +)( *[^ ]+ +)", "")
+		sub("^( *[^ ]+ +){2}", "")
 		ps[pid":args"] = $0
 
 		len -= length($0)
@@ -46,6 +47,7 @@ function tree_fill(tree, ps, pid, n, lv,
 	tree[n":info"] = ps[pid":info"]
 	tree[n":args"] = ps[pid":args"]
 	tree[n":pid"] = pid
+	tree[n":pgid"] = ps[pid":pgid"] == pid ? "*" : " "
 	n++
 
 	cpid = ps[pid":cpid"]
@@ -82,10 +84,13 @@ function tree_format(tree, n,
 }
 
 function tree_print(tree, n,
-	i1, i2)
+	i1, i2, pid, pgid, info)
 {
 	for (i1 = 1; i1 < n; i1++) {
-		pager(sprintf("%6d %s", tree[i1":pid"], tree[i1":info"]))
+		pid = tree[i1":pid"]
+		pgid = tree[i1":pgid"]
+		info = tree[i1":info"]
+		pager(sprintf("%6d%s %s", pid, pgid, info))
 		for (i2 = 1; tree[i1":"i2] != ""; i2++)
 			pager(sprintf("%s", tree[i1":"i2]))
 		pager(sprintf("%s\n", tree[i1":args"]))
