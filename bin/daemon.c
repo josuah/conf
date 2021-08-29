@@ -19,7 +19,7 @@
 #include "util.h"
 
 char	*flag_user;
-int	 flag_facility;
+int	 flag_facility = LOG_DAEMON;
 pid_t	 child;
 
 struct facility {
