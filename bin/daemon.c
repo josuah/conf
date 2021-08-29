@@ -133,6 +133,7 @@ daemon_(char **argv)
 
 	close(0);
 
+	/* double fork: daemonize */
 	switch (fork()) {
 	case -1:
 		syslog(LOG_ERR, "(daemon) pipe: %s", strerror(errno));
@@ -144,18 +145,22 @@ daemon_(char **argv)
 		return;
 	}
 
+	/* to cache error messages from the child */
 	if (pipe(p) == -1) {
 		syslog(LOG_ERR, "(daemon) pipe: %s", strerror(errno));
 		exit(1);
 	}
 
+	/* new process group with daemon itself and its child */
 	if (setsid() == -1) {
 		syslog(LOG_ERR, "(daemon) setsid: %s", strerror(errno));
 		exit(1);
 	}
 
+	/* fork-exec the child */
 	child = spawn(argv, p);
 
+	/* forward most signals to the child */
 	sa.sa_handler = sighandler_forward;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGHUP, &sa, NULL);
@@ -169,16 +174,21 @@ daemon_(char **argv)
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 
+	/* to exit daemon itself but not the child */
 	sa.sa_handler = sighandler_die;
 	sigfillset(&sa.sa_mask);
 	sigaction(SIGABRT, &sa, NULL);
 
+	/* read all logs until the pipe closes like logger(1) does */
 	logger(p[0]);
 
+	/* needs SIGCHLD not caught above but let to default */
 	while (waitpid(child, &status, 0) == -1)
 		assert(errno == EINTR);
 	assert(WIFEXITED(status) || WIFSIGNALED(status));
 	child = 0;
+
+	/* the child is not expected to terminate on its own */
 	syslog(LOG_CRIT, "(daemon) child process exited with status %d",
 	    WEXITSTATUS(status));
 }
