@@ -1,8 +1,20 @@
+/*
+ * Bridging the BSD world and the DJB world:
+ *
+ * daemon(8) forks to background to daemonize (BSD) and invoke a
+ * child to foreground (DJB).
+ *
+ * daemon(8) calls the child with stdout and stderr replaced by a
+ * pipe, from which daemon(8) reads the logs (DJB) further sent to
+ * syslog (BSD).
+ */
+
 #include <assert.h>
 #include <sys/wait.h>
 #include <syslog.h>
 #include <unistd.h>
 #include <signal.h>
+#include <pwd.h>
 
 #include "util.h"
 
@@ -125,6 +137,43 @@ sighandler_die(int sig)
 	exit(0);
 }
 
+void
+setusergroup(char *user)
+{
+	struct passwd *pw;
+	gid_t gr[128];
+	int n;
+
+	syslog(LOG_ERR, "(daemon) setting user to %s", user);
+
+	if ((pw = getpwnam(user)) == NULL) {
+		syslog(LOG_ERR, "(daemon) user %s: %s",
+		    user, strerror(errno));
+		exit(1);
+	}
+
+	n = sizeof gr / sizeof *gr;
+	if (getgrouplist(user, 0, gr, &n) == -1) {
+		syslog(LOG_ERR, "(daemon) inconsistent passwd and group: %s",
+		    strerror(errno));
+		exit(1);
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (setgid(gr[i]) == -1) {
+			syslog(LOG_ERR, "(daemon) setting gid: %s",
+			    strerror(errno));
+			exit(1);
+		}
+	}
+
+	if (setgid(pw->pw_gid) == -1 || setuid(pw->pw_uid) == -1) {
+		syslog(LOG_ERR, "(daemon) setting uid %d gid %d: %s",
+		    pw->pw_uid, pw->pw_gid, strerror(errno));
+		exit(1);
+	}
+}
+
 static void
 daemon_(char **argv)
 {
@@ -144,6 +193,10 @@ daemon_(char **argv)
 	default:
 		return;
 	}
+
+	/* if specified, set user and associated groups */
+	if (flag_user != NULL)
+		setusergroup(flag_user);
 
 	/* to cache error messages from the child */
 	if (pipe(p) == -1) {
