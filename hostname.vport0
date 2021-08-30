@@ -1,2 +1,2 @@
-inet 10.0.{{HOSTID}}.254/24
+inet6 fe80::/64
 up

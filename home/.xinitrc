@@ -4,8 +4,9 @@ setxkbmap us -option compose:ralt
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
-#export XIM_PROGRAM="$(which fcitx)"
 fcitx -dr
+
+dwmstatus &
 
 xsetroot -solid '#222222'
 xset b off

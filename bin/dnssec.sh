@@ -16,8 +16,8 @@ case "$*" in
 	ldns-keygen -k -a ECDSAP256SHA256 -b 4096 -r /dev/urandom "$origin" >>log
 	;;
 ("sign "*)
-	zsk=/etc/dnssec/$origin+zsk/$(tail -n 1 /etc/dnssec/$origin+zsk/log)
-	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 /etc/dnssec/$origin+ksk/log)
+	zsk=/etc/dnssec/$origin+zsk/$(tail -n 1 "/etc/dnssec/$origin+zsk/log")
+	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 "/etc/dnssec/$origin+ksk/log")
 	salt=$(openssl rand -hex 64)
 	ldns-signzone -n -s "$salt" "$zone" "$ksk" "$zsk" >$zone.signed
 	;;
@@ -26,7 +26,7 @@ case "$*" in
 	 | sort | xargs ssh-keyscan -D
 	;;
 ("info "*)
-	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 /etc/dnssec/$origin+ksk/log)
+	ksk=/etc/dnssec/$origin+ksk/$(tail -n 1 "/etc/dnssec/$origin+ksk/log")
 	awk '{ print "tag="$4" algo="$5" type="$6" digest="$7 }' "$ksk.ds"
 	awk '{ print "key="$7 }' "$ksk.key"
 	;;

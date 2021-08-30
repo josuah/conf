@@ -1,5 +1,6 @@
-CONF = login.conf newsyslog.conf relayd.conf relayd/tls.conf pf.conf \
-  usermgmt.conf hostname.wg0
+CONF = hostname.wg0 \
+  login.conf newsyslog.conf pf.conf rad.conf relayd.conf relayd/tls.conf \
+  usermgmt.conf
 
 include conf/mk/conf.mk
 

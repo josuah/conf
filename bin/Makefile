@@ -3,13 +3,16 @@ CFLAGS = $D -std=c99 -Wall -Wextra -pedantic
 LDFLAGS = -static
 PREFIX = /usr/local/bin
 
-BIN = bin2hex ctl hex2bin acme-cli daemon dn42-filter dn42-roa dnssec \
-  hex2bin host log menu monitower mopen mtop mtrash mview netinfo pack pass \
-  play ptree random rcctl rctable rename snapshot syslogf template term totp \
-  wg-obsd wg-ptp whois-expiry x-terminal-emulator x-www-browser \
+BIN = acme-cli bin2hex ctl daemon dn42-filter dn42-roa dnssec hex2bin \
+  host log menu monitower mopen mtop mtrash mview netinfo pack pass \
+  play ptree qemu random rcctl rctable rename snapshot syslogf template \
+  term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator x-www-browser \
   x509 xdg-open zone
 
 all: ${BIN}
+
+dwmstatus: dwmstatus.c
+	${CC} ${CFLAGS} -I/usr/X11R6/include -L/usr/X11R6/lib -o ${PREFIX}/$@ $@.c -lX11
 
 .PHONY: .gitignore
 .SUFFIXES: .c .awk .sh

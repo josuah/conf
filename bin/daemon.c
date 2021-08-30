@@ -26,6 +26,7 @@ struct facility {
 	char *name;
 	int value;
 } facilities[] = {
+
 #define LOG(facility) { #facility, LOG_##facility }
 	LOG(AUTH), LOG(AUTHPRIV), LOG(CRON), LOG(DAEMON), LOG(FTP), LOG(KERN),
 	LOG(MAIL), LOG(NEWS), LOG(SYSLOG), LOG(USER), LOG(UUCP), LOG(LOCAL0),

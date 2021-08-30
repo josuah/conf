@@ -1,11 +1,4 @@
-CONF = vm.conf qemu-ifup qemu-ifdown qemu-start dhcpd/hypervisor.conf \
-  hostname.veb0 hostname.vport0
+CONF = hostname.veb0 hostname.vport0 \
+  vm.conf qemu-ifup qemu-ifdown
 
 include conf/mk/conf.mk
-
-dhcpd.conf: dhcpd/hypervisor.conf
-
-dhcpd/hypervisor.conf: vmtab
-
-dhcpd:
-	mkdir -p $@

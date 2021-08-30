@@ -1,4 +1,4 @@
-ZONE = z0.is z0.dn42 josuah.net metairies.org
+ZONE = z0.is z0.dn42 josuah.net metairies.org atelier-fu.fr
 ZONE_NS = ns1 ns2 ns3
 
 conf: sign
