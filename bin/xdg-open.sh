@@ -45,7 +45,7 @@ case "$(echo "$url" | tr A-Z a-z)" in
 	exec x-terminal-emulator less "$file"
 	;;
 (magnet:*|*.torrent)
-	exec transmission-remote -a "$url"
+	exec daemon transmission-cli "$url"
 	;;
 (ssh://*)
 	exec x-terminal-emulator ssh "$url"
