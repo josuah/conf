@@ -10,3 +10,5 @@ export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
 export PS1="$(hostname -s):\$PWD\\\$\${?#0} "
 export LC_ALL=en_US.UTF-8
+
+umask 002

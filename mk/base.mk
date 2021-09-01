@@ -8,6 +8,9 @@ include conf/mk/conf.mk
 
 conf: pack ssl/hostname.crt ssl/private/hostname.key
 
+home:
+	cp -r conf/home/.??* ${HOME}
+
 bin:
 	make -C /etc/conf/bin
 
