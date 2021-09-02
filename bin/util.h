@@ -202,3 +202,26 @@ strtonum(char const *s, long long min, long long max, char const **errstr)
 		*errstr = NULL;
 	return ll;
 }
+
+int
+getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroups)
+{
+	struct group *gr;
+
+	errno = 0;
+	setgrent();
+	for (int i = 0; (gr = getgrent()) != NULL; i++) {
+		if (i == *ngroups) {
+			errno = EFBIG;
+			goto err;
+		}
+		for (char **mem = gr->gr_mem; *mem != NULL; mem++)
+			if (strcmp(*mem, name) == 0)
+				groups[i] = gr->gr_gid
+	}
+	*ngroups = i;
+err:
+	endgrent();
+	return errno ? -1 : 0;
+}
+
