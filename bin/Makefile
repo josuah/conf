@@ -5,9 +5,9 @@ PREFIX = /usr/local/bin
 
 BIN = acme-cli bin2hex ctl daemon dn42-filter dn42-roa dnssec hex2bin \
   host log menu monitower mopen mtop mtrash mview netinfo pack pass \
-  play ptree qemu random rcctl rctable rename snapshot syslogf template \
-  term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator x-www-browser \
-  x509 xdg-open zone
+  play ptree qemu random rcctl rctable rename riostart snapshot syslogf \
+  template term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
+  x-www-browser x509 xdg-open zone
 
 all: ${BIN}
 

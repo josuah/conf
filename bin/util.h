@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <grp.h>
 
 /*
  * Common code included from various single-c-file projects on this directory.
@@ -207,17 +208,20 @@ int
 getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroups)
 {
 	struct group *gr;
+	int i;
 
+	assert(*ngroups > 0);
 	errno = 0;
 	setgrent();
-	for (int i = 0; (gr = getgrent()) != NULL; i++) {
+	groups[0] = basegid;
+	for (i = 1; (gr = getgrent()) != NULL; i++) {
 		if (i == *ngroups) {
 			errno = EFBIG;
 			goto err;
 		}
 		for (char **mem = gr->gr_mem; *mem != NULL; mem++)
 			if (strcmp(*mem, name) == 0)
-				groups[i] = gr->gr_gid
+				groups[i] = gr->gr_gid;
 	}
 	*ngroups = i;
 err:
