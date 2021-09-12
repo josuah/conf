@@ -1,2 +1,3 @@
-inet6 fe80::/64
+inet6 autoconf
+inet autoconf
 up

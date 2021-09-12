@@ -63,15 +63,14 @@ void
 logger(int fd)
 {
 	FILE *fp;
-	char *line = NULL;
-	size_t sz = 0;
+	char line[1024];
 
 	if ((fp = fdopen(fd, "r")) == NULL) {
 		syslog(LOG_ERR, "(daemon) fdopen pipe: %s", strerror(errno));
 		exit(1);
 	}
 
-	while (getline(&line, &sz, fp) > 0) {
+	while (fgets(line, sizeof line, fp) != NULL) {
 		strchomp(line);
 		syslog(LOG_NOTICE, "%s", line);
 	}
@@ -148,8 +147,7 @@ setusergroup(char *user)
 	syslog(LOG_ERR, "(daemon) setting user to %s", user);
 
 	if ((pw = getpwnam(user)) == NULL) {
-		syslog(LOG_ERR, "(daemon) user %s: %s",
-		    user, strerror(errno));
+		syslog(LOG_ERR, "(daemon) unknown user %s", user);
 		exit(1);
 	}
 

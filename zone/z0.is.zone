@@ -21,11 +21,10 @@ lil1				IN AAAA	2001:470:1f12:769::2
 ams1				IN A	46.23.94.12
 ams1				IN AAAA	2a03:6000:6f66:602::6
 
-tyo1				IN A	167.179.110.61
-tyo1				IN AAAA	2001:19f0:7001:2860::7
-
 mx1				IN ALIAS ams1.z0.is.
-ns1				IN ALIAS lil1.z0.is.
-ns2				IN ALIAS ams1.z0.is.
+mx2				IN ALIAS lil1.z0.is.
+mail				IN ALIAS lil1.z0.is.
+ns1				IN ALIAS ams1.z0.is.
+ns2				IN ALIAS lil1.z0.is.
 @				IN ALIAS ams1.z0.is.
 git				IN ALIAS ams1.z0.is.
