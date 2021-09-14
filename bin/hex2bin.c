@@ -195,8 +195,7 @@ main(int argc, char **argv)
 	if (argc > 1)
 		usage();
 	if (pwrite(1, NULL, 0, 0) < 0)
-		err(1, "expecting seekable file on stdout: %s",
-		    strerror(errno));
+		err(1, "expecting seekable file on stdout");
 	if (hex_init(&h, *argv) < 0)
 		err(1, "%s: %s", *argv, h.err);
 
@@ -209,7 +208,7 @@ main(int argc, char **argv)
 	if (h.err)
 		err(1, "%s:%d: %s", *argv, lnum, h.err);
 	if (ferror(h.fp) || ferror(stdout))
-		err(1, "%s: %s", *argv, strerror(errno));
+		err(1, "%s", *argv);
 	hex_free(&h);
 
 	return 0;

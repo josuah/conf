@@ -106,7 +106,7 @@ spawn(char **argv, int *p)
 		fputc('\n', stderr);
 
 		execvp(*argv, argv);
-		err(127, "execvp %s: %s", *argv, strerror(errno));
+		err(127, "execvp %s", *argv);
 		break;
 	default:
 		close(p[1]);

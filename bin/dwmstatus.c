@@ -11,7 +11,7 @@ main(void)
 	char line[128] = {0};
 
 	if ((dpy = XOpenDisplay(NULL)) == NULL)
-		err(1, "cannot open display: %s", strerror(errno));
+		err(1, "cannot open display");
 
 	while (1) {
 		char datetime[32] = {0};
@@ -22,7 +22,7 @@ main(void)
 		strftime(datetime, sizeof datetime, "%Y-%m-%d %H:%M:%S", localtime(&clock));
 
 		if (getloadavg(loadavg, 1) == -1)
-			warn("getloadavg: %s", strerror(errno));
+			warn("getloadavg");
 
 		snprintf(line, sizeof line, " %.02f %s ", loadavg[0], datetime);
 

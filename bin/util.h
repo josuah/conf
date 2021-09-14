@@ -21,12 +21,12 @@
 char *arg0;
 
 static void
-_log(char const *fmt, va_list va)
+_log(char const *fmt, va_list va, int err)
 {
 	if (arg0 != NULL)
 		fprintf(stderr, "%s: ", arg0);
 	vfprintf(stderr, fmt, va);
-	fprintf(stderr, "\n");
+	fprintf(stderr, err ? ": %s\n" : "\n", strerror(err));
 	fflush(stderr);
 }
 
@@ -36,7 +36,17 @@ err(int e, char const *fmt, ...)
 	va_list va;
 
 	va_start(va, fmt);
-	_log( fmt, va);
+	_log( fmt, va, errno);
+	exit(e);
+}
+
+void
+errx(int e, char const *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	_log( fmt, va, 0);
 	exit(e);
 }
 
@@ -46,7 +56,16 @@ warn(char const *fmt, ...)
 	va_list va;
 
 	va_start(va, fmt);
-	_log(fmt, va);
+	_log(fmt, va, errno);
+}
+
+void
+warnx(char const *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	_log(fmt, va, 0);
 }
 
 void
@@ -60,7 +79,7 @@ debug(char const *fmt, ...)
 	if (!verbose)
 		return;
 	va_start(va, fmt);
-	_log(fmt, va);
+	_log(fmt, va, 0);
 }
 
 size_t

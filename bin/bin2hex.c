@@ -89,14 +89,14 @@ bin2hex(FILE *fp, uint32_t addr)
 		hex_data(addr, (uint8_t *)buf, r);
 
 		if (addr > UINT32_MAX - r)
-			err(1, "address overflow: 0x%04llx > 0x%04"PRIx32,
+			errx(1, "address overflow: 0x%04llx > 0x%04"PRIx32,
 			    (long long)addr + r, UINT32_MAX);
 
 		if ((uint16_t)addr > UINT16_MAX - r)
 			hex_extended_addr((addr + r) >> 16);
 	}
 	if (ferror(fp))
-		err(1, "fread: %s", strerror(errno));
+		err(1, "fread");
 	puts(":00000001FF");
 }
 
@@ -124,7 +124,7 @@ main(int argc, char **argv)
 		case 'b':
 			flag_baseaddr = strtonum(optarg, 0, UINT32_MAX, &e);
 			if (e != NULL)
-				err(1, "baseaddr is %s", e);
+				errx(1, "baseaddr is %s", e);
 			break;
 		case 's':
 			flag_skip = 1;
@@ -141,7 +141,7 @@ main(int argc, char **argv)
 	if (*argv == NULL || strcmp(*argv, "-") == 0)
 		fp = stdin;
 	else if ((fp = fopen(*argv, "r")) == NULL)
-		err(1, "%s: %s", *argv, strerror(errno));
+		err(1, "%s", *argv);
 
 	if (pledge("stdio", NULL) < 0)
 		err(1, "pledge");
