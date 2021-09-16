@@ -1,3 +1,4 @@
+#define binary_h
 #define b00000000 0x00
 #define b00000001 0x01
 #define b00000010 0x02
