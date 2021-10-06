@@ -7,6 +7,7 @@ $ORIGIN metairies.org.
 @				IN TXT	"v=spf1 mx -all"
 
 @				IN ALIAS ams1.z0.is.
+shop				IN ALIAS ams1.z0.is.
 www				IN ALIAS ams1.z0.is.
 atelier				IN ALIAS ams1.z0.is.
 ikebana				IN ALIAS ams1.z0.is.
