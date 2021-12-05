@@ -1,8 +1,8 @@
 SYNC_CONF = ams1 lap1
-SYNC_HOME = root@lap1 backup@lap1 josuah@lap1 \
+SYNC_HOME = \
+	root@lap1 backup@lap1 josuah@lap1 \
 	root@ams1 josuah@ams1 \
 	josuah@bitreich.org josuah@server10.openbsd.amsterdam \
-#	root@dis-sys-2 jdemangeon@dis-sys-2
 
 sync: ${SYNC_HOME}
 ${SYNC_HOME}:
@@ -11,6 +11,3 @@ ${SYNC_HOME}:
 sync: ${SYNC_CONF}
 ${SYNC_CONF}:
 	rsync -vrt --delete conf/* $@:${PWD}/conf/
-
-${SYNC_CONF:=+}: ${SYNC_CONF}
-	ssh $* make -C /etc

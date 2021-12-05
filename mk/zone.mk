@@ -1,12 +1,9 @@
-ZONE = josuah.net metairies.org z0.dn42
 ZONE_NS = ns1
 
 sync: ${ZONE_NS}
 ${ZONE_NS}:
-	ns=$$(echo $@ | tr -cd 0-9) template conf/zone.conf \
-	 | ssh $@.josuah.net 'exec cat >/var/nsd/etc/zone.conf'
-	rsync -rt --delete zone/ $@.josuah.net:/var/nsd/zone/
-	ssh $@.josuah.net exec nsd-control reload
+	rsync -rt --delete zone/ $@:/var/nsd/zone/
+	ssh $@ exec nsd-control reload
 
 conf: sign
 sign zsk ksk: zone

@@ -8,6 +8,8 @@ $ORIGIN josuah.net.
 net1				IN NET	167.179.110.0/24
 net1				IN NET	2001:19f0:7001:2860::/64
 
+net1				IN NET	46.23.94.12/32
+net1				IN NET	2a03:6000:6f66:602::/64
 ams1				IN A	46.23.94.12
 ams1				IN AAAA	2a03:6000:6f66:602::6
 
