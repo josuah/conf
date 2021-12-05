@@ -1,0 +1,10 @@
+#!/bin/ksh
+# in-memory X11 server providing display :0 and user josuah
+
+user=josuah
+daemon="/usr/local/bin/daemon -l user -u $user"
+daemon_flags="Xvfb :0"
+
+. /etc/rc.d/rc.subr
+rc_reload=NO
+rc_cmd $1

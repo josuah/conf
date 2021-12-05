@@ -20,50 +20,14 @@
 
 char	*flag_user;
 int	 flag_facility = LOG_DAEMON;
+char	*flag_dir;
 pid_t	 child;
 
-struct facility {
-	char *name;
-	int value;
-} facilities[] = {
-
-#define LOG(facility) { #facility, LOG_##facility }
-	LOG(AUTH), LOG(AUTHPRIV), LOG(CRON), LOG(DAEMON), LOG(FTP), LOG(KERN),
-	LOG(MAIL), LOG(NEWS), LOG(SYSLOG), LOG(USER), LOG(UUCP), LOG(LOCAL0),
-        LOG(LOCAL1), LOG(LOCAL2), LOG(LOCAL3), LOG(LOCAL4), LOG(LOCAL5),
-	LOG(LOCAL6), LOG(LOCAL7),
-#undef LOG
-	{ NULL, 0 }
-};
-
-int
-facility(char *name)
-{
-	for (struct facility *f = facilities; f->name != NULL; f++)
-		if (strcasecmp(f->name, name) == 0)
-			return f->value;
-	return -1;
-}
-
 static void
-usage(void)
-{
-	fprintf(stderr, "usage: %s [-u user] [-l facility] command [args...]\n",
-	    arg0);
-
-	fprintf(stderr, "facility: ");
-	for (struct facility *f = facilities; f->name != NULL; f++)
-		fprintf(stderr, f > facilities ? ", %s" : "%s", f->name);
-	fputc('\n', stderr);
-
-	exit(1);
-}
-
-void
 logger(int fd)
 {
 	FILE *fp;
-	char line[1024];
+	char line[1024], *r, *s;
 
 	if ((fp = fdopen(fd, "r")) == NULL) {
 		syslog(LOG_ERR, "(daemon) fdopen pipe: %s", strerror(errno));
@@ -72,7 +36,11 @@ logger(int fd)
 
 	while (fgets(line, sizeof line, fp) != NULL) {
 		strchomp(line);
-		syslog(LOG_NOTICE, "%s", line);
+		for (r = s = line; (r = strchr(r, '\r')) != NULL; s = r + 1) {
+			*r = '\0';
+			syslog(LOG_NOTICE, "%s", s);
+		}
+		syslog(LOG_NOTICE, "%s", s);
 	}
 
 	if (ferror(fp))
@@ -115,7 +83,7 @@ spawn(char **argv, int *p)
 	return pid;
 }
 
-void
+static void
 sighandler_forward(int sig)
 {
 	if (child > 0) {
@@ -129,7 +97,7 @@ sighandler_forward(int sig)
 	}
 }
 
-void
+static void
 sighandler_die(int sig)
 {
 	syslog(LOG_INFO, "(daemon) got signal %d, exiting now releasing child",
@@ -137,7 +105,7 @@ sighandler_die(int sig)
 	exit(0);
 }
 
-void
+static void
 setusergroup(char *user)
 {
 	struct passwd *pw;
@@ -209,6 +177,16 @@ daemon_(char **argv)
 		exit(1);
 	}
 
+	if (flag_dir) {
+		syslog(LOG_ERR, "(daemon) chdir %s: %s",
+			flag_dir, strerror(errno));
+		if (chdir(flag_dir) == -1) {
+			syslog(LOG_ERR, "chdir %s: %s",
+				flag_dir, strerror(errno));
+			exit(1);
+		}
+	}
+
 	/* fork-exec the child */
 	child = spawn(argv, p);
 
@@ -222,7 +200,6 @@ daemon_(char **argv)
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGCONT, &sa, NULL);
 	sigaction(SIGWINCH, &sa, NULL);
-	sigaction(SIGINFO, &sa, NULL);
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 
@@ -245,12 +222,51 @@ daemon_(char **argv)
 	    WEXITSTATUS(status));
 }
 
+struct facility {
+	char *name;
+	int value;
+} facilities[] = {
+#define LOG(facility) { #facility, LOG_##facility }
+	LOG(AUTH), LOG(AUTHPRIV), LOG(CRON), LOG(DAEMON), LOG(FTP), LOG(KERN),
+	LOG(MAIL), LOG(NEWS), LOG(SYSLOG), LOG(USER), LOG(UUCP), LOG(LOCAL0),
+        LOG(LOCAL1), LOG(LOCAL2), LOG(LOCAL3), LOG(LOCAL4), LOG(LOCAL5),
+	LOG(LOCAL6), LOG(LOCAL7),
+#undef LOG
+	{ NULL, 0 }
+};
+
+static int
+facility(char *name)
+{
+	for (struct facility *f = facilities; f->name != NULL; f++)
+		if (strcasecmp(f->name, name) == 0)
+			return f->value;
+	return -1;
+}
+
+static void
+usage(void)
+{
+	fprintf(stderr, "usage: %s [-d chdir] [-u user] [-l facility] command [args...]\n",
+	    arg0);
+
+	fprintf(stderr, "facility: ");
+	for (struct facility *f = facilities; f->name != NULL; f++)
+		fprintf(stderr, f > facilities ? ", %s" : "%s", f->name);
+	fputc('\n', stderr);
+
+	exit(1);
+}
+
 int
 main(int argc, char **argv)
 {
 	arg0 = *argv;
-	for (char c; (c = getopt(argc, argv, "u:l:")) != -1;) {
+	for (char c; (c = getopt(argc, argv, "u:l:d:")) != -1;) {
 		switch (c) {
+		case 'd':
+			flag_dir = optarg;
+			break;
 		case 'u':
 			flag_user = optarg;
 			break;

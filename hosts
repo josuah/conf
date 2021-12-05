@@ -1,4 +1,4 @@
-# deployed on {{NOW}}
+cd# deployed on {{NOW}}
 %% me=$(hostname)
 
 # standard
@@ -9,10 +9,12 @@ ff02::1			ip6-allnodes
 ff02::2			ip6-allrouters
 
 # servers
-fe80::3%wg0		term1
-fe80::5%wg0		lil1 ns1
-fe80::6%wg0		ams1 ns2
-192.168.9.9		cpu fs auth
-192.168.8.9		vm4
+192.168.9.3		lap1
+192.168.9.5		lap2
+192.168.9.7		lap3
+192.168.9.8		lap4
+192.168.9.9		rpi1 cpu fs auth
+31.37.164.83		lil1 ns1
+46.23.94.12		ams1 ns2
 
 %%! cat /etc/hosts.local 2>/dev/null

@@ -1,64 +1,82 @@
 #!/bin/sh -eu
 # nimble source-based package manager for custom build recipes
 
+download_http() {
+	if [ ! -f "$cache-$ver.tz" ]
+	then curl -L -o "$cache-$ver.tz" "$1"
+	fi
+}
+
+download_git() {
+	if [ ! -d "$cache.git" ]
+	then git clone --depth 1 --branch "$ver" "$url" ".cache/$pack.git"
+	else git -C ".cache/$pack.git" fetch
+	fi
+}
+
 pack_download() {
 	case $url in
-	(*.txg|*.tar.gz)
-		curl -L "$url" | gzip -cd | tar -xf-
+	(*.tgz|*.tar.gz)
+		download_http "$url"
+		gzip -cd "$cache-$ver.tz" | tar -xf-
 		;;
 	(*.txz|*.tar.xz)
-		curl -L "$url" | xz -cd | tar -xf-
+		download_http "$url"
+		xz -cd "$cache-$ver.tz" | tar -xf-
 		;;
 	(git://*|*.git)
-		git clone --depth 1 --branch "$ver" "$url" "$SOURCE"
-		rm -rf "$SOURCE/.git"
+		download_git
+		cp -r "$cache.git" "$source"
+		git -C "$source" checkout "$ver"
 		;;
 	(*)
 		echo error: unknown url type >&2
 		exit 1
 		;;
 	esac
+
+	if [ -n "$dir" -a "$dir" != "$pack-$ver" ]; then
+		mv "$dir" "$source"
+	fi
 }
 
 pack_configure() {
-	if [ -f autogen.sh -a ! -f configure ]; then
-		./autogen.sh
+	if [ -f autogen.sh -a ! -f configure ]
+	then (set -x; exec ./autogen.sh)
 	fi
-	if [ -f configure ]; then
-		./configure --prefix="$PREFIX"
+	if [ -f configure ]
+	then (set -x; exec ./configure --prefix="$PREFIX")
 	fi
 }
 
 pack_build() {
-	if [ -f Makefile ]; then
-		make
+	if [ -f Makefile ]
+	then (set -x; exec make)
 	fi
 }
 
 pack_install() {
-	make PREFIX="$PREFIX" install
+	(set -x; exec make PREFIX="$PREFIX" install)
 }
 
 pack=$1
-
 . "/etc/pack/$pack.sh"
+: ${ver:=master}
+: ${dir:=$pack-$ver}
+: ${source:=$PWD/$pack-$ver}
+: ${cache:=$PWD/.cache/$pack}
+: ${PREFIX:=/usr/local}
 
-export SOURCE="$PWD/$pack-$ver"
-trap 'rm -rf "$SOURCE"' INT TERM EXIT HUP
-
-if [ ! -d "$SOURCE" ]; then
-	mkdir -p -m 755 source
-	(cd source && pack_download)
-fi
-
-export PREFIX="$PWD/build/$pack-$ver"
-trap 'rm -rf "$PREFIX"' INT TERM EXIT HUP
-
-if [ ! -d "$PREFIX" ]; then
-	mkdir -p -m 755  "$PREFIX"
-	(set +u; cd "$SOURCE" && pack_configure)
-	(set +u; cd "$SOURCE" && pack_build)
-	(set +u; cd "$SOURCE" && pack_install)
-fi
-
-exec echo "built $pack in $PREFIX"
+case $(id -u) in
+(0)
+	(set +u; cd "$source" && pack_install)
+	;;
+(*)
+	mkdir -p .cache
+	trap 'rm -rf "$source"' INT TERM EXIT HUP
+	([ ! -d "$source" ] && pack_download)
+	(set +u; cd "$source" && pack_configure)
+	(set +u; cd "$source" && pack_build)
+	exec echo "built $pack in $source, run same command as root to install"
+	;;
+esac

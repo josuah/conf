@@ -1,0 +1,10 @@
+#!/bin/ksh
+# window manager started in Xvfb
+
+user=josuah
+daemon="/usr/local/bin/daemon -l user -u $user -d /home/$user env DISPLAY=:0"
+daemon_flags="dwm"
+
+. /etc/rc.d/rc.subr
+rc_reload=NO
+rc_cmd $1

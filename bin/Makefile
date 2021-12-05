@@ -1,20 +1,19 @@
-D = -D_POSIX_C_SOURCE=200811L -D_BSD_SOURCE
-CFLAGS = $D -std=c99 -Wall -Wextra -pedantic 
+CFLAGS = -std=c99 -Wall -Wextra -pedantic \
+	-D_POSIX_C_SOURCE=200811L -D_BSD_SOURCE
 LDFLAGS = -static
 PREFIX = /usr/local/bin
 
-BIN = B acme-cli bin2hex ctl daemon dn42-filter dn42-roa dnssec hex2bin \
-  host log menu monitower mopen mtop mtrash mview netinfo pack pass \
-  play ptree qemu random rcctl rctable rename riostart snapshot syslogf \
-  template term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
-  x-www-browser x509 xdg-open zone
+BIN =	80 acme-cli ctl daemon daemonctl dn42-filter dn42-roa dnssec host log \
+	monitower mopen mtop mtrash mview netinfo pack pass pinentry-dmenu \
+	play ptree qemu random rcctl rctable rename riostart syslogf template \
+	term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
+	x-www-browser x509 xdg-open zone
 
 all: ${BIN}
 
 dwmstatus: dwmstatus.c
 	${CC} ${CFLAGS} -I/usr/X11R6/include -L/usr/X11R6/lib -o ${PREFIX}/$@ $@.c -lX11
 
-.PHONY: .gitignore
 .SUFFIXES: .c .awk .sh
 
 .c:

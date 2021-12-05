@@ -1,0 +1,10 @@
+#!/bin/ksh
+# VNC serving display :0 to 127.0.0.1 with /etc/passwd auth
+
+user=josuah
+daemon="/usr/local/bin/daemon -l user -u $user"
+daemon_flags="x11vnc -passwdfile /home/$user/.pass -localhost -display :0"
+
+. /etc/rc.d/rc.subr
+rc_reload=NO
+rc_cmd $1

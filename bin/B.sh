@@ -1,2 +1,4 @@
 #!/bin/sh -eu
-exec $EDITOR "$@"
+for x in "$@"; do
+	echo "/n/$(hostname -s)$(readlink -f "$x")"  
+done

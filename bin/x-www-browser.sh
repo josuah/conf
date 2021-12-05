@@ -1,12 +1,12 @@
-#!/bin/sh -e
+#!/bin/sh -eu
 # standard utility to spawn a web browser
 
 case "$1" in
 (*://twitter.com/*)
-	set -- "https://nitter.net/${x#*://*/}"
+	set -- "https://twitter.censors.us/${1#*://*/}"
 	;;
 (*://www.youtube.com/*|*://youtube.com/*|*://youtu.be/*)
-	set -- "https://invidio.us/${x#*://*/}"
+	set -- "https://invidio.us/${1#*://*/}"
 	;;
 esac
 

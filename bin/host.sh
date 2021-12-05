@@ -1,9 +1,28 @@
-#!/bin/sh -eu
+ #!/bin/sh -eu
 # host a file onto my server through scp
 
-name=$(basename "$1")
+usage() {
+	echo "usage: ${0##*} [-p prefix] file" >&2
+	exit 1
+}
 
-scp "$1" "z0.is:/var/www/htdocs/default/p/$name"
+domain=josuah.net
+prefix=p
 
-echo "gopher://z0.is/9/p/$name"
-echo "https://z0.is/p/$name"
+while [ $# -gt 0 ]; do
+	case $1 in
+	(-p) shift; prefix=$1 ;;
+	(-*) usage ;;
+	(--) shift; break ;;
+	(*) break ;;
+	esac
+	shift
+done
+
+for file in "$@"; do
+	name=$prefix/$(basename "$file")
+	type=$(tr '%\0' '.%' <$file | grep -q % && echo 9 || echo 0)
+	scp "$file" "$domain:/var/www/htdocs/default/$name"
+	echo "gopher://$domain/$type/$name"
+	echo "https://$domain/$name"
+done

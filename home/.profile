@@ -8,7 +8,8 @@ export EDITOR="vi"
 export PAGER="less -SR"
 export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
-export PS1="$(hostname -s):\$PWD\\\$\${?#0} "
+export PS1="$(hostname -s)\\\$ "
 export LC_ALL=en_US.UTF-8
 
+set -o emacs
 umask 002

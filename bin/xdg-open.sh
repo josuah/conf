@@ -10,11 +10,7 @@ file=${XDG_CACHE_HOME:-$HOME/.cache}/hash/$hash-${url##*/}
 case "$(echo "$url" | tr A-Z a-z)" in
 (*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
 |*://vimeo.com/*|*://*bandcamp.com/track/*)
-	exec mpv "$url"
-	;;
-(*://github.com/*/*)
-	mkdir -p "$HOME/git/${url#*//}"
-	exec git clone "$url" "$HOME/git/${url#*//}"
+	exec mpv --ytdl-format=worst "$url"
 	;;
 (http*://*.git|git*://*)
 	dom=${url#*//} dom=${dom%%/*}
@@ -60,7 +56,7 @@ case "$(echo "$url" | tr A-Z a-z)" in
 (ftp://*)
 	exec x-terminal-emulator ftp "$url"
 	;;
-(gopher://)
+(gopher://*|gophers://*)
 	exec x-terminal-emulator sacc "$url"
 	;;
 (http*://*)
