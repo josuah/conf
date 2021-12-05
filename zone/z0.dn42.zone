@@ -21,9 +21,3 @@ dns1				IN AAAA fd42:10e3:10e8::853:1
 
 mx				IN NET	fd42:10e3:10e8::25:0/112
 mx1				IN AAAA	fd42:10e3:10e8::25:1
-
-lil1				IN AAAA	fd42:10e3:10e8::5
-term1				IN AAAA	fd42:10e3:10e8::3
-lil1				IN AAAA	fd42:10e3:10e8::7
-
-@				IN ALIAS lil1.z0.dn42.

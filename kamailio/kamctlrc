@@ -1,6 +1,6 @@
 # deployed on {{NOW}}
 
-SIP_DOMAIN="sip.z0.is"
+SIP_DOMAIN="sip.josuah.net"
 DBENGINE="DBTEXT"
 DBTEXT_PATH="/etc/kamailio/dbtext"
 MD5="sha256"

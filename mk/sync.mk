@@ -1,6 +1,5 @@
-SYNC_CONF = lil1 ams1 tyo1 term1 term1vm1
-SYNC_HOME = root@term1 backup@term1 josuah@term1 \
-	root@lil1 backup@lil1 git@lil1 \
+SYNC_CONF = ams1 lap1
+SYNC_HOME = root@lap1 backup@lap1 josuah@lap1 \
 	root@ams1 josuah@ams1 \
 	josuah@bitreich.org josuah@server10.openbsd.amsterdam \
 #	root@dis-sys-2 jdemangeon@dis-sys-2

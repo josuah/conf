@@ -1,12 +1,12 @@
-ZONE = z0.is z0.dn42 josuah.net metairies.org atelier-fu.fr
-ZONE_NS = ns1 ns2 ns3
+ZONE = josuah.net metairies.org z0.dn42
+ZONE_NS = ns1
 
 sync: ${ZONE_NS}
 ${ZONE_NS}:
 	ns=$$(echo $@ | tr -cd 0-9) template conf/zone.conf \
-	 | ssh $@.z0.is 'exec cat >/var/nsd/etc/zone.conf'
-	rsync -rt --delete zone/ $@.z0.is:/var/nsd/zone/
-	ssh $@.z0.is exec nsd-control reload
+	 | ssh $@.josuah.net 'exec cat >/var/nsd/etc/zone.conf'
+	rsync -rt --delete zone/ $@.josuah.net:/var/nsd/zone/
+	ssh $@.josuah.net exec nsd-control reload
 
 conf: sign
 sign zsk ksk: zone
@@ -15,10 +15,10 @@ sign zsk ksk: zone
 zone: zone/sshfp.zone
 	mkdir -p zone
 	(cd conf/zone && template ${ZONE:=.zone}) | (cd zone && zone)
-	cat zone/sshfp.zone >>zone/z0.is.zone
+	cat zone/sshfp.zone >>zone/josuah.net.zone
 	cat zone/sshfp.zone >>zone/z0.dn42.zone
 
 zone/sshfp.zone:
-	dnssec sshfp conf/zone/z0.is.zone | sort -o $@
+	dnssec sshfp conf/zone/josuah.net.zone | sort -o $@
 
 .PHONY: zone

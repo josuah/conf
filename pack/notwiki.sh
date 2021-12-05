@@ -1,2 +1,2 @@
 ver=master
-url=git://git.z0.is/notwiki
+url=git://git.josuah.net/notwiki

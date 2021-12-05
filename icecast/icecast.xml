@@ -3,7 +3,7 @@
 
 <icecast>
 	<location>@</location>
-	<admin>root@z0.is</admin>
+	<admin>me@josuah.net</admin>
 
 	<limits>
 		<clients>100</clients>
@@ -23,7 +23,7 @@
 		<admin-password>{{ICECAST_PASS}}</admin-password>
 	</authentication>
 
-	<hostname>icecast.z0.is</hostname>
+	<hostname>icecast.josuah.net</hostname>
 
 	<listen-socket>
 		<port>8000</port>
