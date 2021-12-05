@@ -4,7 +4,6 @@ CONF = hostname.wg0 \
 include conf/mk/conf.mk
 
 conf: pf/whitelist pf/blacklist pf/local.conf
-
 pf/whitelist pf/blacklist pf/local.conf: pf
 	touch $@
 

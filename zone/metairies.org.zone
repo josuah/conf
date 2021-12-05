@@ -1,17 +1,17 @@
 $ORIGIN metairies.org.
 
-%% nsdom=z0.is template %head.zone
+%% nsdom=josuah.net template %head.zone
 
 @				IN MX	1 spool.mail.gandi.net.
 @				IN MX	2 fb.mail.gandi.net.
 @				IN TXT	"v=spf1 mx -all"
 
-@				IN ALIAS ams1.z0.is.
-shop				IN ALIAS ams1.z0.is.
-www				IN ALIAS ams1.z0.is.
-atelier				IN ALIAS ams1.z0.is.
-ikebana				IN ALIAS ams1.z0.is.
-kyudo				IN ALIAS ams1.z0.is.
-miki				IN ALIAS ams1.z0.is.
-agora				IN ALIAS ams1.z0.is.
-sado				IN ALIAS ams1.z0.is.
+@				IN ALIAS ams1.josuah.net.
+shop				IN ALIAS ams1.josuah.net.
+www				IN ALIAS ams1.josuah.net.
+atelier				IN ALIAS ams1.josuah.net.
+ikebana				IN ALIAS ams1.josuah.net.
+kyudo				IN ALIAS ams1.josuah.net.
+miki				IN ALIAS ams1.josuah.net.
+agora				IN ALIAS ams1.josuah.net.
+sado				IN ALIAS ams1.josuah.net.

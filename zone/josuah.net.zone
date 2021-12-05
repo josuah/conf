@@ -1,10 +1,17 @@
 $ORIGIN josuah.net.
 
-%% nsdom=z0.is template %head.zone
+%% nsdom=josuah.net template %head.zone
 
-@				IN MX	1 mx1.z0.is.
+@				IN MX	1 mx1.josuah.net.
 @				IN TXT	"v=spf1 mx -all"
-_sip._tcp			IN SRV	1 1 5060 sip.z0.is.
 
-@				IN ALIAS ams1.z0.is.
-www				IN ALIAS ams1.z0.is.
+net1				IN NET	167.179.110.0/24
+net1				IN NET	2001:19f0:7001:2860::/64
+
+ams1				IN A	46.23.94.12
+ams1				IN AAAA	2a03:6000:6f66:602::6
+
+@				IN ALIAS ams1.josuah.net.
+mx1				IN ALIAS ams1.josuah.net.
+ns1				IN ALIAS ams1.josuah.net.
+git				IN ALIAS ams1.josuah.net.
