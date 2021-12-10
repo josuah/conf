@@ -1,3 +1,4 @@
 #!/bin/sh -eu
+: ${timeout:=2}
 
-exec curl -Lfvs "$url" >/dev/null
+exec timeout "$timeout" curl -Lfvs "$url" >/dev/null

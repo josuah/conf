@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+: ${timeout:=1}
 
-exec openssl s_client </dev/null \
+exec timeout "$timeout" openssl s_client </dev/null \
   -servername "$dom" -connect "$dom:$port" -verify_return_error -verify_depth 3

@@ -1,6 +1,7 @@
-#define util_h
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
+#include <grp.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -8,7 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <grp.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 /*
  * Common code included from various single-c-file projects on this directory.
@@ -17,6 +19,10 @@
 #ifndef __OpenBSD__
 #define pledge(...) 0
 #define unveil(...) 0
+#endif
+
+#ifndef PATH_MAX
+#define PATH_MAX 256
 #endif
 
 char *arg0;
@@ -65,20 +71,6 @@ warnx(char const *fmt, ...)
 {
 	va_list va;
 
-	va_start(va, fmt);
-	_log(fmt, va, 0);
-}
-
-void
-debug(char const *fmt, ...)
-{
-	static int verbose = -1;
-	va_list va;
-
-	if (verbose < 0)
-		verbose = (getenv("DEBUG") != NULL);
-	if (!verbose)
-		return;
 	va_start(va, fmt);
 	_log(fmt, va, 0);
 }
@@ -194,34 +186,35 @@ reallocarray(void *mem, size_t n, size_t sz)
 	return realloc(mem, n * sz);
 }
 
-long long
-strtonum(char const *s, long long min, long long max, char const **errstr)
+uint64_t
+strint(char **sp, uint64_t max, uint8_t b)
 {
-	long long ll = 0;
-	char *end;
+	uint64_t n;
+	char *s, *p, *digits = "0123456789ABCDEF";
+	char c;
 
-	assert(min < max);
-	errno = 0;
-	ll = strtoll(s, &end, 10);
-	if ((errno == ERANGE && ll == LLONG_MIN) || ll < min) {
-		if (errstr != NULL)
-			*errstr = "too small";
-		return 0;
+	n = 0;
+	for (s = *sp ;; s++) {
+		c = toupper(*s);
+		p = strchr(digits, c);
+		if (p == NULL || p >= digits + b)
+			break;
+
+		if (n > max / b)
+			goto err;
+		n *= b;
+
+		if (n > max - (p - digits))
+			goto err;
+		n += p - digits;
 	}
-	if ((errno == ERANGE && ll == LLONG_MAX) || ll > max) {
-		if (errstr != NULL)
-			*errstr = "too large";
-		return 0;
-	}
-	if (errno == EINVAL || *end != '\0') {
-		if (errstr != NULL)
-			*errstr = "invalid";
-		return 0;
-	}
-	assert(errno == 0);
-	if (errstr != NULL)
-		*errstr = NULL;
-	return ll;
+	if (*sp == s)
+		goto err;
+	*sp = s;
+	return n;
+err:
+	*sp = NULL;
+	return 0;
 }
 
 int
@@ -249,3 +242,40 @@ err:
 	return errno ? -1 : 0;
 }
 
+static inline void
+xstat(char *path, struct stat *st)
+{
+	if (stat(path, st) == -1)
+		err(1, "reading %s status", path);
+}
+
+static inline void
+xstrlcpy(char *dst, char const *src, size_t sz)
+{
+	if (strlcpy(dst, src, sz) >= sz)
+		err(1, "string too long: %s", src);
+}
+
+static inline void
+xstrlcat(char *dst, char *src, size_t sz)
+{
+	if (strlcat(dst, src, sz) >= sz)
+		err(1, "string too long: %s", dst);
+}
+
+static inline void
+xrename(char const *from, char const *to)
+{
+	if (rename(from, to) == -1)
+		err(1, "cannot rename %s to %s", from, to);
+}
+
+static inline DIR *
+xopendir(char const *path)
+{
+	DIR *dp;
+
+	if ((dp = opendir(path)) == NULL)
+		err(1, "cannot open directory %s", path);
+	return dp;
+}

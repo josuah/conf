@@ -262,7 +262,7 @@ int
 main(int argc, char **argv)
 {
 	arg0 = *argv;
-	for (char c; (c = getopt(argc, argv, "u:l:d:")) != -1;) {
+	for (int c; (c = getopt(argc, argv, "u:l:d:")) != -1;) {
 		switch (c) {
 		case 'd':
 			flag_dir = optarg;

@@ -29,7 +29,7 @@ case ${1:-} in
 	done
 	;;
 ("")
-	file=$(find * -type f | menu)
+	file=$(find * -type f | dmenu -p pass:)
 	"$0" show "$file" | tr -d '\n' | xsel -i
 	echo "${file##*/}" | tr -d '\n' | xsel -bi
 	;;

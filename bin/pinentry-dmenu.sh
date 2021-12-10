@@ -25,8 +25,8 @@ while read -r command args; do
 		;;
 	(GETINFO)
 		case $args in
-		(flavor) OK "$flavor" ;;
-		(version) OK "$version" ;;
+		(flavor) OK "$FLAVOR" ;;
+		(version) OK "$VERSION" ;;
 		(ttyinfo) OK "- - -" ;;
 		(pid) OK "$$" ;;
 		(*) ERR 0 unknown GETINFO value

@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+: ${timeout:=10}
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' INT TERM EXIT HUP
@@ -11,8 +12,10 @@ expect() {
 }
 
 for x in $(dig +short mx "$dom" | sed -rn 's/\.$//; s/^[0-9]+ +//p'); do
-	openssl s_client -verify_return_error -verify_depth 3 -starttls smtp \
-	 -servername "$x" -connect "$x:25" -quiet -no_ign_eof <$tmp/fifo \
+	echo "connecting to $x" >&2
+	timeout "$timeout" openssl s_client -starttls smtp \
+	  -verify_return_error -verify_depth 3 \
+	  -servername "$x" -connect "$x:25" -quiet -no_ign_eof <$tmp/fifo \
 	| {
 		echo "EHLO $(hostname)"
 		while read line; do

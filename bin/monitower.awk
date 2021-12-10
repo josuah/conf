@@ -190,7 +190,7 @@ function parse_type(file, type, check,
 				die("invalid variable name in "$i)
 			check[type n] = check[type n]" "$i"'"
 		}
-		check[type n] = check[type n] " exec '"CHECK"/check-"$2"'"
+		check[type n] = check[type n] " exec '/etc/monitower/check-"$2"'"
 	}
 }
 
@@ -243,13 +243,14 @@ function cmd_show(conf, name, len,
 }
 
 function cmd_run(conf, name,
-	i, e, val, path)
+	i, e, s, val, path)
 {
 	for (i = 0; i in conf; i++) {
 		if (name[i] != name[i-1])
 			val[name[i]] = SUCCESS
 
 		if (system(conf[i]" >/dev/null 2>&1") != 0) {
+			sub(" exec ", " ", conf[i])
 			print conf[i]
 			val[name[i]] = FAILURE
 		}
@@ -274,7 +275,6 @@ function usage()
 }
 
 BEGIN {
-	CHECK = ENVIRON["CHECK"] ? ENVIRON["CHECK"] : "/etc/monitower"
 	SUCCESS = 1; FAILURE = 2
 
 	file = "/etc/monitower.conf"

@@ -6,7 +6,6 @@ case ${1:-help} in
 	;;
 (*)
 	echo "usage: daemonctl show"
-	echo "       daemonctl stop <pid>"
 	;;
 esac
 

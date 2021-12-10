@@ -1,6 +1,6 @@
 # deployed on {{NOW}}
 
-AuthorizedKeysFile	.ssh/authorized_keys
+AuthorizedKeysFile	.ssh/authorized_keys /etc/ssh/authorized_keys
 PasswordAuthentication	no
 
 Subsystem	sftp	/usr/libexec/sftp-server

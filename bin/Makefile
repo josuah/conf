@@ -3,11 +3,12 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic \
 LDFLAGS = -static
 PREFIX = /usr/local/bin
 
-BIN =	80 acme-cli ctl daemon daemonctl dn42-filter dn42-roa dnssec host log \
-	monitower mopen mtop mtrash mview netinfo pack pass pinentry-dmenu \
-	play ptree qemu random rcctl rctable rename syslogf template \
-	term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
-	x-www-browser x509 xdg-open zone
+BIN =	80 acme-cli ctl daemon daemonctl dn42-filter dn42-roa dnssec doc host \
+	log monitower mopen mtop mtrash mview netinfo pack pass \
+	pinentry-dmenu play ptree qemu random rcctl rctable rename \
+	mailtube-xnotify mailtube-server syslogf template term \
+	totp wg-obsd wg-ptp whois-expiry x-terminal-emulator x-www-browser \
+	x509 xdg-open zone
 
 all: ${BIN}
 

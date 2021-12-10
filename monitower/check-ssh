@@ -1,3 +1,4 @@
 #!/bin/sh -eu
+: ${timeout:=1}
 
-exec ssh-keyscan -T 1 "$ip"
+exec ssh-keyscan -T "$timeout" "$ip"

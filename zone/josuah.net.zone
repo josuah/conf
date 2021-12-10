@@ -14,6 +14,7 @@ ams1				IN A	46.23.94.12
 ams1				IN AAAA	2a03:6000:6f66:602::6
 
 @				IN ALIAS ams1.josuah.net.
+www				IN ALIAS ams1.josuah.net.
 mx1				IN ALIAS ams1.josuah.net.
 ns1				IN ALIAS ams1.josuah.net.
 git				IN ALIAS ams1.josuah.net.

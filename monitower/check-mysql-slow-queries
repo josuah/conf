@@ -1,4 +1,5 @@
 #!/bin/sh -eu
+: ${timeout:=1}
 : ${time:=30}
 
 q="
@@ -7,4 +8,4 @@ q="
 	AND	Command != 'Sleep'
 "
 
-exec [ -z "$(exec mysql -Be "$q")" ]
+exec [ -z "$(exec timeout "$timeout" mysql -Be "$q")" ]

@@ -7,8 +7,8 @@ case $(uname) in
 esac
 
 IFS='= ' read -r ctl key _ <<EOF
-$(for x in $list; do "$x" -a | sed -n "s/^/$x /; /=/p"; done | menu -l 20)
+$(for x in $list; do "$x" -a | sed -n "s/^/$x /; /=/p"; done | dmenu -l 20 -p ctl:)
 EOF
 
 test -n "$ctl"
-exec "$ctl" "$key=$(menu -p "$key=" </dev/null)"
+exec "$ctl" "$key=$(dmenu -p "$key=" </dev/null)"

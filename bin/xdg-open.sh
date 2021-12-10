@@ -7,6 +7,8 @@ url=$(echo "$1" | sed 's,#.*,,; s,/*$,,')
 hash=$(echo "$url" | openssl sha256 | sed 's/(stdin)= //')
 file=${XDG_CACHE_HOME:-$HOME/.cache}/hash/$hash-${url##*/}
 
+mkdir -p "$(dirname "$file")"
+
 case "$(echo "$url" | tr A-Z a-z)" in
 (*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
 |*://vimeo.com/*|*://*bandcamp.com/track/*)
