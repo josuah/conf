@@ -27,27 +27,37 @@ static void
 logger(int fd)
 {
 	FILE *fp;
-	char line[1024], *r, *s;
+	char line[1024];
 
 	if ((fp = fdopen(fd, "r")) == NULL) {
 		syslog(LOG_ERR, "(daemon) fdopen pipe: %s", strerror(errno));
 		exit(1);
 	}
+	for (size_t i = 0;; i++) {
+		int c;
 
-	while (fgets(line, sizeof line, fp) != NULL) {
-		strchomp(line);
-		for (r = s = line; (r = strchr(r, '\r')) != NULL; s = r + 1) {
-			*r = '\0';
-			syslog(LOG_NOTICE, "%s", s);
+		if (i >= sizeof line - 1) {
+			line[sizeof line - 1] = '\0';
+			syslog(LOG_NOTICE, "%s \\", line);
+			i = 0;
 		}
-		syslog(LOG_NOTICE, "%s", s);
+		switch ((c = fgetc(fp))) {
+		case EOF:
+			if (ferror(fp))
+				syslog(LOG_ERR, "(daemon) reading logs: %s",
+				    strerror(errno));
+			fclose(fp);
+			return;
+		case '\r':
+		case '\n':
+			line[i] = '\0';
+			syslog(LOG_NOTICE, "%s", line);
+			i = 0;
+			break;
+		default:
+			line[i] = c;
+		}
 	}
-
-	if (ferror(fp))
-		syslog(LOG_ERR, "(daemon) reading from log pipe: %s",
-		    strerror(errno));
-
-	fclose(fp);
 }
 
 static pid_t

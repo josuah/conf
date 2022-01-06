@@ -50,7 +50,7 @@ while read -r command args; do
 		;;
 	(GETPIN)
 		p=$prompt${error:+ ($error)}
-		if ! pin=$(DISPLAY=:0 menu -p "$p" </dev/null); then
+		if ! pin=$(DISPLAY=:0 dmenu -p "$p" </dev/null); then
 			ERR "could not run dmenu"
 			echo BYE
 			exit 1

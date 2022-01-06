@@ -1,3 +1,6 @@
 #!/bin/sh -e
 
-find /n/doc/ -type f | dmenu -i -l 20 -p doc: | xargs -n 1 mupdf
+find /n/doc/ "$HOME/Downloads" -type f \
+| dmenu -i -l 20 -p doc: \
+| tr '\n' '\0' \
+| xargs -0 -n 1 mupdf

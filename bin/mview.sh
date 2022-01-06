@@ -31,4 +31,8 @@ case "$*" in
 	end=$(($(mseq | wc -l) + 1))
 	exec less -R -Ps"mview (%i of %m).." +$end:x $(mscan -n :) /
 	;;
+(*)
+	mlist "$@" | msort -d | mseq -S
+	exec "$0"
+	;;
 esac

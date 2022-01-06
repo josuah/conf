@@ -3,7 +3,7 @@ $ORIGIN josuah.net.
 %% nsdom=josuah.net template %head.zone
 
 @				IN MX	1 mx1.josuah.net.
-@				IN TXT	"v=spf1 mx -all"
+@				IN TXT	"v=spf1 mx include:_mailcust.gandi.net -all"
 
 net1				IN NET	167.179.110.0/24
 net1				IN NET	2001:19f0:7001:2860::/64

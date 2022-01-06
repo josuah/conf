@@ -105,7 +105,7 @@ mkfifo "$XNOTIFY_FIFO"
 xnotify -g -20+40 <>$XNOTIFY_FIFO &
 
 # notifications for incoming mail
-daemon mailtubes-xnotify ssh josuah@mx1.josuah.net mailtubes-server Maildir
+daemon mailtube-xnotify ssh josuah@mx1.josuah.net mailtube-server Maildir
 
 # window manager
 exec ssh-agent dwm
