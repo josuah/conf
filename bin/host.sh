@@ -1,28 +1,19 @@
- #!/bin/sh -eu
+#!/bin/sh -eu
 # host a file onto my server through scp
 
 usage() {
-	echo "usage: ${0##*} [-p prefix] file" >&2
+	echo "usage: ${0##*} [-r rand] file" >&2
 	exit 1
 }
 
-domain=josuah.net
-prefix=p
+domain=paste.josuah.net
+rand=${RAND:=$(openssl rand -base64 15 | tr '+/' 'az')}
+paste=/var/www/htdocs/paste
 
-while [ $# -gt 0 ]; do
-	case $1 in
-	(-p) shift; prefix=$1 ;;
-	(-*) usage ;;
-	(--) shift; break ;;
-	(*) break ;;
-	esac
-	shift
-done
+ssh "$domain" "
+	mkdir -p '$paste/$rand'
+	touch '$paste/index.html'
+"
 
-for file in "$@"; do
-	name=$prefix/$(basename "$file")
-	type=$(tr '%\0' '.%' <$file | grep -q % && echo 9 || echo 0)
-	scp "$file" "$domain:/var/www/htdocs/default/$name"
-	echo "gopher://$domain/$type/$name"
-	echo "https://$domain/$name"
-done
+scp "$@" "$domain:$paste/$rand/"
+echo "https://$domain/$rand/"
