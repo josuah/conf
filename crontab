@@ -14,3 +14,7 @@ MAILTO=me@josuah.net
 0~30	3	*	*	*	root	syspatch
 
 0~30	4	*	*	3	root	pkg_add -u
+
+0	6	*	*	*	root	calendar -a
+
+%%! cat /etc/crontab.local 2>/dev/null
