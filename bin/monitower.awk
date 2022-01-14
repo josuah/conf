@@ -206,7 +206,7 @@ function parse(file, conf, name,
 		} else if ($1 == "monitor") {
 			parse_entry(file, conf, name, check)
 		} else {
-			die("unknown keyword '"$1"' in line '"$0"'")
+			die("unknown keyword '"$1"' in '"$0"'")
 		}
 	}
 	if (!("step" in conf) || !("size" in conf) || !("home" in conf))
