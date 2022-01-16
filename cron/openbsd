@@ -1,0 +1,9 @@
+
+# cron/openbsd
+*/10	*	*	*	*	root	newsyslog
+*/5	*	*	*	*	root	rdate -s pool.ntp.org
+*/5	*	*	*	*	root	rcctl ls failed
+@reboot					root	syspatch
+0~30	3	*	*	*	root	syspatch
+0~30	4	*	*	3	root	pkg_add -u
+0~10	0	*	*	*	root	awk '{print$3}' /etc/relayd/tls.conf | xargs -tr -n 1 acme-cli

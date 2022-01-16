@@ -1,11 +1,24 @@
 #!/usr/bin/awk -f
 # read/write to a ring-buffer time series database of up/down events
 
-function die(message) { print "error: "message >"/dev/stderr"; exit(1) }
-function max(a, b) { return a > b ? a : b }
-function min(a, b) { return a < b ? a : b }
+function die(message)
+{
+	print "error: "message >"/dev/stderr"
+	exit(1)
+}
 
-function now(time)
+function max(a, b)
+{
+	return a > b ? a : b
+}
+
+function min(a, b)
+{
+	return a < b ? a : b
+}
+
+function now(\
+	time)
 {
 	"exec date +%s" | getline time
 	close("exec date +%s")

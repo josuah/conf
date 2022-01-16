@@ -6,7 +6,7 @@ SYNC_HOME = \
 
 sync: ${SYNC_HOME}
 ${SYNC_HOME}:
-	rsync -vrt conf/home/ $@:
+	rsync -vrt conf/home/ $@:.
 
 sync: ${SYNC_CONF}
 ${SYNC_CONF}:

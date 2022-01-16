@@ -3,7 +3,7 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic \
 LDFLAGS = -static
 PREFIX = /usr/local/bin
 
-BIN =	acme-cli blackout ctl daemon daemonctl dn42-filter dn42-roa dmenu_dir \
+BIN =	acme-cli bawkup ctl daemon daemonctl dn42-filter dn42-roa dmenu_dir \
 	dnssec doc host html log monitower mopen mtop mtrash mview netinfo \
 	pack pass pinentry-dmenu play ptree qemu random rcctl rctable rename \
 	mailtube-xnotify mailtube-server sha256dedup syslogf template term \
