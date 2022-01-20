@@ -28,7 +28,7 @@ function timegm(year, mon, day)
 	return (day - 719527) * 86400
 }
 
-function totime(str, time)
+function totime(str)
 {
 	return timegm(substr(str, 1, 4), substr(str, 6, 2), substr(str, 9, 2))
 }
@@ -81,10 +81,10 @@ function parse_flags(tgz, flags,
 function new_name(repo, tgz, last,
 	time, m, w, y)
 {
-	time = totime(tgz, EPOCH)
-	w = time >= totime(last["w"], time) + 86400 * 7
-	m = time >= totime(last["m"], time) + 86400 * 30
-	y = time >= totime(last["y"], time) + 86400 * 365
+	time = totime(tgz)
+	w = time >= totime(last["w"]) + 86400 * 7
+	m = time >= totime(last["m"]) + 86400 * 30
+	y = time >= totime(last["y"]) + 86400 * 365
 	return substr(tgz, 1, 10) "-d" \
 	    (w ? "w" : "") (w && m ? "m" : "") (w && m && y ? "y" : "") ".tgz"
 }
@@ -137,21 +137,22 @@ function backup(name, inc, exc, keep,
 	repo)
 {
 	repo = REPO"/"name
-
 	if (ARGV[1] == "clean") {
 		move(repo)
 		purge(repo, keep)
 	} else if (ARGV[1] == "sync") {
 		sync(repo, DATE"-n.tgz", inc, exc)
 	} else {
-		die("usage: bawkup ( clean | sync )")
+		print "usage: bawkup sync   - take a new backup"
+		print "       bawkup clean  - remove old backups"
+		exit(1)
 	}
 }
 
 function parse_backup(name,
 	inc, exc, keep, i)
 {
-	while (nextline() && ($1 != "}")) {
+	while (nextline() && $1 != "}") {
 		if ($1 == "keep") {
 			for (i = 2; $i; i++)
 				keep[substr($i, length($i), 1)] = 0 + $i
@@ -185,7 +186,6 @@ BEGIN {
 	FILENAME = "/etc/bawkup.conf"
 	REPO = "/var/bawkup"
 	"exec date +%Y-%m-%d" | getline DATE
-	EPOCH = totime(DATE)
 
 	parse_conf()
 	exec("rm -f '"REPO"'/*/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")
