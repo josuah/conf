@@ -1,0 +1,20 @@
+RunAsDaemon	1
+DataDirectory	/var/tor
+User		_tor
+
+Log		notice stderr
+
+HiddenServiceDir /var/tor/dns
+HiddenServicePort 53 127.0.0.53:53
+
+HiddenServiceDir /var/tor/git
+HiddenServicePort 9418 127.0.0.1:9418
+
+HiddenServiceDir /var/tor/gopher
+HiddenServicePort 70 127.0.0.1:70
+
+HiddenServiceDir /var/tor/http
+HiddenServicePort 80 127.0.0.1:80
+
+HiddenServiceDir /var/tor/smtp
+HiddenServicePort 25 127.0.0.1:25
