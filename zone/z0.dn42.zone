@@ -4,6 +4,7 @@ $ORIGIN z0.dn42.
 
 @				IN MX	1 mx1.z0.dn42.
 @				IN TXT	"v=spf1 mx -all"
+@				IN CAA	0 issue "letsencrypt.org"
 
 hyaku-oku			IN NET	fd42:10e3:10e8::/48
 

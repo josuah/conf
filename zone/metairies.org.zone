@@ -5,6 +5,7 @@ $ORIGIN metairies.org.
 @				IN MX	1 spool.mail.gandi.net.
 @				IN MX	2 fb.mail.gandi.net.
 @				IN TXT	"v=spf1 mx -all"
+@				IN CAA	0 issue "letsencrypt.org"
 
 @				IN ALIAS ams1.josuah.net.
 shop				IN ALIAS ams1.josuah.net.
@@ -15,3 +16,4 @@ kyudo				IN ALIAS ams1.josuah.net.
 miki				IN ALIAS ams1.josuah.net.
 agora				IN ALIAS ams1.josuah.net.
 sado				IN ALIAS ams1.josuah.net.
+news				IN ALIAS ams1.josuah.net.

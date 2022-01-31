@@ -130,7 +130,7 @@ function sync(repo, tgz, inc, exc,
 		args = args" '"inc[i]"'"
 	exec("rsync -a --delete"args" '"repo"/sync'")
 	exec("ln -s 'sync' '"repo"/"DATE"'")
-	exec("tar -cz -f '"repo"/"tgz"' -C '"repo"' '"DATE"/'")
+	exec("tar -Hcz -f '"repo"/"tgz"' -C '"repo"' '"DATE"/'")
 }
 
 function backup(name, inc, exc, keep,
