@@ -6,6 +6,7 @@ $ORIGIN metairies.org.
 @				IN MX	2 fb.mail.gandi.net.
 @				IN TXT	"v=spf1 mx -all"
 @				IN CAA	0 issue "letsencrypt.org"
+@				IN TXT	"google-site-verification=5p_4azKCED3TDLHrIP-8kUKuc58gtHGsUwKKpMCzZGw"
 
 @				IN ALIAS ams1.josuah.net.
 shop				IN ALIAS ams1.josuah.net.
