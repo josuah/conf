@@ -6,4 +6,9 @@ PasswordAuthentication	no
 Subsystem	sftp	/usr/libexec/sftp-server
 
 Match Group users
-  X11Forwarding		yes
+X11Forwarding		yes
+
+Match Group sftp
+ForceCommand		internal-sftp 
+ChrootDirectory		%h
+PasswordAuthentication	yes
