@@ -6,9 +6,9 @@ PREFIX = /usr/local/bin
 BIN =	acme-cli bawkup ctl daemon daemonctl dn42-filter dn42-roa dmenu_dir \
 	dnssec doc host html log monitower mopen mtop mtrash mview netinfo \
 	pack pass pinentry-dmenu play ptree qemu random rcctl rctable rename \
-	mailtube-xnotify mailtube-server sha256dedup syslogf template term \
-	totp wg-obsd wg-ptp whois-expiry x-terminal-emulator x-www-browser \
-	x509 xdg-open zone
+	mailtube-xnotify mailtube-server pdf-sign sha256dedup syslogf template \
+	term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
+	x-www-browser x509 xdg-open zone
 
 all: ${BIN}
 
