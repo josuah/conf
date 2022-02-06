@@ -1,4 +1,7 @@
 #!/bin/sh -e
+# add an image on the selected position of a document
+
+[ $# != 4 ] && exec echo usage: ${0##*/} signature.jpg xpos ypos document.pdf
 
 signature=$1 x=$2 y=$3 file=$4
 
@@ -8,16 +11,9 @@ EOF
 
 gs -sDEVICE=pdfwrite -sOutputFile="${file%.pdf}.signed.pdf" -dPDFSETTINGS=/prepress - "$file" <<EOF
 
-/CompatibilityLevel 1.4
-/signatureText { ( $signature ) } def
-/signatureFont { /Helvetica-Bold 72 selectfont } def
-/pageWidth { currentpagedevice /PageSize get 0 get } def
-/pageHeight { currentpagedevice /PageSize get 1 get } def
 <<
 /EndPage {
-	0 .pushpdf14devicefilter % depth .pushpdf14devicefilter -
-	2 eq { pop false }
-	{
+	2 eq { pop false } {
 		gsave
 
 		$x $y translate		% set lower left of image at ($x, $y)
@@ -35,8 +31,9 @@ gs -sDEVICE=pdfwrite -sOutputFile="${file%.pdf}.signed.pdf" -dPDFSETTINGS=/prepr
 		grestore
 		true
 	} ifelse
-	.poppdf14devicefilter
 } bind
 >> setpagedevice
 
 EOF
+
+exec mupdf "${file%.pdf}.signed.pdf"
