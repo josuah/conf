@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+: ${timeout:=2}
+
+exec timeout "$timeout" curl -Lfvs -X POST --data-raw "$post" "$url" >/dev/null

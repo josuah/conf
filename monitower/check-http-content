@@ -1,0 +1,4 @@
+#!/bin/sh -eu
+: ${timeout:=2}
+
+exec timeout "$timeout" curl -Lfvs "$url" | grep -qi -- "$match"

@@ -28,7 +28,7 @@ case "$(echo "$url" | tr A-Z a-z)" in
 	[ -f "$url" ] && file=$url || curl -Lo "$file" "$url"
 	exec mpv "$file"
 	;;
-(*.pdf|*.ps)
+(*.pdf|*.ps|*.svg)
 	[ -f "$url" ] && file=$url || curl -Lo "$file" "$url"
 	exec mupdf "$file"
 	;;

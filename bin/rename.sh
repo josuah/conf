@@ -1,6 +1,17 @@
 #!/bin/sh -e
 # rename files in batch using sed -i commands
 
+
+
+if [ "$1" = "-a" ]; then
+	shift
+	exec "$0" '
+		s/[!-,[-`{-~ ]/-/g
+		s/\.+/./g; s/-+/-/g; s/^-//; s/-$//
+		s/\.-/-/g; s/-\././g
+	' "$@"
+fi
+
 pattern=$1
 shift
 
