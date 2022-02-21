@@ -21,6 +21,7 @@
 char	*flag_user;
 int	 flag_facility = LOG_DAEMON;
 char	*flag_dir;
+int	 flag_restart;
 pid_t	 child;
 
 static void
@@ -33,7 +34,8 @@ logger(int fd)
 		syslog(LOG_ERR, "(daemon) fdopen pipe: %s", strerror(errno));
 		exit(1);
 	}
-	for (size_t i = 0;; i++) {
+
+	for (size_t i = 0;;) {
 		int c;
 
 		if (i >= sizeof line - 1) {
@@ -41,6 +43,7 @@ logger(int fd)
 			syslog(LOG_NOTICE, "%s \\", line);
 			i = 0;
 		}
+
 		switch ((c = fgetc(fp))) {
 		case EOF:
 			if (ferror(fp))
@@ -55,7 +58,7 @@ logger(int fd)
 			i = 0;
 			break;
 		default:
-			line[i] = c;
+			line[i++] = c;
 		}
 	}
 }
@@ -71,12 +74,13 @@ spawn(char **argv, int *p)
 		exit(1);
 		break;
 	case 0:
+		close(p[0]);
+
 		if (dup2(p[1], 1) == -1 || dup2(p[1], 2) == -1) {
 			syslog(LOG_ERR, "dup2 log pipe: %s",
 			    strerror(errno));
 			exit(1);
 		}
-		close(p[0]);
 
 		fputs("(daemon) executing", stderr);
 		for (char **arg = argv; *arg != NULL; arg++)
@@ -99,11 +103,17 @@ sighandler_forward(int sig)
 	if (child > 0) {
 		syslog(LOG_INFO, "(daemon) forwarding signal %d to child %d",
 		    sig, child);
+
 		if (kill(child, sig) == -1)
 			syslog(LOG_ERR, "(daemon) kill: %s", strerror(errno));
 	} else {
-		syslog(LOG_INFO, "(daemon) child not ready, not sending signal %d",
+		syslog(LOG_INFO, "(daemon) child not ready, not forwarding signal %d",
 		    sig);
+	}
+
+	if (flag_restart && (sig == SIGTERM || sig == SIGKILL)) {
+		flag_restart = 0;
+		syslog(LOG_INFO, "(daemon) disabling auto-restart");
 	}
 }
 
@@ -152,76 +162,23 @@ setusergroup(char *user)
 }
 
 static void
-daemon_(char **argv)
+spawn_logger(char **argv)
 {
-	struct sigaction sa;
 	int p[2], status;
 
-	close(0);
-
-	/* double fork: daemonize */
-	switch (fork()) {
-	case -1:
-		syslog(LOG_ERR, "(daemon) pipe: %s", strerror(errno));
-		exit(1);
-		break;
-	case 0:
-		break;
-	default:
-		return;
-	}
-
-	/* if specified, set user and associated groups */
-	if (flag_user != NULL)
-		setusergroup(flag_user);
-
-	/* to cache error messages from the child */
+	/* to catch error messages from the child */
 	if (pipe(p) == -1) {
 		syslog(LOG_ERR, "(daemon) pipe: %s", strerror(errno));
 		exit(1);
 	}
 
-	/* new process group with daemon itself and its child */
-	if (setsid() == -1) {
-		syslog(LOG_ERR, "(daemon) setsid: %s", strerror(errno));
-		exit(1);
-	}
-
-	if (flag_dir) {
-		syslog(LOG_ERR, "(daemon) chdir %s: %s",
-			flag_dir, strerror(errno));
-		if (chdir(flag_dir) == -1) {
-			syslog(LOG_ERR, "chdir %s: %s",
-				flag_dir, strerror(errno));
-			exit(1);
-		}
-	}
-
 	/* fork-exec the child */
 	child = spawn(argv, p);
 
-	/* forward most signals to the child */
-	sa.sa_handler = sighandler_forward;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGHUP, &sa, NULL);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
-	sigaction(SIGALRM, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGCONT, &sa, NULL);
-	sigaction(SIGWINCH, &sa, NULL);
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
-
-	/* to exit daemon itself but not the child */
-	sa.sa_handler = sighandler_die;
-	sigfillset(&sa.sa_mask);
-	sigaction(SIGABRT, &sa, NULL);
-
-	/* read all logs until the pipe closes like logger(1) does */
+	/* read logs until pipe close, like the logger(1) command */
 	logger(p[0]);
 
-	/* needs SIGCHLD not caught above but let to default */
+	/* SIGCHLD should not be caught for this to work */
 	while (waitpid(child, &status, 0) == -1)
 		assert(errno == EINTR);
 	assert(WIFEXITED(status) || WIFSIGNALED(status));
@@ -268,21 +225,96 @@ usage(void)
 	exit(1);
 }
 
+void
+daemon_(char **argv)
+{
+	struct sigaction sa;
+
+	close(0);
+	close(1);
+	close(2);
+
+	/* double fork: daemonize */
+	switch (fork()) {
+	case -1:
+		syslog(LOG_ERR, "(daemon) pipe: %s", strerror(errno));
+		exit(1);
+	case 0:
+		break;
+	default:
+		return;
+	}
+
+	/* if specified, set user and associated groups */
+	if (flag_user != NULL)
+		setusergroup(flag_user);
+
+	/* new process group with daemon itself and its child */
+	if (setsid() == -1) {
+		syslog(LOG_ERR, "(daemon) setsid: %s", strerror(errno));
+		exit(1);
+	}
+
+	if (flag_dir) {
+		syslog(LOG_ERR, "(daemon) chdir %s: %s",
+			flag_dir, strerror(errno));
+		if (chdir(flag_dir) == -1) {
+			syslog(LOG_ERR, "chdir %s: %s",
+				flag_dir, strerror(errno));
+			exit(1);
+		}
+	}
+
+	/* forward most signals to the child */
+	sa.sa_handler = sighandler_forward;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGALRM, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGCONT, &sa, NULL);
+	sigaction(SIGWINCH, &sa, NULL);
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
+
+	/* to exit daemon itself but not the child */
+	sa.sa_handler = sighandler_die;
+	sigfillset(&sa.sa_mask);
+	sigaction(SIGABRT, &sa, NULL);
+
+	for (;;) {
+		spawn_logger(argv);
+
+		if (flag_restart) {
+			syslog(LOG_CRIT, "(daemon) restarting in %d second",
+				flag_restart);
+			sleep(flag_restart);
+		} else {
+			syslog(LOG_CRIT, "(daemon) terminating");
+			return;
+		}
+	}
+}
+
 int
 main(int argc, char **argv)
 {
 	arg0 = *argv;
-	for (int c; (c = getopt(argc, argv, "u:l:d:")) != -1;) {
+	for (int c; (c = getopt(argc, argv, "d:l:ru:")) != -1;) {
 		switch (c) {
 		case 'd':
 			flag_dir = optarg;
 			break;
-		case 'u':
-			flag_user = optarg;
-			break;
 		case 'l':
 			if ((flag_facility = facility(optarg)) == -1)
 				usage();
+			break;
+		case 'r':
+			flag_restart = 1;
+			break;
+		case 'u':
+			flag_user = optarg;
 			break;
 		default:
 			usage();

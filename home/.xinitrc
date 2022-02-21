@@ -86,11 +86,7 @@ xrdb -merge "$HOME/.Xresources"
 find /usr/local/share/fonts -mindepth 1 -maxdepth 1 -type d -exec xset +fp {} \;
 
 # IME
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
 setxkbmap us -option compose:ralt
-daemon fcitx -Dr
 
 # status bar
 daemon dwmstatus
@@ -105,7 +101,7 @@ mkfifo "$XNOTIFY_FIFO"
 xnotify -g -20+40 <>$XNOTIFY_FIFO &
 
 # notifications for incoming mail
-daemon mailtube-xnotify ssh josuah@mx1.josuah.net mailtube-server Maildir
+daemon -r mailtube-xnotify ssh josuah@mx1.josuah.net mailtube-server Maildir
 
 # window manager
 exec ssh-agent dwm

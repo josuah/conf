@@ -4,7 +4,7 @@ url=https://github.com/raspberrypi/openocd.git
 pack_configure() {
 	export AUTOMAKE_VERSION=1.16 AUTOCONF_VERSION=2.69
 	./bootstrap
-	exec ./configure --prefix="$prefix" \
+	exec ./configure --prefix="$PREFIX" \
 		--enable-picoprobe \
 		--disable-werror \
 		--without-capstone \
