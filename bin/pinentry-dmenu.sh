@@ -1,67 +1,67 @@
-#!/bin/sh -e
+#!/bin/sh -eu
 
 FLAVOR=dmenu
-VERSION=0.1
+VERSION=0.2
 
-OK() {
-	[ $# = 0 ] || printf 'D %s\n' "$@"
-	echo "OK"
-	echo "; (OK $*)" >>/tmp/out
-}
-
-ERR() {
-	printf 'ERR 0 %s\n' "$*"
-	echo "; (ERR $*)" >>/tmp/out
-}
-
-echo OK here is $0
+echo OK "here is $0"
 
 while read -r command args; do
-	echo "$command $args" >>/tmp/out
-
 	case $(echo "$command" | tr a-z A-Z) in
 	(OPTION)
-		OK
+		echo OK
 		;;
 	(GETINFO)
 		case $args in
-		(flavor) OK "$FLAVOR" ;;
-		(version) OK "$VERSION" ;;
-		(ttyinfo) OK "- - -" ;;
-		(pid) OK "$$" ;;
-		(*) ERR 0 unknown GETINFO value
+		(flavor)
+			echo D "$FLAVOR"
+			echo OK
+			;;
+		(version)
+			echo D "$VERSION"
+			echo OK
+			;;
+		(ttyinfo)
+			echo D "- - -"
+			echo OK
+			;;
+		(pid)
+			echo D "$$"
+			echo OK
+			;;
+		(*) echo 0 ERR "unknown GETINFO value"
 		esac
 		;;
 	(SETKEYINFO)
 		keyinfo=$args
-		OK
+		echo OK
 		;;
 	(SETDESC)
 		desc=$args
-		OK
+		echo OK
 		;;
 	(SETPROMPT)
 		prompt=$args
-		OK
+		echo OK
 		;;
 	(SETERROR)
 		error=$args
-		OK
+		echo OK
 		;;
 	(GETPIN)
 		p=$prompt${error:+ ($error)}
 		if ! pin=$(DISPLAY=:0 dmenu -p "$p" </dev/null); then
-			ERR "could not run dmenu"
+			echo ERR 0 "could not run dmenu"
 			echo BYE
 			exit 1
 		fi
-		OK "$pin"
+		echo D "$pin"
+		echo OK
 		;;
 	(BYE)
-		OK
+		echo OK
 		;;
 	(*)
-		ERR "unknown command"
+		echo 0 ERR "unknown command"
 		;;
 	esac
 done

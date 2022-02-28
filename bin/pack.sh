@@ -1,20 +1,21 @@
 #!/bin/sh -eu
 # nimble source-based package manager for custom build recipes
 
-download_http() {
-	if [ ! -f "$cache-$v.$1" ]
-	then exec curl -L -o "$cache-$v.$1" "$2"
+download_http() { set -eu
+	if [ ! -f "$cache-$v.$1" ]; then
+		curl -L -o "$cache-$v.$1" "$2"
 	fi
 }
 
-download_git() {
-	if [ -d "$cache.git" ]
-	then exec git clone --depth 1 --branch "$v" "$url" ".cache/$name.git"
-	else exec git -C ".cache/$name.git" fetch
+download_git() { set -eu
+	if [ -d "$cache.git" ]; then
+		git -C ".cache/$name.git" fetch
+	else
+		git clone --depth 1 --branch "$v" "$url" ".cache/$name.git"
 	fi
 }
 
-pack_download() {
+pack_download() { set -eu
 	case $url in
 	(*.tgz|*.tar.gz)
 		download_http tgz "$url"
@@ -26,8 +27,8 @@ pack_download() {
 		;;
 	(git://*|*.git)
 		download_git
-		cp -r "$cache.git" "$source.$t"
-		git -C "$source.$t" checkout "$v"
+		cp -r "$cache.git" "$source"
+		git -C "$source" checkout "$v"
 		;;
 	(*)
 		echo error: unknown url type >&2
@@ -35,52 +36,49 @@ pack_download() {
 		;;
 	esac
 
-	if [ -n "$dir" -a "$dir" != "$name-$v" ]
-	then mv "$dir" "$source.$t"
+	if [ "$dir" != "$name-$v" ]; then
+		mv "$dir" "$source"
 	fi
 }
 
-pack_configure() {
-	if [ -f autogen.sh -a ! -f configure ]
-	then (set -x; exec ./autogen.sh)
+pack_configure() { set -eux
+	if [ -f autogen.sh -a ! -f configure ]; then
+		./autogen.sh
 	fi
-	if [ -f configure ]
-	then (set -x; exec ./configure --prefix="$PREFIX")
-	fi
-}
-
-pack_build() {
-	if [ -f Makefile ]
-	then (set -x; exec make)
+	if [ -f configure ]; then
+		exec ./configure --prefix="$PREFIX"
 	fi
 }
 
-pack_install() {
-	(set -x; exec make PREFIX="$PREFIX" install)
+pack_build() { set -eux
+	exec make
+}
+
+pack_install() { set -eux
+	exec make PREFIX="$PREFIX" install
 }
 
 name=$1
 . "/etc/pack/$name.sh"
-: ${v:=master}
 : ${dir:=$name-$v}
 : ${pack:=$PWD}
 : ${source:=$pack/$name-$v}
 : ${cache:=$pack/.cache/$name}
 : ${PREFIX:=/usr/local}
 
-t=$(date +%s)
 mkdir -p .cache
 
 case $(id -u) in
 (0)
 	set -x
-	(cd "$source.$t" && pack_install)
+	cd "$source"
+	(exec pack_install)
 	;;
 (*)
 	set -x
-	(pack_download)
-	(cd "$source.$t" && pack_configure)
-	(cd "$source.$t" && pack_build)
-	mv "$source.$t" "$source"
+	(exec pack_download)
+	cd "$source"
+	(exec pack_configure)
+	(exec pack_build)
 	;;
 esac

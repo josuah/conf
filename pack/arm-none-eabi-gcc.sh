@@ -2,21 +2,21 @@ v=11.2.0
 url=http://mirror.koddos.net/gcc/releases/gcc-$v/gcc-$v.tar.gz
 dir=gcc-$v
 
+target=arm-none-eabi
+
 pack_configure() {
-	mkdir .bin
-cat <<'EOF' >.bin/cc
-#!/bin/sh -eu
-export PATH="${PATH#*/.bin:}"
-set -x
-exec cc -I/usr/local/include -L/usr/local/lib "$@"
-EOF
-	chmod +x .bin/*
+	GMP=/usr/local MPFR=/usr/local MPC=/usr/local
 
-	export PATH="$PWD/.bin:$PATH" CC="$PWD/.bin/cc"
+	mkdir -p build
+	cd build
 
-	./configure --prefix="$PREFIX" CC="$PWD/.bin/cc"
+	../configure --prefix="$PREFIX" --target="$target" \
+	  --with-gmp="$GMP" --with-mpfr="$MPFR" --with-mpc="$MPC" \
+	  --enable-languages=c
 }
 
 pack_build() {
+	cd build
+
 	gmake
 }
