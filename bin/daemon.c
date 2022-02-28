@@ -22,6 +22,7 @@ char	*flag_user;
 int	 flag_facility = LOG_DAEMON;
 char	*flag_dir;
 int	 flag_restart;
+int	 flag_no_close;
 pid_t	 child;
 
 static void
@@ -214,7 +215,7 @@ facility(char *name)
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-d chdir] [-u user] [-l facility] command [args...]\n",
+	fprintf(stderr, "usage: %s [-012r] [-d chdir] [-u user] [-l facility] command [args...]\n",
 	    arg0);
 
 	fprintf(stderr, "facility: ");
@@ -230,9 +231,9 @@ daemon_(char **argv)
 {
 	struct sigaction sa;
 
-	close(0);
-	close(1);
-	close(2);
+	for (int i = 0; i <= 2; i++)
+		if ((flag_no_close & 1 << i) == 0)
+			close(i);
 
 	/* double fork: daemonize */
 	switch (fork()) {
@@ -301,8 +302,13 @@ int
 main(int argc, char **argv)
 {
 	arg0 = *argv;
-	for (int c; (c = getopt(argc, argv, "d:l:ru:")) != -1;) {
+	for (int c; (c = getopt(argc, argv, "012d:l:ru:")) != -1;) {
 		switch (c) {
+		case '0':
+		case '1':
+		case '2':
+			flag_no_close |= 1u << (c - '0');
+			break;
 		case 'd':
 			flag_dir = optarg;
 			break;

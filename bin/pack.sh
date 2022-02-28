@@ -2,32 +2,32 @@
 # nimble source-based package manager for custom build recipes
 
 download_http() {
-	if [ ! -f "$cache-$ver.tz" ]
-	then curl -L -o "$cache-$ver.tz" "$1"
+	if [ ! -f "$cache-$v.$1" ]
+	then exec curl -L -o "$cache-$v.$1" "$2"
 	fi
 }
 
 download_git() {
-	if [ ! -d "$cache.git" ]
-	then git clone --depth 1 --branch "$ver" "$url" ".cache/$pack.git"
-	else git -C ".cache/$pack.git" fetch
+	if [ -d "$cache.git" ]
+	then exec git clone --depth 1 --branch "$v" "$url" ".cache/$name.git"
+	else exec git -C ".cache/$name.git" fetch
 	fi
 }
 
 pack_download() {
 	case $url in
 	(*.tgz|*.tar.gz)
-		download_http "$url"
-		gzip -cd "$cache-$ver.tz" | tar -xf-
+		download_http tgz "$url"
+		gzip -cd "$cache-$v.tgz" | tar -xf-
 		;;
 	(*.txz|*.tar.xz)
-		download_http "$url"
-		xz -cd "$cache-$ver.tz" | tar -xf-
+		download_http txz "$url"
+		xz -cd "$cache-$v.txz" | tar -xf-
 		;;
 	(git://*|*.git)
 		download_git
-		cp -r "$cache.git" "$source"
-		git -C "$source" checkout "$ver"
+		cp -r "$cache.git" "$source.$t"
+		git -C "$source.$t" checkout "$v"
 		;;
 	(*)
 		echo error: unknown url type >&2
@@ -35,8 +35,8 @@ pack_download() {
 		;;
 	esac
 
-	if [ -n "$dir" -a "$dir" != "$pack-$ver" ]; then
-		mv "$dir" "$source"
+	if [ -n "$dir" -a "$dir" != "$name-$v" ]
+	then mv "$dir" "$source.$t"
 	fi
 }
 
@@ -59,24 +59,28 @@ pack_install() {
 	(set -x; exec make PREFIX="$PREFIX" install)
 }
 
-pack=$1
-. "/etc/pack/$pack.sh"
-: ${ver:=master}
-: ${dir:=$pack-$ver}
-: ${source:=$PWD/$pack-$ver}
-: ${cache:=$PWD/.cache/$pack}
+name=$1
+. "/etc/pack/$name.sh"
+: ${v:=master}
+: ${dir:=$name-$v}
+: ${pack:=$PWD}
+: ${source:=$pack/$name-$v}
+: ${cache:=$pack/.cache/$name}
 : ${PREFIX:=/usr/local}
+
+t=$(date +%s)
+mkdir -p .cache
 
 case $(id -u) in
 (0)
-	(set +u; cd "$source" && pack_install)
+	set -x
+	(cd "$source.$t" && pack_install)
 	;;
 (*)
-	mkdir -p .cache
-	trap 'rm -rf "$source"' INT TERM EXIT HUP
-	([ ! -d "$source" ] && pack_download)
-	(set +u; cd "$source" && pack_configure)
-	(set +u; cd "$source" && pack_build)
-	exec echo "built $pack in $source, run same command as root to install"
+	set -x
+	(pack_download)
+	(cd "$source.$t" && pack_configure)
+	(cd "$source.$t" && pack_build)
+	mv "$source.$t" "$source"
 	;;
 esac

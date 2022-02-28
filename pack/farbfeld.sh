@@ -1,4 +1,4 @@
-ver=master
+v=master
 url=git://git.suckless.org/farbfeld
 
 pack_build() {

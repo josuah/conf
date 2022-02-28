@@ -1,5 +1,5 @@
+v=master
 url=git://git.suckless.org/dmenu
-ver=master
 
 pack_configure() {
 	sed -ri 's/^#(FREETYPEINC *=)/\1/' config.mk

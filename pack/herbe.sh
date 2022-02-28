@@ -1,4 +1,4 @@
-ver=master
+v=master
 url=https://github.com/dudik/herbe.git
 
 pack_build() {

@@ -1,8 +1,13 @@
 #!/usr/bin/awk -f
 
-BEGIN { WIDTH = ("WIDTH" in ENVIRON) ? (ENVIRON["WIDTH"]) : (48) }
+BEGIN {
+	WIDTH = ("WIDTH" in ENVIRON) ? (ENVIRON["WIDTH"]) : (48)
+}
 
-{ gsub(/ +\t/, "\t") }
+{
+	gsub(/     +/, "\t")
+	gsub(/ +\t/, "\t")
+}
 
 match($0, /^[^ \t]+[^\t]+\t+[^\t]/) {
 	head = substr($0, RSTART, RLENGTH - 1)

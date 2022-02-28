@@ -1,4 +1,4 @@
-ver=dunfell
+v=dunfell
 url=http://git.yoctoproject.org/git/poky.git
 
 openembedded=git://git.openembedded.org/meta-openembedded

@@ -1,4 +1,4 @@
-ver=rp2040
+v=rp2040
 url=https://github.com/raspberrypi/openocd.git
 
 pack_configure() {
