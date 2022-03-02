@@ -12,11 +12,17 @@ pack_configure() {
 
 	../configure --prefix="$PREFIX" --target="$target" \
 	  --with-gmp="$GMP" --with-mpfr="$MPFR" --with-mpc="$MPC" \
-	  --enable-languages=c
+	  --enable-languages=c --disable-libssp
 }
 
 pack_build() {
 	cd build
 
 	gmake
+}
+
+pack_install() {
+	cd build
+
+	gmake install
 }

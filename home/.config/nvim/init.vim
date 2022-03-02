@@ -1,2 +1,2 @@
 syntax off
-set noautoindent
+set paste

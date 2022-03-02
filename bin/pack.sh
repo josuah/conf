@@ -76,7 +76,7 @@ case $(id -u) in
 	;;
 (*)
 	set -x
-	(exec pack_download)
+	([ -d "$source" ] || exec pack_download)
 	cd "$source"
 	(exec pack_configure)
 	(exec pack_build)
