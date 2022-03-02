@@ -1,0 +1,6 @@
+trap 'sfeed_mbox .sfeed/feeds/* | sfeed_mbox_deliver' EXIT
+
+feeds() {
+	feed TheGuardian	https://www.theguardian.com/world/rss
+	feed RT			https://www.rt.com/rss/
+}
