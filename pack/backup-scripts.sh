@@ -1,2 +1,2 @@
 v=master
-url=git://git.josuah.net/backup-script
+url=git://git.josuah.net/backup-scripts

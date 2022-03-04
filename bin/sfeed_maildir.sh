@@ -1,23 +1,22 @@
-#!/bin/sh -eu
+#!/bin/sh
+set -eu
 
 host=$(hostname)
-n='
-'
 
 deliver() {
-	if [ -z "${put:-}" ]; then
-		return
-	fi
-	echo "delivering '$new'"
+	set -eu
 	mkdir -p "${cur%/*}" "${new%/*}" "${tmp%/*}"
 	echo "$mail" >$tmp
 	mv "$tmp" "$new"
 }
 
+put=
 while read line; do
 	case $line in
 	("From MAILER-DAEMON "*)
-		deliver
+		if [ "$put" ]; then
+			deliver "$put"
+		fi
 		mail=
 		continue
 		;;
@@ -30,7 +29,10 @@ while read line; do
 		[ -f "$cur"* -o -f "$new"* -o -f "$tmp"* ] && put= || put=1
 		;;
 	esac
-	mail=$mail$line$n
+	mail=$mail$line'
+'
 done
 
-deliver
+if [ "$put" ]; then
+	deliver
+fi

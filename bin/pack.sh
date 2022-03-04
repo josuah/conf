@@ -5,30 +5,28 @@ download_http() { set -eu
 	if [ ! -f "$cache-$v.$1" ]; then
 		curl -L -o "$cache-$v.$1" "$2"
 	fi
+	"$3" -cd "$cache-$v.$1" | tar -xf -
 }
 
-download_git() { set -eu
+download_git() { set -eux
 	if [ -d "$cache.git" ]; then
-		git -C ".cache/$name.git" fetch
+		git -C "$cache.git" fetch origin "$v"
 	else
-		git clone --depth 1 --branch "$v" "$url" ".cache/$name.git"
+		git clone --bare --depth 1 --branch "$v" "$url" "$cache.git"
 	fi
+	git -C "$cache.git" archive --prefix="$name-$v/" "$v" | tar -xf -
 }
 
 pack_download() { set -eu
 	case $url in
 	(*.tgz|*.tar.gz)
-		download_http tgz "$url"
-		gzip -cd "$cache-$v.tgz" | tar -xf-
+		download_http tgz "$url" gzip
 		;;
 	(*.txz|*.tar.xz)
-		download_http txz "$url"
-		xz -cd "$cache-$v.txz" | tar -xf-
+		download_http txz "$url" xz
 		;;
 	(git://*|*.git)
 		download_git
-		cp -r "$cache.git" "$source"
-		git -C "$source" checkout "$v"
 		;;
 	(*)
 		echo error: unknown url type >&2
@@ -70,12 +68,10 @@ mkdir -p .cache
 
 case $(id -u) in
 (0)
-	set -x
 	cd "$source"
 	(exec pack_install)
 	;;
 (*)
-	set -x
 	([ -d "$source" ] || exec pack_download)
 	cd "$source"
 	(exec pack_configure)
