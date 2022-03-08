@@ -1,7 +1,4 @@
-#!/bin/sh
-set -eu
-
-host=$(hostname)
+#!/bin/sh -eu
 
 deliver() {
 	set -eu
@@ -10,8 +7,9 @@ deliver() {
 	mv "$tmp" "$new"
 }
 
-put=
-while read line; do
+prefix=$1 host=$(hostname) put=
+shift 1
+sfeed_mbox "$@" | while read line; do
 	case $line in
 	("From MAILER-DAEMON "*)
 		if [ "$put" ]; then
@@ -23,9 +21,9 @@ while read line; do
 	("Message-ID: "*)
 		id=${line%%@*} id=${id##*<}
 		md=${line##*@} md=${md%%>*}
-		cur=$HOME/Maildir/news-$md/cur/$id.$host:2,
-		new=$HOME/Maildir/news-$md/new/$id.$host:2,
-		tmp=$HOME/Maildir/news-$md/tmp/$id.$host:2,
+		cur=$prefix$md/cur/$id.$host:2,
+		new=$prefix$md/new/$id.$host:2,
+		tmp=$prefix$md/tmp/$id.$host:2,
 		[ -f "$cur"* -o -f "$new"* -o -f "$tmp"* ] && put= || put=1
 		;;
 	esac

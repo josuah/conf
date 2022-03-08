@@ -1,4 +1,4 @@
-trap 'sfeed_mbox .sfeed/feeds/* | sfeed_mbox_deliver' EXIT
+trap 'exec sfeed_maildir Maildir/news- .sfeed/feeds/*' EXIT
 
 feeds() {
 	feed theguardian	https://www.theguardian.com/world/rss

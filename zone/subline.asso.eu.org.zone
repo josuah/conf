@@ -1,0 +1,11 @@
+$ORIGIN subline.asso.eu.org.
+
+%% nsdom=subline.asso.eu.org template %head.zone
+
+@				IN TXT	"v=spf1 mx include:_mailcust.gandi.net -all"
+@				IN CAA	0 issue "letsencrypt.org"
+
+@				IN ALIAS ams1.josuah.net.
+www				IN ALIAS ams1.josuah.net.
+ns1				IN ALIAS ams1.josuah.net.
+ns2				IN ALIAS ams1.josuah.net.

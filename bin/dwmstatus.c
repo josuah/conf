@@ -1,6 +1,9 @@
+#include <sys/time.h>
+#include <sys/sensors.h>
+#include <sys/sysctl.h>
 #include <X11/Xlib.h>
+#include <errno.h>
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
 #include "util.h"
 

@@ -14,7 +14,7 @@ download_git() { set -eux
 	else
 		git clone --bare --depth 1 --branch "$v" "$url" "$cache.git"
 	fi
-	git -C "$cache.git" archive --prefix="$name-$v/" "$v" | tar -xf -
+	git clone --branch "$v" "$cache.git" "$source"
 }
 
 pack_download() { set -eu
