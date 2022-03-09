@@ -1,4 +1,4 @@
-CONF = tor/torrc
+CONF =	tor/torrc
 include conf/mk/conf.mk
 
 conf: tor

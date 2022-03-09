@@ -1,4 +1,4 @@
-CONF = monitower.conf cron/monit
+CONF =	monitower.conf cron/monit
 include conf/mk/conf.mk
 
 crontab: cron/monit

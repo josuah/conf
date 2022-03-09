@@ -1,7 +1,7 @@
 PREFIX = /usr/local
 
-CONF = hosts syslog.conf crontab profile ssh/authorized_keys \
-  ssh/sshd_config ssh/ssh_config unbound.conf resolv.conf.tail inetd.conf
+CONF =	hosts syslog.conf crontab profile ssh/authorized_keys \
+	ssh/sshd_config ssh/ssh_config unbound.conf resolv.conf.tail inetd.conf
 include conf/mk/conf.mk
 
 home:

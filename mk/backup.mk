@@ -1,4 +1,4 @@
-CONF = backup.conf cron/backup
+CONF =	backup.conf cron/backup
 include conf/mk/conf.mk
 
 crontab: cron/backup
