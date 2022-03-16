@@ -1,7 +1,7 @@
 v=rp2040
 url=https://github.com/raspberrypi/openocd.git
 
-pack_configure() {
+pack_configure() { set -eux
 	export AUTOMAKE_VERSION=1.16 AUTOCONF_VERSION=2.69
 	./bootstrap
 	exec ./configure --prefix="$PREFIX" \
@@ -18,7 +18,7 @@ pack_configure() {
 		HIDAPI_LDLFAGS="$(pkg-config --libs hidapi-libusb)"
 }
 
-pack_build() {
+pack_build() { set -eux
 	export PATH="$PWD:$PATH"
 	touch makeinfo
 	chmod +x makeinfo
@@ -26,7 +26,7 @@ pack_build() {
 	exec gmake
 }
 
-pack_install() {
+pack_install() { set -eux
 	export PATH="$PWD:$PATH"
 	exec gmake install
 }

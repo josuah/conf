@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 BEGIN {
-	WIDTH = ("WIDTH" in ENVIRON) ? (ENVIRON["WIDTH"]) : (48)
+	WIDTH = ("WIDTH" in ENVIRON) ? (ENVIRON["WIDTH"]) : (64)
 }
 
 {

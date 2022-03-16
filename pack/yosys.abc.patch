@@ -1,0 +1,13 @@
+diff --git a/src/base/main/mainReal.c b/src/base/main/mainReal.c
+index a13be5e5..8ed7cbff 100644
+--- a/src/base/main/mainReal.c
++++ b/src/base/main/mainReal.c
+@@ -141,7 +141,7 @@ int Abc_RealMain( int argc, char * argv[] )
+                     maxMb * (1llu << 20), /* soft limit */      
+                     maxMb * (1llu << 20)  /* hard limit */      
+                 };                                              
+-                setrlimit(RLIMIT_AS, &limit);                   
++                setrlimit(RLIMIT_DATA, &limit);
+ #endif
+                 break; 
+             }                                         

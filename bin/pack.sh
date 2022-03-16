@@ -8,7 +8,7 @@ download_http() { set -eu
 	"$3" -cd "$cache-$v.$1" | tar -xf -
 }
 
-download_git() { set -eux
+download_git() { set -eu
 	if [ -d "$cache.git" ]; then
 		git -C "$cache.git" fetch origin "$v"
 	else
@@ -18,6 +18,10 @@ download_git() { set -eux
 }
 
 pack_download() { set -eu
+	if [ -d "$dir" ]; then
+		return
+	fi
+
 	case $url in
 	(*.tgz|*.tar.gz)
 		download_http tgz "$url" gzip

@@ -4,25 +4,22 @@ dir=gcc-$v
 
 target=arm-none-eabi
 
-pack_configure() {
+pack_configure() { set -eux
 	GMP=/usr/local MPFR=/usr/local MPC=/usr/local
 
 	mkdir -p build
 	cd build
-
 	../configure --prefix="$PREFIX" --target="$target" \
 	  --with-gmp="$GMP" --with-mpfr="$MPFR" --with-mpc="$MPC" \
 	  --enable-languages=c --disable-libssp
 }
 
-pack_build() {
+pack_build() { set -eux
 	cd build
-
 	gmake
 }
 
-pack_install() {
+pack_install() { set -eux
 	cd build
-
 	gmake install
 }

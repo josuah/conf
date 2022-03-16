@@ -1,0 +1,148 @@
+diff --git a/Makefile b/Makefile
+index 5a03fda..f154688 100644
+--- a/Makefile
++++ b/Makefile
+@@ -88,7 +88,7 @@ YOSYS_SRC := $(dir $(firstword $(MAKEFILE_LIST)))
+ VPATH := $(YOSYS_SRC)
+ 
+ CXXSTD ?= c++11
+-CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -ggdb -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC -I$(PREFIX)/include
++CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC -I$(PREFIX)/include
+ LDLIBS := $(LDLIBS) -lstdc++ -lm
+ PLUGIN_LDFLAGS :=
+ 
+@@ -352,6 +352,10 @@ else ifneq ($(CONFIG),none)
+ $(error Invalid CONFIG setting '$(CONFIG)'. Valid values: clang, gcc, gcc-4.8, emcc, mxe, msys2-32, msys2-64)
+ endif
+ 
++ifeq ($(OS), OpenBSD)
++LDLIBS := $(filter-out -lrt, $(LDLIBS))
++endif
++
+ ifeq ($(ENABLE_LIBYOSYS),1)
+ TARGETS += libyosys.so
+ endif
+@@ -418,7 +422,7 @@ endif
+ ifeq ($(ENABLE_PLUGINS),1)
+ CXXFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG) --silence-errors --cflags libffi) -DYOSYS_ENABLE_PLUGINS
+ LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG) --silence-errors --libs libffi || echo -lffi)
+-ifneq ($(OS), FreeBSD)
++ifneq ($(OS), $(filter $(OS), FreeBSD OpenBSD))
+ LDLIBS += -ldl
+ endif
+ endif
+diff --git a/kernel/yosys.cc b/kernel/yosys.cc
+index 0990969..11fc1e6 100644
+--- a/kernel/yosys.cc
++++ b/kernel/yosys.cc
+@@ -70,6 +70,10 @@
+ #include <signal.h>
+ #endif
+ 
++#ifdef __OpenBSD__
++#  include <sys/wait.h>
++#endif
++
+ #include <limits.h>
+ #include <errno.h>
+ 
+@@ -807,6 +811,11 @@ std::string proc_self_dirname()
+ 	free(buffer);
+ 	return path;
+ }
++#elif defined(__OpenBSD__)
++std::string proc_self_dirname()
++{
++	return "${PREFIX}/bin/";
++}
+ #elif defined(__APPLE__)
+ std::string proc_self_dirname()
+ {
+diff --git a/libs/fst/config.h b/libs/fst/config.h
+index 0598fb8..8bc0056 100644
+--- a/libs/fst/config.h
++++ b/libs/fst/config.h
+@@ -21,6 +21,9 @@
+ #undef HAVE_LIBPTHREAD
+ #undef HAVE_FSEEKO
+ #endif
++#if defined(__OpenBSD__)
++#undef HAVE_ALLOCA_H
++#endif
+ 
+ # ifndef __STDC_FORMAT_MACROS
+ #  define __STDC_FORMAT_MACROS 1
+diff --git a/Makefile b/Makefile
+index 5a03fda..f154688 100644
+--- a/Makefile
++++ b/Makefile
+@@ -88,7 +88,7 @@ YOSYS_SRC := $(dir $(firstword $(MAKEFILE_LIST)))
+ VPATH := $(YOSYS_SRC)
+ 
+ CXXSTD ?= c++11
+-CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -ggdb -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC -I$(PREFIX)/include
++CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC -I$(PREFIX)/include
+ LDLIBS := $(LDLIBS) -lstdc++ -lm
+ PLUGIN_LDFLAGS :=
+ 
+@@ -352,6 +352,10 @@ else ifneq ($(CONFIG),none)
+ $(error Invalid CONFIG setting '$(CONFIG)'. Valid values: clang, gcc, gcc-4.8, emcc, mxe, msys2-32, msys2-64)
+ endif
+ 
++ifeq ($(OS), OpenBSD)
++LDLIBS := $(filter-out -lrt, $(LDLIBS))
++endif
++
+ ifeq ($(ENABLE_LIBYOSYS),1)
+ TARGETS += libyosys.so
+ endif
+@@ -418,7 +422,7 @@ endif
+ ifeq ($(ENABLE_PLUGINS),1)
+ CXXFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG) --silence-errors --cflags libffi) -DYOSYS_ENABLE_PLUGINS
+ LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG) --silence-errors --libs libffi || echo -lffi)
+-ifneq ($(OS), FreeBSD)
++ifneq ($(OS), $(filter $(OS), FreeBSD OpenBSD))
+ LDLIBS += -ldl
+ endif
+ endif
+diff --git a/kernel/yosys.cc b/kernel/yosys.cc
+index 0990969..11fc1e6 100644
+--- a/kernel/yosys.cc
++++ b/kernel/yosys.cc
+@@ -70,6 +70,10 @@
+ #include <signal.h>
+ #endif
+ 
++#ifdef __OpenBSD__
++#  include <sys/wait.h>
++#endif
++
+ #include <limits.h>
+ #include <errno.h>
+ 
+@@ -807,6 +811,11 @@ std::string proc_self_dirname()
+ 	free(buffer);
+ 	return path;
+ }
++#elif defined(__OpenBSD__)
++std::string proc_self_dirname()
++{
++	return "${PREFIX}/bin/";
++}
+ #elif defined(__APPLE__)
+ std::string proc_self_dirname()
+ {
+diff --git a/libs/fst/config.h b/libs/fst/config.h
+index 0598fb8..8bc0056 100644
+--- a/libs/fst/config.h
++++ b/libs/fst/config.h
+@@ -21,6 +21,9 @@
+ #undef HAVE_LIBPTHREAD
+ #undef HAVE_FSEEKO
+ #endif
++#if defined(__OpenBSD__)
++#undef HAVE_ALLOCA_H
++#endif
+ 
+ # ifndef __STDC_FORMAT_MACROS
+ #  define __STDC_FORMAT_MACROS 1
