@@ -1,0 +1,23 @@
+v=11.2.0
+url=http://mirror.koddos.net/gcc/releases/gcc-$v/gcc-$v.tar.gz
+dir=gcc-$v
+
+pack_configure() { set -eux
+	GMP=/usr/local MPFR=/usr/local MPC=/usr/local
+
+	mkdir -p build
+	cd build
+	../configure --prefix="$PREFIX" \
+	  --with-gmp="$GMP" --with-mpfr="$MPFR" --with-mpc="$MPC" \
+	  --enable-languages=c --disable-libssp
+}
+
+pack_build() { set -eux
+	cd build
+	gmake
+}
+
+pack_install() { set -eux
+	cd build
+	gmake install
+}

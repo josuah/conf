@@ -3,7 +3,7 @@ url=https://github.com/YosysHQ/nextpnr.git
 
 pack_configure() { set -eux
 	exec cmake . \
-	 -DARCH=gowin \
+	 -DARCH=ice40 \
 	 -DEIGEN3_INCLUDE_DIRS="${PREFIX}/include/eigen3"
 }
 
