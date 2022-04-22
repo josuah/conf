@@ -1,5 +1,5 @@
-v=rp2040
-url=https://github.com/raspberrypi/openocd.git
+v=master
+url=https://git.code.sf.net/p/openocd/code.git
 
 pack_configure() { set -eux
 	export AUTOMAKE_VERSION=1.16 AUTOCONF_VERSION=2.69

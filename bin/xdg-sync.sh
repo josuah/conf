@@ -4,10 +4,9 @@
 : ${XNOTIFY_FIFO:=$HOME/.cache/xnotify.fifo}
 
 case "$1" in
-(*.pdf|*.ps)
+(*.mobi|*.epub|*.pdf|*.ps)
 	mkdir -p "$HOME/.cache/xdg-sync/ereader"
-	file=$HOME/.cache/xdg-sync/ereader/$(basename "${1%.*}.pdf")
-	mutool convert -O "$MUTOOL" -o "$file" "$1" || cp "$1" "$file"
+	cp "$1" "$HOME/.cache/xdg-sync/ereader/$(basename "$1")"
 	;;
 (*.mka|*.ogg|*.opus|*.mp3|*.flac|*.wav)
 	mkdir -p "$HOME/.cache/xdg-sync/mp3player"

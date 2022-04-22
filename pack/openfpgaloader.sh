@@ -4,7 +4,7 @@ url=https://github.com/trabucayre/openFPGALoader.git
 pack_configure() { set -eux
 	mkdir -p build
 	cd build
-	cmake .. -DBUILD_STATIC=ON -DENABLE_CMSISDAP=OFF
+	cmake .. -DBUILD_STATIC=ON -DENABLE_CMSISDAP=OFF -DCMAKE_PREFIX_PATH=/usr/local
 }
 
 pack_build() { set -eux

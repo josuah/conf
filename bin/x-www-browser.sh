@@ -2,6 +2,9 @@
 # standard utility to spawn a web browser
 
 case "$1" in
+(*://*reddit.com/*)
+	set -- "https://teddit.net/${1#*://*/}"
+	;;
 (*://twitter.com/*)
 	set -- "https://twitter.censors.us/${1#*://*/}"
 	;;

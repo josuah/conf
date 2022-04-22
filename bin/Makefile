@@ -2,10 +2,10 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic \
 	-D_POSIX_C_SOURCE=200811L -D_BSD_SOURCE
 LDFLAGS = -static
 PREFIX = /usr/local/bin
-BIN =	acme-cli align backup-clean backup-mirror backup-rsync bin ctl \
-	daemon daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc hex host \
+BIN =	acme-cli align backup-clean backup-mirror backup-rsync bin ctl daemon \
+	daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc hex host edit \
 	html log mailtube-server mailtube-xnotify monitower mopen mtop \
-	mtrash mview netinfo pdf-sign sfeed_maildir sha256dedup syslogf \
+	mtrash mview netinfo pdf-sign play sfeed_maildir sha256dedup syslogf \
 	template term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
 	x-www-browser x509 xdg-open xdg-sync zone
 
