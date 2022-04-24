@@ -4,9 +4,9 @@ SYNC_HOME = root@lap1 josuah@lap1 root@ams1 josuah@ams1 \
 
 sync: ${SYNC_HOME}
 ${SYNC_HOME}:
-	rsync -vrt conf/home/ $@:.
+	rsync -lvrt conf/home/ $@:.
 
 sync: ${SYNC_CONF}
 ${SYNC_CONF}:
-	rsync -vrt --delete conf/* $@:${PWD}/conf/
+	rsync -lvrt --delete conf/* $@:${PWD}/conf/
 	ssh $@ make -C /etc
