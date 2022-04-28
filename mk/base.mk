@@ -6,8 +6,6 @@ include conf/mk/conf.mk
 
 home:
 	cp -r conf/home/.??* ${HOME}
-	mkdir -p conf/home/$$USER
-	ln -sf conf/home/$$USER/.??* /home/$$USER
 
 bin:
 	make -C /etc/conf/bin

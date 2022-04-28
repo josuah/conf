@@ -12,7 +12,7 @@ mkdir -p "$(dirname "$file")"
 case "$(echo "$url" | tr A-Z a-z)" in
 (*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
 |*://vimeo.com/*|*://*bandcamp.com/track/*)
-	exec mpv --ytdl-format=worst "$url"
+	exec mpv --ytdl-format='[height<=480]' "$url"
 	;;
 (http*://*.git|git*://*)
 	dom=${url#*//} dom=${dom%%/*}
