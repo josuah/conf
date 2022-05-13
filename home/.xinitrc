@@ -89,7 +89,7 @@ find /usr/local/share/fonts -mindepth 1 -maxdepth 1 -type d -exec xset +fp {} \;
 setxkbmap us -option compose:ralt
 
 # status bar
-daemon dwmstatus
+daemon spoon
 
 # right clic
 daemon xclickroot x-terminal-emulator

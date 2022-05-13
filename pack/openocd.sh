@@ -1,8 +1,11 @@
 v=master
 url=https://git.code.sf.net/p/openocd/code.git
 
+export AUTOMAKE_VERSION=1.16
+export AUTOCONF_VERSION=2.69
+export PATH="$PWD:$PATH"
+
 pack_configure() { set -eux
-	export AUTOMAKE_VERSION=1.16 AUTOCONF_VERSION=2.69
 	./bootstrap
 	exec ./configure --prefix="$PREFIX" \
 		--enable-picoprobe \
@@ -19,7 +22,6 @@ pack_configure() { set -eux
 }
 
 pack_build() { set -eux
-	export PATH="$PWD:$PATH"
 	touch makeinfo
 	chmod +x makeinfo
 	sed -i 's/hid_init/hidapi_&/' src/jtag/drivers/*.c
@@ -27,6 +29,5 @@ pack_build() { set -eux
 }
 
 pack_install() { set -eux
-	export PATH="$PWD:$PATH"
 	exec gmake install
 }

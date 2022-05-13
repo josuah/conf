@@ -11,7 +11,7 @@ mkdir -p "$(dirname "$file")"
 
 case "$(echo "$url" | tr A-Z a-z)" in
 (*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
-|*://vimeo.com/*|*://*bandcamp.com/track/*)
+|*://vimeo.com/*|*://*bandcamp.com/track/*|*://odysee.com/*)
 	exec mpv --ytdl-format='[height<=480]' "$url"
 	;;
 (http*://*.git|git*://*)

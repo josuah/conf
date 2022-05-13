@@ -1,10 +1,10 @@
 trap 'exec sfeed_maildir Maildir/news- .sfeed/feeds/*' EXIT
 
 feeds() {
-	feed theguardian	"https://www.theguardian.com/world/rss"
-	feed rt			"https://www.rt.com/rss/"
+#	feed theguardian	"https://www.theguardian.com/world/rss"
+#	feed rt			"https://www.rt.com/rss/"
 	feed hackaday		"https://hackaday.com/blog/feed/"
 	feed theregister	"https://www.theregister.com/headlines.atom"
-	feed quartz		"https://cms.qz.com/feed"
+#	feed quartz		"https://cms.qz.com/feed"
 	feed undeadly		"https://undeadly.org/cgi?action=rss"
 }

@@ -13,7 +13,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6:chat", "7:media", "8:pdf", "9:web" };
+static const char *tags[] = { "1", "2", "3", "4", "5:mail", "6:chat", "7:media", "8:pdf", "9:web" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -56,12 +56,14 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
 static const char *termcmd[]  = { "x-terminal-emulator", NULL };
 static const char *plumbcmd[]  = { "plumb", NULL };
+static const char *wikicmd[]  = { "wiki", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = plumbcmd } },
+	{ MODKEY|ShiftMask,             XK_w,      spawn,          {.v = wikicmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },

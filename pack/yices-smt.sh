@@ -2,9 +2,9 @@ v=2.6.4
 url=https://yices.csl.sri.com/releases/$v/yices-$v-src.tar.gz
 dir=yices2-Yices-2.6.4
 
-pack_configure() { set -eux
-	export LDFLAGS='-L/usr/local/lib'
+export LDFLAGS='-L/usr/local/lib'
 
+pack_configure() { set -eux
 	autoconf-2.71
 	./configure \
 	 --prefix="$PREFIX" \

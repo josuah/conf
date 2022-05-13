@@ -9,7 +9,7 @@ case "$1" in
 	set -- "https://twitter.censors.us/${1#*://*/}"
 	;;
 (*://www.youtube.com/*|*://youtube.com/*|*://youtu.be/*)
-	set -- "https://invidio.us/${1#*://*/}"
+	set -- "https://yewtu.be/${1#*://*/}"
 	;;
 esac
 

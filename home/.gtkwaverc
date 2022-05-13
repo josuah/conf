@@ -1,0 +1,8 @@
+fill_waveform		yes
+enable_horiz_grid	no
+enable_vert_grid	yes
+fontname_logfile	Terminus 6
+fontname_signals	Terminus 6
+fontname_waves		Terminus 6
+use_nonprop_fonts	yes
+use_big_fonts		no

@@ -7,7 +7,7 @@ BIN =	acme-cli align backup-clean backup-mirror backup-rsync bin ctl daemon \
 	html log mailtube-server mailtube-xnotify monitower mopen mtop \
 	mtrash mview netinfo notify-send pdf-sign play sfeed_maildir sha256dedup \
 	syslogf template term totp wg-obsd wg-ptp whois-expiry x-terminal-emulator \
-	x-www-browser x509 xdg-open xdg-sync zone
+	x-www-browser x-www-search x-www-wiki x509 xdg-open xdg-sync zone
 
 all: ${BIN}
 
