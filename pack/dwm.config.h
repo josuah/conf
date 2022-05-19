@@ -56,7 +56,8 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
 static const char *termcmd[]  = { "x-terminal-emulator", NULL };
 static const char *plumbcmd[]  = { "plumb", NULL };
-static const char *wikicmd[]  = { "wiki", NULL };
+static const char *wikicmd[]  = { "x-www-wiki", NULL };
+static const char *searchcmd[]  = { "x-www-search", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -64,6 +65,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = plumbcmd } },
 	{ MODKEY|ShiftMask,             XK_w,      spawn,          {.v = wikicmd } },
+	{ MODKEY|ShiftMask,             XK_s,      spawn,          {.v = searchcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },

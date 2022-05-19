@@ -22,12 +22,10 @@ pack_configure() { set -eux
 }
 
 pack_build() { set -eux
-	touch makeinfo
-	chmod +x makeinfo
-	sed -i 's/hid_init/hidapi_&/' src/jtag/drivers/*.c
-	exec gmake
+	sed -ri 's/([^_])(hid_init)/\1hidapi_\2/' src/jtag/drivers/*.c
+	exec gmake MAKEINFO=true
 }
 
 pack_install() { set -eux
-	exec gmake install
+	exec gmake MAKEINFO=true install
 }
