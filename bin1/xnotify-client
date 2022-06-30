@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+while read cmd arg; do
+	case "$cmd" in
+	(mail)
+		x-terminal-emulator sh -c '
+			ssh -t josuah@mx1.josuah.net mshow "$0" | less
+		' "$args"
+		;;
+	esac
+done &

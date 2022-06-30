@@ -2,7 +2,7 @@ ZONE_NS = ns1
 
 sync: ${ZONE_NS}
 ${ZONE_NS}:
-	rsync -rt --delete zone/ $@:/var/nsd/zone/
+	rsync -rt --delete zone/ $@:/var/nsd/zones/master/
 	ssh $@ exec nsd-control reload
 
 conf: sign

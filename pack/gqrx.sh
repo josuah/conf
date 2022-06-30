@@ -7,6 +7,6 @@ pack_configure() { set -eux
 	cmake . \
 	-DGNURADIO_OSMOSDR_LIBRARIES=/usr/local/lib \
 	-DGNURADIO_OSMOSDR_INCLUDE_DIRS=/usr/local/include/gnuradio \
-	-DCMAKE_C_FLAGS='-include math.h' \
+	-DCMAKE_C_FLAGS='-D__GNUC__=11' \
 	-Wno-dev
 }

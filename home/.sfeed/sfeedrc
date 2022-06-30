@@ -8,4 +8,6 @@ feeds() {
 #	feed quartz		"https://cms.qz.com/feed"
 	feed undeadly		"https://undeadly.org/cgi?action=rss"
 	feed joshua		"https://joshua.net/rss"
+	feed bilingualnews	"https://bilingualnews.jp/feed/"
+	feed theamphour		"http://www.theamphour.com/feed/podcast"
 }
