@@ -7,6 +7,9 @@ daemon_flags="-u _mysql /usr/local/libexec/mariadbd"
 
 . /etc/rc.d/rc.subr
 
+mkdir -p /var/run/mysql
+chown _mysql:_mysql /var/run/mysql
+
 rc_bg=YES
 rc_reload=NO
 

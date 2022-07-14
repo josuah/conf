@@ -3,7 +3,8 @@ WEECHAT = /home/weechat/.local/share/weechat
 conf: ${WEECHAT}/python /home/weechat/shell.sh
 
 ${WEECHAT}/python: ${WEECHAT}
-	ln -sf /etc/conf/weechat/python ${WEECHAT}
+	cp -r /etc/conf/weechat/python ${WEECHAT}
+	chown -R weechat:weechat ${WEECHAT}
 
 ${WEECHAT}: /home/weechat
 	mkdir -p $@

@@ -10,9 +10,10 @@ tmp=$(mktemp -d)
 
 list() {
 	cd "$1"
-	find . -exec stat -f "$fmt" {} + | sort
+	find . ! -type d -exec stat -f "$fmt" {} + | sort
 }
 
+mkdir -p "$2"
 (list "$1") >$tmp/1
 (list "$2") >$tmp/2
 
@@ -21,12 +22,8 @@ if [ $(comm -3 "$tmp/1" "$tmp/2" | sed 1q | wc -l) -eq 0 ]; then
 	exit
 fi
 
-comm -3 "$tmp/1" "$tmp/2" | awk '{
-	sub(/^\t?[^\t]*\t/, "")
-	if (!uniq[$0]++) {
-		do {
-			print $0
-			print $0 >"/dev/stderr"
-		} while (sub("/[^/]+$", ""))
-	}
-}' | (cd "$1" && tar -c -I- -f-) | (cd "$2" && tar -xp -f-)
+comm -3 "$tmp/1" "$tmp/2" | while IFS='	' read -r info file; do
+	echo "$1 -> $2 ... ${file#./}"
+	mkdir -p "$2/${file%/*}"
+	cp -p "$1/$file" "$2/$file"
+done

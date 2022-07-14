@@ -1,84 +1,66 @@
 #!/bin/sh -eu
 # nimble source-based package manager for custom build recipes
 
-download_http() { set -eu
-	if [ ! -f "$cache-$v.$1" ]; then
-		curl -L -o "$cache-$v.$1" "$2"
+pack_download_http() { set -eu
+	mkdir -p .cache
+	if [ ! -f ".cache/$NAME-$V.$1" ]; then
+		curl -L -o ".cache/$NAME-$V.$1" "$2"
 	fi
-	"$3" -cd "$cache-$v.$1" | tar -xf -
+	if [ ! -d "$NAME-$V" ]; then
+		"$3" -cd ".cache/$NAME-$V.$1" | tar -xf -
+	fi
+	if [ -n "$4" ]; then
+		mv "$2" "$NAME-$V"
+	fi
+	cd "$NAME-$V"
 }
 
-download_git() { set -eu
-	if [ -d "$cache.git" ]; then
-		git -C "$cache.git" fetch origin "$v"
-	else
-		git clone --bare --depth 1 --branch "$v" "$url" "$cache.git"
+pack_download_git() { set -eu
+	if [ ! -d "$NAME-$V" ]; then
+		git clone --depth 1 --branch "$V" "$1" "$NAME-$V"
 	fi
-	git clone "$cache.git" "${source}"
+	cd "$NAME-$V"
 }
 
-pack_download() { set -eu
-	if [ -d "$dir" ]; then
-		return
-	fi
-
-	case $url in
-	(*.tgz|*.tar.gz)
-		download_http tgz "$url" gzip
-		;;
-	(*.txz|*.tar.xz)
-		download_http txz "$url" xz
-		;;
-	(git://*|*.git)
-		download_git
-		;;
-	(*)
-		echo error: unknown url type >&2
-		exit 1
-		;;
-	esac
-
-	if [ "$dir" != "$name-$v" ]; then
-		mv "$dir" "$source"
-	fi
+pack_rename() {
+	mv "$NAME-$V" "$1"
 }
 
-pack_configure() { set -eux
-	if [ -f autogen.sh -a ! -f configure ]; then
-		./autogen.sh
-	fi
-	if [ -f configure ]; then
-		exec ./configure --prefix="$PREFIX"
-	fi
+pack_download_tgz() { set -eu
+	pack_download_http tgz "$1" gzip "${2:-}"
 }
 
-pack_build() { set -eux
-	exec make
+pack_download_txz() { set -eu
+	pack_download_http txz "$1" xz "${2:-}"
 }
 
-pack_install() { set -eux
-	exec make PREFIX="$PREFIX" install
+pack_cmake() { set -eu
+	mkdir -p build
+	cd build
+	cmake .. "$@"
 }
 
-name=$1
-. "/etc/pack/$name.sh"
-: ${dir:=$name-$v}
-: ${pack:=$PWD}
-: ${source:=$pack/$name-$v}
-: ${cache:=$pack/.cache/$name}
-: ${PREFIX:=/usr/local}
+pack_configure() { set -eu
+	./configure --prefix="$PREFIX" "$@"
+}
 
-mkdir -p .cache
+pack_make() { set -eu
+	exec ${MAKE:-make} CC="cc" CXX="c++"
+}
+
+pack_install() { set -eu
+	exec ${MAKE:-make} PREFIX="$PREFIX" install
+}
+
+export NAME="$1" PREFIX="/usr/local"
 
 case $(id -u) in
 (0)
-	cd "$source"
-	(exec pack_install)
+	set -eux
+	. /etc/pack/$NAME/install.sh
 	;;
 (*)
-	([ -d "$source" ] || exec pack_download)
-	cd "$source"
-	(exec pack_configure)
-	(exec pack_build)
+	set -eux
+	. /etc/pack/$NAME/build.sh
 	;;
 esac

@@ -6,4 +6,4 @@ MAILTO=me@josuah.net
 
 # crontab
 0	6	*	*	*	root	calendar -a -A 5
-%%! cat /etc/cron/* 2>/dev/null
+%%! cat /etc/conf/cron/* 2>/dev/null

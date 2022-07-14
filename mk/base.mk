@@ -17,9 +17,5 @@ conf: pack
 pack: /home/pack
 	ln -sf ${PWD}/conf/pack /etc
 
-conf: ssl/private/hostname.key
-ssl/private/hostname.key:
-	ln -sf /etc/ssl/private/$$(hostname).key $@
-
 conf: ssh
 	ssh-keygen -A

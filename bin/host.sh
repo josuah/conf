@@ -8,7 +8,7 @@ usage() {
 
 domain=paste.josuah.net
 rand=${RAND:=$(openssl rand -base64 15 | tr '+/' 'az')}
-paste=/var/www/htdocs/paste
+paste=/var/www/htdocs/josuah-paste
 
 case $1	in
 (-a)

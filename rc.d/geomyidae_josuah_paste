@@ -1,0 +1,13 @@
+#!/bin/ksh
+
+site="josuah-paste"
+base="/var/www/htdocs/$site"
+log="/var/log/geomyidae.$site.log"
+port=71
+
+daemon="/usr/local/bin/geomyidae"
+daemon_flags="-p $port -l $log -u _geomyidae -g _geomyidae -b $base"
+
+. /etc/rc.d/rc.subr
+
+rc_cmd $1

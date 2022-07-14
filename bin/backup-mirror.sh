@@ -1,15 +1,17 @@
 #!/bin/sh -eux
 
 e=0
-rsync='rsync -Drlpt'
 
-if ! mount | grep -q ' /mnt.backup '; then
-	mount /mnt.backup
+if ! mount | grep -q ' /backup '; then
+	mount /backup
 fi
 
-$rsync /home/backup/		/mnt.backup/backup/	|| e=1
-$rsync /home/josuah/Music/	/mnt.backup/Music/	|| e=1
-$rsync /home/josuah/Video/	/mnt.backup/Video/	|| e=1
+rsync -a /home/josuah/Text/	/backup/Text/	|| e=1
+rsync -a /home/josuah/Code/	/backup/Code/	|| e=1
+rsync -a /home/josuah/Music/	/backup/Music/	|| e=1
+rsync -a /home/josuah/Videos/	/backup/Videos/	|| e=1
+rsync -a /home/josuah/Images/	/backup/Images/	|| e=1
+rsync -a /home/backup/		/backup/backup/	|| e=1
 
-umount /mnt.backup
+umount /backup
 exit $e

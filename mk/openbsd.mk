@@ -13,6 +13,11 @@ conf: newaliases
 newaliases:
 	newaliases
 
+conf: rc-scripts
+
+rc-scripts:
+	cp -f conf/rc.d/* rc.d
+
 relayd pf cron:
 	mkdir -p $@
 
