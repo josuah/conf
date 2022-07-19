@@ -253,7 +253,7 @@ function cmd_show(conf, name, len,
 		print s
 		db_close(db)
 	}
-	printf(" X - downtime     : - uptime")
+	print " 'X' downtime     ':' uptime"
 }
 
 function cmd_run(conf, name,

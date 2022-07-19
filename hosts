@@ -12,6 +12,5 @@ ff02::2			ip6-allrouters
 10.102.108.3		lap1
 10.102.108.6		ams1
 46.23.94.12		ams1 ns1 mx1
-192.168.1.28		rpi2
 
 %%! cat /etc/hosts.local 2>/dev/null

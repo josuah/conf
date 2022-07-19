@@ -3,7 +3,7 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic \
 LDFLAGS = -static
 PREFIX = /usr/local/bin
 BIN =	acme-cli align backup-clean backup-mirror backup-rsync bin ctl daemon \
-	daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc hex host edit \
+	daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc git-less hex host edit \
 	html log mailtube-server mailtube-xnotify mirror monitower mopen mtop \
 	mtrash mview netinfo notify-send pack pdf-sign pkg_menu play sfeed_maildir \
 	sha256dedup syslogf template term totp webcam wg-obsd wg-ptp whois-expiry \

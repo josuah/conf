@@ -10,7 +10,8 @@ file=${XDG_CACHE_HOME:-$HOME/.cache}/hash/$hash-${url##*/}
 mkdir -p "$(dirname "$file")"
 
 case "$(echo "$url" | tr A-Z a-z)" in
-(*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
+(ytdl://*\
+|*://invidio.us/*|*://*youtube.com/*|*://youtu.be/*|*://*dailymotion.com/*\
 |*://vimeo.com/*|*://*bandcamp.com/track/*|*://odysee.com/*|*://*bilibili.com/*\
 |*://*bitchute.com*|*://*/watch*|*://*twitch.tv*\
 |*.mkv|*.webm|*.mp4|*.m4v|*.m2t|*.avi|*.flv|*.wmv)
