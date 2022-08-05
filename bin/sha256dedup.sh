@@ -1,11 +1,32 @@
 #!/bin/sh -eu
 # set read-only and deduplicate all files found on the current directory
 
-find . -name '*.core' -delete # mpv crash workaround
-find . -xdev -type f -exec chmod -w {} + -exec openssl sha256 -r {} + \
-| sed 's, \*,	,; s,...,sha256/&/&,' \
+set -o pipefail
+
+find="find . -xdev -path ./sha256 -prune -o ! -name '*.core' -type f"
+
+# prepare the repo
+mkdir -p sha256/index
+
+# generate the sha256
+$find -exec openssl sha256 -r {} + | sed 's/ \*/	/' >sha256/tmp
+
+index=$(openssl sha256 -r sha256/tmp | sed 's/ .*//')
+
+# build-up the hashes store
+sed 's,...,sha256/&/&,' sha256/index \
 | while IFS='	' read -r hash file; do
 	mkdir -p "${hash%/*}"
-	[ -f "$hash" ] && ln -f "$hash" "$file" || ln -f "$file" "$hash"
+	if [ -f "$hash" ]; then
+		ln -f "$hash" "$file"
+	else
+		ln -f "$file" "$hash"
+	fi
 done
-find sha256 -type f -exec chmod -w {} +
+
+# commit the transaction
+mv -f "sha256/tmp" "sha256/index/$index"
+date +"%Y-%m-%d %H:%M:%S $index" >>sha256/history
+
+# make all files read-only
+find sha256/*/ -type f -exec chmod -w {} +

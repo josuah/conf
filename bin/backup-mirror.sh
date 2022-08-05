@@ -2,16 +2,16 @@
 
 e=0
 
-if ! mount | grep -q ' /backup '; then
-	mount /backup
+if ! mount | grep -q ' /mirror '; then
+	mount /mirror
 fi
 
-rsync -a /home/josuah/Text/	/backup/Text/	|| e=1
-rsync -a /home/josuah/Code/	/backup/Code/	|| e=1
-rsync -a /home/josuah/Music/	/backup/Music/	|| e=1
-rsync -a /home/josuah/Videos/	/backup/Videos/	|| e=1
-rsync -a /home/josuah/Images/	/backup/Images/	|| e=1
-rsync -a /home/backup/		/backup/backup/	|| e=1
+rsync -va /home/josuah/Text/	/mirror/Text/	|| e=1
+rsync -va /home/josuah/Code/	/mirror/Code/	|| e=1
+rsync -va /home/josuah/Music/	/mirror/Music/	|| e=1
+rsync -va /home/josuah/Videos/	/mirror/Videos/	|| e=1
+rsync -va /home/josuah/Images/	/mirror/Images/	|| e=1
+rsync -va /home/backup/		/mirror/backup/	|| e=1
 
-umount /backup
+umount /mirror
 exit $e

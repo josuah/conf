@@ -48,7 +48,7 @@ pack_make() { set -eu
 	exec ${MAKE:-make} CC="cc" CXX="c++"
 }
 
-pack_install() { set -eu
+pack_make_install() { set -eu
 	exec ${MAKE:-make} PREFIX="$PREFIX" install
 }
 

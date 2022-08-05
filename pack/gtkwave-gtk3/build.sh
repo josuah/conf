@@ -1,6 +1,6 @@
 export V=3.3.111
 
-pack_download_tgz http://gtkwave.sourceforge.net/gtkwave-gtk3-$v.tar.gz
+pack_download_tgz http://gtkwave.sourceforge.net/gtkwave-gtk3-$V.tar.gz
 sed -i 's/\${TCL_VERSION}/86/' configure # dayum!
 pack_configure \
 	  --with-tcl=/usr/local/lib/tcl/tcl8.6/ \
