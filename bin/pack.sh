@@ -1,5 +1,6 @@
-#!/bin/sh -eu
+#!/bin/sh
 # nimble source-based package manager for custom build recipes
+set -eu -o pipefail
 
 pack_download_http() { set -eu
 	mkdir -p .cache
