@@ -6,4 +6,4 @@ i=$#; while [ $i -gt 0 ]; do i=$((i-1))
 	shift
 done
 
-tail -n 30 -f /var/log/debug.log | grep "$@"
+tail -n 30 -f /var/log/debuglog | grep "$@"

@@ -79,6 +79,7 @@ function backup(name, inc, exc, keep,
 	exec("rsync -Drlpt --delete"args" '"repo"/sync'")
 	exec("ln -s 'sync' '"repo"/"DATE"'")
 	exec("tar -Hcz -f '"repo"/"tgz"' -C '"repo"' '"DATE"/'")
+	exec("rm -f '"repo"/"DATE"'")
 }
 
 function init()

@@ -21,7 +21,7 @@ function envfile(file)
 		gsub(/["']/, "")
 		if (!sub(/ *= */, "='")) continue
 		if (!sub(/^[A-Z_a-z_0-9]+=.*$/, "&'")) continue
-		shell($0"\n")
+		shell("export "$0"\n")
 	}
 }
 

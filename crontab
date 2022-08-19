@@ -3,4 +3,4 @@
 MAILTO=me@josuah.net
 
 #Min	#Hour	#DoM	#Mon	#DoW	#User	#Command
-%%! cat /etc/conf/cron/* 2>/dev/null
+%%! cat /etc/cron/* 2>/dev/null
