@@ -6,17 +6,13 @@ key=$HOME/.ssh/id_ed25519
 mkdir -p "$HOME/.password-store"
 cd "$HOME/.password-store"
 
-case ${1:-} in
-(show)
-	exec gpg2 -qad "$2"
+case ${1:-menu} in
+(show) pass=$2
+	exec age -d -i "$key" "$pass"
 	;;
-(insert)
-	if [ -e "$2" ]; then
-		echo>&2 "password $2 already exist"
-		exit 2
-	fi
-	mkdir -p "${2%/*}"
-	exec gpg2 -qae -r "$EMAIL" >$2
+(insert) pass=$2
+	mkdir -p "${pass%/*}"
+	exec age -e -a -R "$key.pub" >$2
 	;;
 (export)
 	for x in */*; do
@@ -28,14 +24,13 @@ case ${1:-} in
 		echo "$pass" | "$0" insert "$id"
 	done
 	;;
-("")
+(menu)
 	file=$(find * -type f | dmenu -p pass:)
 	"$0" show "$file" | tr -d '\n' | xsel -i
 	echo "${file##*/}" | tr -d '\n' | xsel -bi
 	;;
 (-*)
-	echo>&2 "usage:	${0##*/} [show|insert] resource/account-name"
-	echo>&2 "	${0##*/} [import|export]"
+	sed -rn "s/=\\\$[0-9]+//g; s/^\(([a-z]+)\)/${0##*/} \1/p" "$0" >&2
 	exit 1
 	;;
 (*)

@@ -7,7 +7,7 @@ all: \
 256 acme-cli align backup-clean backup-mirror backup-rsync bin ctl \
 daemon daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc edit git-less \
 hex host html log mailtube-server mailtube-xnotify marchive mirror monitower \
-mopen mtop mtrash mview netinfo notify-send pack pdf-sign pkg_menu play \
+mopen mtop mtrash mview netinfo notify-send pass pack pdf-sign pkg_menu play \
 remote sfeed_maildir syslogf template term \
 totp webcam wg-obsd wg-ptp whois-expiry worldclock x-terminal-emulator \
 x-www-browser x-www-search x-www-wiki x509 xdg-get xdg-open xdg-sync \

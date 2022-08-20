@@ -98,7 +98,7 @@ daemon xclickroot x-terminal-emulator
 export XNOTIFY_FIFO="$HOME/.cache/xnotify.fifo"
 rm -f "$XNOTIFY_FIFO"
 mkfifo "$XNOTIFY_FIFO"
-xnotify -g -20+40 <>$XNOTIFY_FIFO &
+daemon -01 xnotify -g -20+40 <>$XNOTIFY_FIFO &
 
 # notifications for incoming mail
 daemon -r mailtube-xnotify ssh josuah@mx1.josuah.net mailtube-server Maildir

@@ -10,7 +10,7 @@ shift 2
 		echo "$path"
 		mkdir -p "$dst/${path%/*}"
 		tmp=$(mktemp -p "$dst")
-		cp -p "$src/$path" "$tmp"
+		cp "$src/$path" "$tmp"
 		mv "$tmp" "$dst/$path"
 	fi
 done

@@ -20,7 +20,7 @@ if ! mount | grep -q " "$mnt" "; then
 	mount "$mnt"
 fi
 
-try rsync -va /home/josuah/Text/ "$mnt/Text/" || e=1
+try rsync -rv /home/josuah/Text/ "$mnt/Text/" || e=1
 try mirror /home/josuah/Music/.256/ "$mnt/Music/.256/" || e=1
 try mirror /home/josuah/Videos/.256/ "$mnt/Videos/.256/" || e=1
 try mirror /home/josuah/Images/.256/ "$mnt/Images/.256/" || e=1
