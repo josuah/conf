@@ -19,7 +19,7 @@ case $1 in
 	done
 	mv -f ".256/tmp" ".256/rev/$rev"
 	date +"%Y-%m-%d %H:%M:%S $rev" >>.256/log
-	find .256/*/ -type f -exec chmod -w {} +
+	find * .256/*/ -type f -exec chmod -w {} +
 	tail .256/log
 	;;
 (expand) rev=$2
