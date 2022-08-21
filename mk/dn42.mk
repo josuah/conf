@@ -3,9 +3,7 @@ DN42_DIR = /home/dn42/registry
 DN42_DATA = ${DN42_DIR}/data
 DN42_FILTER = ${DN42_DATA}/filter.txt ${DN42_DATA}/filter6.txt
 
-sync: dn42/sync
-
-dn42/sync: ${DN42_DIR}
+dn42: ${DN42_DIR}
 	doas -u dn42 git -C ${DN42_DIR} fetch origin
 	doas -u dn42 git -C ${DN42_DIR} reset --hard origin/master
 
