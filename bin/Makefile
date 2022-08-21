@@ -10,7 +10,7 @@ hex host html log mailtube-server mailtube-xnotify marchive mirror monitower \
 mopen mtop mtrash mview netinfo notify-send pass pack pdf-sign pkg_menu play \
 remote sfeed_maildir syslogf template term \
 totp webcam wg-obsd wg-ptp whois-expiry worldclock x-terminal-emulator \
-x-www-browser x-www-search x-www-wiki x509 xdg-get xdg-open xdg-sync \
+x-www-browser x509 xdg-plumb xdg-open \
 zone
 
 dwmstatus: dwmstatus.c
