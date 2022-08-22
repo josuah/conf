@@ -1,5 +1,5 @@
 #!/bin/sh
-# prompt what to do with the urlection and do it
+# prompt what to do with the selection and do it
 set -eu -o pipefail
 
 mkchdir() { dir=$1
@@ -14,7 +14,7 @@ www() { dir=$1 url=${2%#*} file=${url##*/}
 	xdg-open "$file" &
 }
 
-url=$(xsel -o)
+sel=$(xsel -o)
 
 if [ $# -eq 1 ]; then
 	choice=$1
@@ -24,35 +24,38 @@ fi
 
 case $choice in
 (open)
-	exec xdg-open "$url"
+	exec xdg-open "$sel"
 	;;
 (search)
-	exec x-www-browser "https://duckduckgo.com/?q=$url"
+	exec x-www-browser "https://duckduckgo.com/?q=$sel"
 	;;
 (wikipedia)
-	exec x-www-browser "https://en.wikipedia.org/wiki/$url"
+	exec x-www-browser "https://en.wikipedia.org/wiki/$sel"
+	;;
+(web)
+	exec x-www-browser "$sel"
 	;;
 (ytdl)
 	mkchdir "$HOME/Videos/new"
-	exec youtube-dl -f '[height<=480]' "$url"
+	exec youtube-dl -f '[height<=480]' "$sel"
 	;;
 (music)
-	www "$HOME/Music/new" "$url"
+	exec www "$HOME/Music/new" "$sel"
 	;;
 (paper)
-	www mkchdir "$HOME/Text/paper" "$url"
+	exec www mkchdir "$HOME/Text/paper" "$sel"
 	;;
 (manual)
-	www "$HOME/Text/manual" "$url"
+	exec www "$HOME/Text/manual" "$sel"
 	;;
 (datasheet)
-	www "$HOME/Text/datasheet" "$url"
+	exec www "$HOME/Text/datasheet" "$sel"
 	;;
 (book)
-	www mkchdir "$HOME/Book" "$url"
+	exec www mkchdir "$HOME/Book" "$sel"
 	;;
 (git)
-	git clone "$url" "$HOME/Code/${url##*/}"
+	exec git clone "$sel" "$HOME/Code/${sel##*/}"
 	;;
 (*)
 	exit 1

@@ -17,6 +17,47 @@ function min(a, b)
 	return a < b ? a : b
 }
 
+function isleap(year)
+{
+	return (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0)
+}
+
+function mdays(mon, year)
+{
+	return (mon == 2) ? (28 + isleap(year)) : (30 + (mon + (mon > 7)) % 2)
+}
+
+function gmtime(sec, tm)
+{
+	sec = sec + 0
+	tm["year"] = 1970
+	while (sec >= (s = 86400 * (365 + isleap(tm["year"])))) {
+		tm["year"]++
+		sec -= s
+	}
+	tm["mon"] = 1
+	while (sec >= (s = 86400 * mdays(tm["mon"], tm["year"]))) {
+		tm["mon"]++
+		sec -= s
+	}
+	tm["mday"] = 1
+	while (sec >= (s = 86400)) {
+		tm["mday"]++
+		sec -= s
+	}
+	tm["hour"] = 0
+	while (sec >= 3600) {
+		tm["hour"]++
+		sec -= 3600
+	}
+	tm["min"] = 0
+	while (sec >= 60) {
+		tm["min"]++
+		sec -= 60
+	}
+	tm["sec"] = sec
+}
+
 function now(\
 	time)
 {
@@ -239,21 +280,33 @@ function cmd_conf(conf, name,
 }
 
 function cmd_show(conf, name, len,
-	i, s, last, time, end)
+	i, s, last, time, beg, end, step, tm)
 {
+	print ""
 	time = now()
 	for (i = 0; ++i in name; last = name[i]) {
 		if (last == name[i])
 			continue
 		db_open(db, conf["home"]"/"name[i]".db")
-		printf "\n[%s]\n", name[i]
 		end = int(time / db["step"])
+		beg = end - len
+		step = db["step"]
+		printf "[%s]\n", name[i]
 		s = db_get(db, end - len, end)
 		gsub(/0/, " ", s); gsub(/1/, ":", s); gsub(/2/, "X", s)
 		print s
+		print ""
 		db_close(db)
 	}
-	print " 'X' downtime     ':' uptime"
+	gmtime(beg * step, tm)
+	printf(" from %04d-%02d-%02d %02d:%02d:%02d",
+	    tm["year"], tm["mon"], tm["mday"], tm["hour"], tm["min"], tm["sec"])
+	gmtime(end * step, tm)
+	printf(" to %04d-%02d-%02d %02d:%02d:%02d",
+	    tm["year"], tm["mon"], tm["mday"], tm["hour"], tm["min"], tm["sec"])
+	printf ", 'X' on error"
+	printf ", ':' on success"
+	print ""
 }
 
 function cmd_run(conf, name,
