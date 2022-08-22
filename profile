@@ -8,8 +8,7 @@ export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
 export PS1='\u@\h:$PWD%${?#0} '
 export CVSROOT="anoncvs@anoncvs.fr.openbsd.org:/cvs"
-export LIBPYTHON_LOC="$(ldconfig -r | sed -n '/libpython3/ s/^.* // p')"
 export LC_ALL="en_US.UTF-8"
 
-[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+[ -f "$HOME/.profile" -a -z "$ENV" ] && . "$HOME/.profile"
 set -o emacs
