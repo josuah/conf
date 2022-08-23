@@ -2,7 +2,7 @@
 # set a xxxctl key to chosen value
 
 case $(uname) in
-(Linux) list_a="sysctl" ;;
+(Linux) list_a="sysctl sysfs" ;;
 (OpenBSD) list_a="sysctl mixerctl wsconsctl audioctl xvctl" list="sndioctl " ;;
 esac
 

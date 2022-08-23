@@ -55,13 +55,5 @@ pack_make_install() { set -eu
 
 export NAME="$1" PREFIX="/usr/local"
 
-case $(id -u) in
-(0)
-	set -eux
-	. /etc/pack/$NAME/install.sh
-	;;
-(*)
-	set -eux
-	. /etc/pack/$NAME/build.sh
-	;;
-esac
+set -eux
+. /etc/pack/$NAME/build.sh

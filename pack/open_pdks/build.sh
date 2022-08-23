@@ -9,6 +9,7 @@ tool='
 	--enable-xschem
 '
 sky130='
+	--enable-sky130-pdk
 	--enable-alpha-sky130
 	--enable-xschem-sky130
 	--enable-klayout-sky130
@@ -19,6 +20,7 @@ sky130='
 	--enable-osu-t18-sky130
 '
 gf180='
+	--enable-gf180-pdk
 	--enable-primitive-gf180mcu
 	--enable-io-gf180mcu
 	--enable-sc-7t5v0-gf180mcu
