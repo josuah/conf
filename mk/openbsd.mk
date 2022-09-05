@@ -4,17 +4,18 @@ CONF =	hostname.wg0 login.conf newsyslog.conf pf.conf rad.conf \
 include conf/mk/conf.mk
 
 crontab: cron/openbsd
+hostname.wg0: wireguard/wg0.conf
 
 conf: pf/whitelist pf/blacklist pf/local.conf
 pf/whitelist pf/blacklist pf/local.conf: pf
 	touch $@
+
 
 conf: newaliases
 newaliases:
 	newaliases
 
 conf: rc-scripts
-
 rc-scripts:
 	cp -f conf/rc.d/* rc.d
 

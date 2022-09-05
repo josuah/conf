@@ -15,7 +15,7 @@ bin:
 
 conf: pack
 pack: /home/pack
-	ln -sf ${PWD}/conf/pack /etc
+	ln -sf /etc/conf/pack /etc
 
 conf: ssh
 	ssh-keygen -A
@@ -26,5 +26,5 @@ ${RSSH}:
 
 sync: ${SYNC}
 ${SYNC}:
-	rsync -lvrt --delete conf/* $@:${PWD}/conf/
+	rsync -lvrt --delete conf/* $@:/etc/conf/
 	ssh $@ make -C /etc

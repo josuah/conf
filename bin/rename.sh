@@ -15,7 +15,7 @@ sed='
 '
 
 awk='
-	BEGIN { RS="|"; FS="=" } { gsub("\n", ""); F[$1] = $2 }
+	BEGIN { RS="|"; FS="=" } { gsub("[/\n]", " "); F[$1] = $2 }
 	END { printf "%s-%s/%02d-%s-%s.%s\n", F["tag:album_artist"],
 		F["tag:album"], F["tag:track"], F["tag:artist"],
 		F["tag:title"], F["format_name"] }

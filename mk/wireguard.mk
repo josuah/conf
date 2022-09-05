@@ -1,7 +1,5 @@
-CONF =	hostname.wg0 wireguard/wg0.conf
+CONF =	wireguard/wg0.conf
 include conf/mk/conf.mk
-
-hostname.wg0: wireguard/wg0.conf
 
 wireguard/wg0.conf: wireguard/key
 

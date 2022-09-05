@@ -6,7 +6,7 @@ export MAKE=gmake
 pack_download_git https://git.code.sf.net/p/openocd/code.git
 ./bootstrap
 pack_configure \
-	--enable-picoprobe \
+	--enable-internal-jimtcl \
 	--disable-werror \
 	--without-capstone \
 	LIBFTDI_CFLAGS="$(pkg-config --cflags libftdi1)" \
@@ -17,6 +17,8 @@ pack_configure \
 	LIBUSB1_LDFLAGS="$(pkg-config --libs libusb)" \
 	HIDAPI_CLFAGS="$(pkg-config --libs hidapi-libusb)" \
 	HIDAPI_LDLFAGS="$(pkg-config --libs hidapi-libusb)"
-sed -ri 's/([^_])(hid_init)/\1hidapi_\2/' src/jtag/drivers/*.c
+case $(uname) in
+(OpenBSD) sed -ri 's/([^_])(hid_init)/\1hidapi_\2/' src/jtag/drivers/*.c ;;
+esac
 pack_make MAKEINFO=true
 pack_install MAKEINFO=true install

@@ -1,4 +1,5 @@
-export V=master MAKE=gmake
+export V=master
+export MAKE=gmake
 
 tool='
 	--enable-magic

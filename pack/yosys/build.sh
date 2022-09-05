@@ -1,4 +1,5 @@
-export V=master MAKE=gmake
+export V=master
+export MAKE=gmake
 
 pack_download_git https://github.com/josuah/yosys.git
 pack_make \

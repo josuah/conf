@@ -12,3 +12,5 @@ export LC_ALL="en_US.UTF-8"
 
 [ -f "$HOME/.profile" -a -z "$ENV" ] && . "$HOME/.profile"
 set -o emacs
+
+alias ls="LC_ALL=C ls"

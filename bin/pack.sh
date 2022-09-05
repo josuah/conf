@@ -35,10 +35,27 @@ pack_download_txz() { set -eu
 	pack_download_http txz "$1" xz "${2:-}"
 }
 
+pack_download_git_submodules() { set -eu
+	git submodule update --init --recursive "$@"
+}
+
 pack_cmake() { set -eu
 	mkdir -p build
 	cd build
 	cmake .. "$@"
+}
+
+pack_meson() {
+	meson --prefix "$PREFIX" --libdir lib "$@" build .
+	cd build
+}
+
+pack_ninja() {
+	ninja "$@"
+}
+
+pack_autogen() { set -eu
+	sh autogen.sh
 }
 
 pack_configure() { set -eu
@@ -46,7 +63,7 @@ pack_configure() { set -eu
 }
 
 pack_make() { set -eu
-	exec ${MAKE:-make} CC="cc" CXX="c++"
+	exec ${MAKE:-make} "$@"
 }
 
 pack_make_install() { set -eu

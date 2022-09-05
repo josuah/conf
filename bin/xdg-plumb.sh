@@ -40,19 +40,19 @@ case $choice in
 	exec youtube-dl -f '[height<=480]' "$sel"
 	;;
 (music)
-	exec www "$HOME/Music/new" "$sel"
+	www "$HOME/Music/new" "$sel"
 	;;
 (paper)
-	exec www mkchdir "$HOME/Text/paper" "$sel"
+	www mkchdir "$HOME/Text/paper" "$sel"
 	;;
 (manual)
-	exec www "$HOME/Text/manual" "$sel"
+	www "$HOME/Text/manual" "$sel"
 	;;
 (datasheet)
-	exec www "$HOME/Text/datasheet" "$sel"
+	www "$HOME/Text/datasheet" "$sel"
 	;;
 (book)
-	exec www mkchdir "$HOME/Book" "$sel"
+	www mkchdir "$HOME/Book" "$sel"
 	;;
 (git)
 	exec git clone "$sel" "$HOME/Code/${sel##*/}"
