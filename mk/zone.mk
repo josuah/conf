@@ -7,15 +7,15 @@ ${ZONE_NS}:
 
 conf: sign
 sign zsk ksk: zone
-	for zone in zone/*.*.zone; do doas dnssec $@ "$$zone"; done
+	for zone in zone/*.*.zone; do dnssec $@ "$$zone"; done
 
 zone: zone/sshfp.zone
 	mkdir -p zone
 	(cd conf/zone && template ${ZONE:=.zone}) | (cd zone && zone)
 	cat zone/sshfp.zone >>zone/josuah.net.zone
-	cat zone/sshfp.zone >>zone/z0.dn42.zone
 
 zone/sshfp.zone:
+	mkdir -p zone
 	dnssec sshfp conf/zone/josuah.net.zone | sort -o $@
 
 .PHONY: zone

@@ -9,5 +9,4 @@ cd build
 pack_configure --target=arm-none-eabi \
 	--with-gmp="$GMP" --with-mpfr="$MPFR" --with-mpc="$MPC" \
 	--enable-languages=c --disable-libssp
-gmake
-gmake install
+pack_make

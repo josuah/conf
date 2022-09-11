@@ -35,14 +35,16 @@ pack_download_txz() { set -eu
 	pack_download_http txz "$1" xz "${2:-}"
 }
 
+pack_download_tbz() { set -eu
+	pack_download_http tbz "$1" bunzip2 "${2:-}"
+}
+
 pack_download_git_submodules() { set -eu
 	git submodule update --init --recursive "$@"
 }
 
 pack_cmake() { set -eu
-	mkdir -p build
-	cd build
-	cmake .. "$@"
+	mkdir -p build; cd build; cmake .. "$@"
 }
 
 pack_meson() {
@@ -63,14 +65,16 @@ pack_configure() { set -eu
 }
 
 pack_make() { set -eu
-	exec ${MAKE:-make} "$@"
+	${MAKE:-make} PREFIX="$PREFIX" "$@"
 }
 
-pack_make_install() { set -eu
-	exec ${MAKE:-make} PREFIX="$PREFIX" install
+pack_cp() {
+	case "$1" in
+	(install) shift; mkdir -p "$(dirname "$2")"; cp -f "$1" "$2" ;;
+	esac
 }
 
 export NAME="$1" PREFIX="/usr/local"
-
+shift
 set -eux
 . /etc/pack/$NAME/build.sh

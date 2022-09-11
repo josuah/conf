@@ -37,6 +37,7 @@ function expect(got, wanted)
 function parse_backup(name,
 	inc, exc, keep, i)
 {
+	delete inc[0] # set type of inc to array[]
 	while (nextline() && $1 != "}") {
 		if ($1 == "keep") {
 			for (i = 2; $i; i++)

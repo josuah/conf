@@ -6,10 +6,10 @@ PREFIX = /usr/local/bin
 all: \
 256 acme-cli align backup-clean backup-mirror backup-rsync bin ctl daemon \
 daemonctl dmenu_dir dn42-filter dn42-roa dnssec doc edit git-less hex \
-host html log mailtube-server mailtube-xnotify marchive mirror monitower \
+host html log mailtube-server mailtube-xnotify marchive minute mirror monitower \
 mopen mtop mtrash mview netinfo notify-send pass pack pdf-sign ptree \
-pkg_menu play remote rename sfeed_maildir sysfs syslogf template term totp \
-webcam wg-obsd wg-ptp whois-expiry worldclock x-terminal-emulator \
+pkg_menu play random remote rename sfeed_maildir sysfs syslogf template term \
+totp webcam wg-obsd wg-ptp whois-expiry worldclock x-terminal-emulator \
 x-www-browser x509 xdg-plumb xdg-open zone
 
 dwmstatus: dwmstatus.c

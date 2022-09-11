@@ -6,7 +6,7 @@ fi
 
 exit=0
 for iface; do
-	sh -eu "/etc/hostname.$iface" || exit=1
+	sh -ux "/etc/hostname.$iface" || exit=1
 done
 
 exit $exit

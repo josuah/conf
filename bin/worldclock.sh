@@ -9,7 +9,8 @@ while :; do
 	clear
 	for zone in $list; do
 		[ -f "$zone" ] || continue
-		printf '%25s %s\n' "$zone" "$(TZ=$zone date)"
+		printf '%25s ' "$zone"
+		TZ=$zone date
 	done
 	sleep 0.5
 done
