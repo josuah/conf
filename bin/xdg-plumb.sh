@@ -45,11 +45,11 @@ case $choice in
 (paper)
 	www mkchdir "$HOME/Text/paper" "$sel"
 	;;
-(manual)
-	www "$HOME/Text/manual" "$sel"
+(software)
+	www "$HOME/Text/software" "$sel"
 	;;
-(datasheet)
-	www "$HOME/Text/datasheet" "$sel"
+(hardware)
+	www "$HOME/Text/hardware" "$sel"
 	;;
 (book)
 	www mkchdir "$HOME/Book" "$sel"

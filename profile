@@ -6,7 +6,7 @@ export EDITOR="vi"
 export PAGER="less -SR"
 export MANPAGER="less"
 export LESSHISTFILE="/tmp/lesshist"
-export PS1='\u@\h:$PWD%${?#0} '
+export PS1='$USER@$(hostname):$PWD/$(git branch --show-current 2>&-)%${?#0} '
 export CVSROOT="anoncvs@anoncvs.fr.openbsd.org:/cvs"
 export LC_ALL="en_US.UTF-8"
 
