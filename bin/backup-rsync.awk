@@ -37,7 +37,8 @@ function expect(got, wanted)
 function parse_backup(name,
 	inc, exc, keep, i)
 {
-	delete inc[0] # set type of inc to array[]
+	delete inc[0] # set type
+	delete exc[0] # set type
 	while (nextline() && $1 != "}") {
 		if ($1 == "keep") {
 			for (i = 2; $i; i++)
@@ -79,7 +80,7 @@ function backup(name, inc, exc, keep,
 		args = args" '"inc[i]"'"
 	exec("rsync -Drlpt --delete"args" '"repo"/sync'")
 	exec("ln -s 'sync' '"repo"/"DATE"'")
-	exec("tar -Hcz -f '"repo"/"tgz"' -C '"repo"' '"DATE"/'")
+	exec("tar -cz -f '"repo"/"tgz"' -C '"repo"' '"DATE"/'")
 	exec("rm -f '"repo"/"DATE"'")
 }
 

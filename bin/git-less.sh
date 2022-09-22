@@ -1,5 +1,6 @@
-#!/bin/sh -eux
+#!/bin/sh
 # custom less(1) wrapper around mshow and mseq
+set -eu -o pipefail
 
 case "$*" in
 ("-- /")
